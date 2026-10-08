@@ -1,172 +1,172 @@
-# Codebase Structure
+# Estrutura do Codebase
 
-**Analysis Date:** 2026-10-08
+**Data da Análise:** 2026-10-08
 
-## Directory Layout
+## Layout de Diretórios
 
 ```
 scriptvisaocomput/
-├── main.py                     # Webcam real-time inference entry point
-├── run_pipeline.py             # 2-stage pipeline orchestrator (subprocess)
-├── treinar_crowdhuman.py       # Monolithic end-to-end training script
-├── treinar_crowdhuman_colab.ipynb  # Colab notebook variant of the trainer
-├── data.yaml                   # Ultralytics dataset config (class: person)
-├── README.md                   # Portuguese step-by-step guide
-├── yolo26n.pt                  # Base YOLOv26-nano weights (5.3 MB)
-├── scripts/                    # Pipeline stage scripts
-│   ├── download_and_convert_crowdhuman.py  # Stage 1: dataset download + ODGT→YOLO
-│   ├── train_body.py          # Stage 2: transfer-learning training
-│   ├── validate_body.py       # Stage 3: formal val-split metrics
-│   └── setup_colab_ssh.py     # Utility: cloudflared SSH config for Colab
-├── models/                     # Isolated seed/base weights
-│   └── base_face_weights.pt   # Copy of face-model weights for transfer learning
-├── resultados/                 # Promoted trained weights (manual copies)
+├── main.py                     # Ponto de entrada de inferência em tempo real na webcam
+├── run_pipeline.py             # Orquestrador de pipeline de 2 estágios (subprocess)
+├── treinar_crowdhuman.py       # Script de treino monolítico ponta a ponta
+├── treinar_crowdhuman_colab.ipynb  # Variante em Colab do treinador
+├── data.yaml                   # Config do dataset Ultralytics (class: person)
+├── README.md                   # Guia passo a passo em português
+├── yolo26n.pt                  # Pesos base YOLOv26-nano (5.3 MB)
+├── scripts/                    # Scripts de estágios do pipeline
+│   ├── download_and_convert_crowdhuman.py  # Estágio 1: download do dataset + ODGT→YOLO
+│   ├── train_body.py          # Estágio 2: treino com transfer learning
+│   ├── validate_body.py       # Estágio 3: métricas formais do split de val
+│   └── setup_colab_ssh.py     # Utilitário: config SSH com cloudflared para o Colab
+├── models/                     # Pesos base/iniciais isolados
+│   └── base_face_weights.pt   # Cópia dos pesos do modelo de rosto para transfer learning
+├── resultados/                 # Pesos treinados promovidos (cópias manuais)
 │   ├── best.pt
 │   └── best (1).pt
-├── runs/                       # Ultralytics run output (generated)
+├── runs/                       # Saída das execuções do Ultralytics (gerada)
 │   └── detect/train_crowdhuman_body/
-│       ├── args.yaml          # Full hyperparameter record of last run
-│       ├── train_batch*.jpg, labels.jpg  # Training preview plots
-│       └── weights/           # (empty in this checkout — best.pt lives elsewhere)
-├── test/                       # Sample media, NOT unit tests
+│       ├── args.yaml          # Registro completo de hiperparâmetros da última execução
+│       ├── train_batch*.jpg, labels.jpg  # Gráficos de pré-visualização do treino
+│       └── weights/           # (vazio neste checkout — best.pt está em outro lugar)
+├── test/                       # Mídia de exemplo, NÃO testes unitários
 │   └── gemini_generated_video_8d21d35f.mp4
-├── .planning/codebase/         # GSD codebase analysis docs (this file)
-└── .git/                       # Repo initialized, no commits yet
+├── .planning/codebase/         # Documentos de análise de codebase do GSD (este arquivo)
+└── .git/                       # Repo inicializado, sem commits ainda
 ```
 
-Not present but created at runtime: `dataset/` (with `images/{train,val}`, `labels/{train,val}`, `downloads_cache/`) — referenced by `data.yaml` and `scripts/download_and_convert_crowdhuman.py:13-14`.
+Ausente, mas criado em tempo de execução: `dataset/` (com `images/{train,val}`, `labels/{train,val}`, `downloads_cache/`) — referenciado por `data.yaml` e `scripts/download_and_convert_crowdhuman.py:13-14`.
 
-## Directory Purposes
+## Propósitos dos Diretórios
 
 **scripts/:**
-- Purpose: One script per ML pipeline stage, each independently runnable
-- Contains: `*.py` stage scripts (snake_case, verb-first names)
-- Key files: `download_and_convert_crowdhuman.py` (HuggingFace download + ODGT→YOLO conversion), `train_body.py` (Ultralytics training), `validate_body.py` (metrics), `setup_colab_ssh.py` (dev-environment SSH tunnel setup)
-- Subdirectories: none (flat)
+- Propósito: um script por estágio do pipeline de ML, cada um executável independentemente
+- Contém: scripts de estágio `*.py` (nomes em snake_case, com o verbo primeiro)
+- Arquivos-chave: `download_and_convert_crowdhuman.py` (download do HuggingFace + conversão ODGT→YOLO), `train_body.py` (treino Ultralytics), `validate_body.py` (métricas), `setup_colab_ssh.py` (configuração de túnel SSH do ambiente de desenvolvimento para o Colab)
+- Subdiretórios: nenhum (plano)
 
 **models/:**
-- Purpose: Isolated base/seed weights used to start transfer learning
-- Contains: `*.pt` PyTorch checkpoints
-- Key files: `base_face_weights.pt` — a *copy* of face-detection weights so training never mutates the original (per `scripts/train_body.py:7-8` comment)
-- Note: scripts also fall back to a sibling-directory path `../models/yolo26n.pt` (`scripts/train_body.py:11`, `main.py:15`), which does not exist here
+- Propósito: pesos base/iniciais isolados usados para iniciar o transfer learning
+- Contém: checkpoints `*.pt` do PyTorch
+- Arquivos-chave: `base_face_weights.pt` — uma *cópia* dos pesos de detecção de rosto para que o treino nunca altere o original (conforme o comentário em `scripts/train_body.py:7-8`)
+- Observação: os scripts também usam fallback para um caminho em diretório irmão `../models/yolo26n.pt` (`scripts/train_body.py:11`, `main.py:15`), que não existe aqui
 
 **resultados/:**
-- Purpose: Stable, human-curated location for promoted trained weights ("resultados" = results)
-- Contains: `best.pt`, `best (1).pt` (duplicate download/copy artifacts)
-- Consumed by: `main.py:12` (first candidate in weight-resolution list)
+- Propósito: local estável, curado manualmente, para os pesos treinados promovidos ("resultados", do inglês "results")
+- Contém: `best.pt`, `best (1).pt` (artefatos duplicados de download/cópia)
+- Consumido por: `main.py:12` (primeiro candidato na lista de resolução de pesos)
 
 **runs/:**
-- Purpose: Ultralytics YOLO training/validation output (framework-generated)
-- Contains: `detect/train_crowdhuman_body/` with `args.yaml` (116-line hyperparameter record), preview JPGs, `weights/` subdirectory
-- Key files: `runs/detect/train_crowdhuman_body/args.yaml` — authoritative record of the last training run, including absolute paths from the original machine
-- Subdirectories: `runs/detect/val_results/` is created by `scripts/validate_body.py:18` but is not present yet
+- Propósito: saída de treino/validação do Ultralytics YOLO (gerada pelo framework)
+- Contém: `detect/train_crowdhuman_body/` com `args.yaml` (registro de hiperparâmetros de 116 linhas), JPGs de pré-visualização, subdiretório `weights/`
+- Arquivos-chave: `runs/detect/train_crowdhuman_body/args.yaml` — registro oficial da última execução de treino, incluindo caminhos absolutos da máquina original
+- Subdiretórios: `runs/detect/val_results/` é criado por `scripts/validate_body.py:18` mas ainda não está presente
 
 **test/:**
-- Purpose: Holds a single generated sample video (`gemini_generated_video_8d21d35f.mp4`, ~6 MB)
-- Contains: media only — no test framework, no `*.test.py`/`*.spec.*` files anywhere in the repo
-- Not a testing directory in the conventional sense
+- Propósito: guarda um único vídeo de exemplo gerado (`gemini_generated_video_8d21d35f.mp4`, ~6 MB)
+- Contém: apenas mídia — sem framework de testes, sem arquivos `*.test.py`/`*.spec.*` em lugar nenhum do repo
+- Não é um diretório de testes no sentido convencional
 
-**Root (project root):**
-- Purpose: Entry-point scripts and top-level config/documentation
-- Contains: `main.py`, `run_pipeline.py`, `treinar_crowdhuman.py`, `treinar_crowdhuman_colab.ipynb`, `data.yaml`, `README.md`, `yolo26n.pt`
+**Raiz (raiz do projeto):**
+- Propósito: scripts de entrada e configuração/documentação de nível superior
+- Contém: `main.py`, `run_pipeline.py`, `treinar_crowdhuman.py`, `treinar_crowdhuman_colab.ipynb`, `data.yaml`, `README.md`, `yolo26n.pt`
 
-## Key File Locations
+## Locais dos Arquivos-Chave
 
-**Entry Points:**
-- `main.py`: Real-time webcam body detection (`python main.py`, press `q` to quit)
-- `run_pipeline.py`: Orchestrates dataset prep then training via `subprocess.run(..., check=True)`
-- `treinar_crowdhuman.py`: Self-contained local training (download + convert + train in one file)
-- `treinar_crowdhuman_colab.ipynb`: Same flow as a Colab notebook for GPU execution
+**Pontos de Entrada:**
+- `main.py`: detecção de corpo em tempo real na webcam (`python main.py`, pressione `q` para sair)
+- `run_pipeline.py`: orquestra a preparação do dataset e depois o treino via `subprocess.run(..., check=True)`
+- `treinar_crowdhuman.py`: treino local autossuficiente (download + conversão + treino em um único arquivo)
+- `treinar_crowdhuman_colab.ipynb`: o mesmo fluxo como notebook Colab para execução em GPU
 
-**Configuration:**
-- `data.yaml`: Ultralytics dataset spec (`path`, `train`, `val`, `nc: 1`, `names: ['person']`) — `path` is a hard-coded absolute path from another machine and must be updated per host
-- `runs/detect/train_crowdhuman_body/args.yaml`: Generated record of every training hyperparameter
-- Hyperparameters are otherwise hard-coded inline: `scripts/train_body.py:29-43` (epochs=300, imgsz=640, batch=8, box=8.5, cls=0.8, dfl=2.0) vs `treinar_crowdhuman.py:128-142` (box=10.0, cls=0.7, adaptive batch 8/32)
-- No `requirements.txt`, `pyproject.toml`, `.gitignore`, or lint/format config exists
+**Configuração:**
+- `data.yaml`: especificação de dataset do Ultralytics (`path`, `train`, `val`, `nc: 1`, `names: ['person']`) — `path` é um caminho absoluto fixo de outra máquina e deve ser atualizado em cada host
+- `runs/detect/train_crowdhuman_body/args.yaml`: registro gerado de todos os hiperparâmetros de treino
+- Demais hiperparâmetros estão fixados inline: `scripts/train_body.py:29-43` (epochs=300, imgsz=640, batch=8, box=8.5, cls=0.8, dfl=2.0) vs `treinar_crowdhuman.py:128-142` (box=10.0, cls=0.7, batch adaptativo 8/32)
+- Não existem `requirements.txt`, `pyproject.toml`, `.gitignore` nem configuração de lint/formatação
 
-**Core Logic:**
-- `scripts/download_and_convert_crowdhuman.py`: Dataset acquisition and label conversion (`download_file`, `extract_zip`, `flatten_directory`, `convert_odgt_to_yolo`)
-- `scripts/train_body.py`: Training stage with weight fallback resolution
-- `scripts/validate_body.py`: Validation stage printing mAP@0.5, mAP@0.5:0.95, P, R, F1
-- `main.py:11-19`: Weight candidate-path resolution (5 ordered fallbacks)
-- `treinar_crowdhuman.py`: Duplicated converter + `data.yaml` regeneration + GPU-aware batch sizing
+**Lógica Central:**
+- `scripts/download_and_convert_crowdhuman.py`: aquisição do dataset e conversão de rótulos (`download_file`, `extract_zip`, `flatten_directory`, `convert_odgt_to_yolo`)
+- `scripts/train_body.py`: estágio de treino com resolução de fallback de pesos
+- `scripts/validate_body.py`: estágio de validação que imprime mAP@0.5, mAP@0.5:0.95, P, R, F1
+- `main.py:11-19`: resolução de caminhos candidatos de pesos (5 fallbacks ordenados)
+- `treinar_crowdhuman.py`: conversor duplicado + regeneração do `data.yaml` + dimensionamento de batch conforme a GPU
 
-**Testing:**
-- No test files exist. `test/` contains only a sample MP4. Testing gap documented in the quality/concerns analysis.
+**Testes:**
+- Não existem arquivos de teste. `test/` contém apenas um MP4 de exemplo. A lacuna de testes está documentada na análise de qualidade/preocupações.
 
-**Documentation:**
-- `README.md`: Portuguese guide with the 4-step usage flow (download → train → validate → webcam)
+**Documentação:**
+- `README.md`: guia em português com o fluxo de uso em 4 passos (download → treino → validação → webcam)
 
-## Naming Conventions
+## Convenções de Nomenclatura
 
-**Files:**
-- `snake_case.py` for all Python files, verb-first for actions: `train_body.py`, `validate_body.py`, `run_pipeline.py`, `download_and_convert_crowdhuman.py`
-- Mixed languages: English technical terms in `scripts/`, Portuguese in root-level names (`treinar_crowdhuman.py`, `resultados/`)
+**Arquivos:**
+- `snake_case.py` para todos os arquivos Python, com o verbo primeiro nas ações: `train_body.py`, `validate_body.py`, `run_pipeline.py`, `download_and_convert_crowdhuman.py`
+- Idiomas mistos: termos técnicos em inglês em `scripts/`, português nos nomes de nível raiz (`treinar_crowdhuman.py`, `resultados/`)
 - Notebooks: `{task}_{context}_{platform}.ipynb` — `treinar_crowdhuman_colab.ipynb`
-- UPPERCASE for docs: `README.md`
-- Artifact copies may contain spaces/parens: `resultados/best (1).pt` (avoid this pattern for new files)
+- MAIÚSCULAS para documentos: `README.md`
+- Cópias de artefatos podem conter espaços/parênteses: `resultados/best (1).pt` (evite esse padrão em arquivos novos)
 
-**Directories:**
-- Lowercase singular/plural, no separators: `scripts/`, `models/`, `runs/`, `test/`, `resultados/`
-- Framework-generated hierarchy preserved: `runs/detect/{task}_{name}/` per Ultralytics convention
+**Diretórios:**
+- Minúsculas, singular/plural, sem separadores: `scripts/`, `models/`, `runs/`, `test/`, `resultados/`
+- Hierarquia gerada pelo framework preservada: `runs/detect/{task}_{name}/` pela convenção do Ultralytics
 
-**Code:**
-- Every script: `def main():` + `if __name__ == "__main__": main()` guard
-- Path resolution idiom: `base_dir = os.path.dirname(os.path.abspath(__file__))` at root, `os.path.dirname(os.path.dirname(...))` inside `scripts/`
-- Console status tags: `[OK]`, `[Aviso]`, `-->`, `====` banner separators; messages in Portuguese
+**Código:**
+- Todo script: guard `def main():` + `if __name__ == "__main__": main()`
+- Idiomática de resolução de caminhos: `base_dir = os.path.dirname(os.path.abspath(__file__))` na raiz, `os.path.dirname(os.path.dirname(...))` dentro de `scripts/`
+- Tags de status no console: `[OK]`, `[Aviso]`, `-->`, separadores de banner `====`; mensagens em português
 
-## Where to Add New Code
+## Onde Adicionar Código Novo
 
-**New Pipeline Stage:**
-- Implementation: `scripts/{verb}_{noun}.py` with a `main()` guard
-- Invocation: wire it into `run_pipeline.py` as an additional `subprocess.run([sys.executable, ...], check=True)` step
-- Docs: add a numbered step to `README.md`
+**Novo Estágio do Pipeline:**
+- Implementação: `scripts/{verb}_{noun}.py` com um guard `main()`
+- Invocação: conectá-lo ao `run_pipeline.py` como uma etapa adicional `subprocess.run([sys.executable, ...], check=True)`
+- Documentação: acrescentar um passo numerado ao `README.md`
 
-**New Entry-Point Script (user-facing):**
-- Primary code: project root (e.g., next to `main.py`), following the candidate-path fallback pattern for locating weights
+**Novo Script de Ponto de Entrada (voltado ao usuário):**
+- Código principal: raiz do projeto (ex.: ao lado de `main.py`), seguindo o padrão de fallback de caminhos candidatos para localizar pesos
 
-**Shared Helper Logic:**
-- No shared module exists today. Prefer extracting a common module (e.g., `scripts/common.py` or `utils/`) rather than adding a third copy — the ODGT converter is already duplicated in `scripts/download_and_convert_crowdhuman.py:95` and `treinar_crowdhuman.py:86`
-- Utility/environment scripts: `scripts/` (see `setup_colab_ssh.py`)
+**Lógica Auxiliar Compartilhada:**
+- Hoje não existe módulo compartilhado. Prefira extrair um módulo comum (ex.: `scripts/common.py` ou `utils/`) em vez de adicionar uma terceira cópia — o conversor ODGT já está duplicado em `scripts/download_and_convert_crowdhuman.py:95` e `treinar_crowdhuman.py:86`
+- Scripts utilitários/de ambiente: `scripts/` (ver `setup_colab_ssh.py`)
 
-**New Configuration:**
-- Dataset/class config: `data.yaml` (single file, root)
-- Hyperparameters: currently inline in the training script; if externalizing, add a YAML next to `data.yaml` and reference it from `scripts/train_body.py`
+**Nova Configuração:**
+- Config de dataset/classes: `data.yaml` (arquivo único, raiz)
+- Hiperparâmetros: atualmente inline no script de treino; se externalizar, adicionar um YAML ao lado do `data.yaml` e referenciá-lo a partir de `scripts/train_body.py`
 
-**Trained Weights:**
-- Keep framework output in `runs/detect/{run_name}/weights/best.pt`; promote a stable copy to `resultados/` or `models/` when it should be consumed by `main.py`
+**Pesos Treinados:**
+- Manter a saída do framework em `runs/detect/{run_name}/weights/best.pt`; promover uma cópia estável para `resultados/` ou `models/` quando for consumida por `main.py`
 
-**Generated/Model Artifacts (do not hand-edit):**
-- `runs/**`, `dataset/**`, `*.pt` checkpoints, `yolo26n.pt`
+**Artefatos Gerados/De Modelo (não editar manualmente):**
+- `runs/**`, `dataset/**`, checkpoints `*.pt`, `yolo26n.pt`
 
-## Special Directories
+## Diretórios Especiais
 
 **runs/**
-- Purpose: Ultralytics-generated training/validation artifacts
-- Source: Written by `scripts/train_body.py` (`project=runs/detect`, `name=train_crowdhuman_body`, `exist_ok=True` — reruns overwrite)
-- Committed: Yes (currently tracked in git status as untracked-but-present; contains large preview JPGs)
+- Propósito: artefatos de treino/validação gerados pelo Ultralytics
+- Fonte: gravado por `scripts/train_body.py` (`project=runs/detect`, `name=train_crowdhuman_body`, `exist_ok=True` — reexecuções sobrescrevem)
+- Commitado: Sim (atualmente aparece no git status como não rastreado, mas presente; contém JPGs de pré-visualização grandes)
 
 **resultados/**
-- Purpose: Manually promoted trained weights
-- Source: Human copy of a run's `best.pt`
-- Committed: Yes (untracked; ~5 MB per `.pt` file)
+- Propósito: pesos treinados promovidos manualmente
+- Fonte: cópia manual do `best.pt` de uma execução
+- Commitado: Sim (não rastreado; ~5 MB por arquivo `.pt`)
 
-**dataset/** (absent)
-- Purpose: CrowdHuman images + YOLO labels + `downloads_cache/`
-- Source: Created by `scripts/download_and_convert_crowdhuman.py` or `treinar_crowdhuman.py`
-- Committed: Not present in this checkout; referenced by `data.yaml`
+**dataset/** (ausente)
+- Propósito: imagens do CrowdHuman + rótulos YOLO + `downloads_cache/`
+- Fonte: criado por `scripts/download_and_convert_crowdhuman.py` ou `treinar_crowdhuman.py`
+- Commitado: não presente neste checkout; referenciado por `data.yaml`
 
 **.planning/**
-- Purpose: GSD planning/codebase analysis documents
-- Source: Generated by `/gsd-map-codebase` and related commands
-- Committed: Yes
+- Propósito: documentos de planejamento/análise de codebase do GSD
+- Fonte: gerado por `/gsd-map-codebase` e comandos relacionados
+- Commitado: Sim
 
 **.git/**
-- Purpose: Version control (repo initialized on `master`, zero commits, no `.gitignore`)
-- Source: `git init`
-- Committed: Everything currently untracked; large binaries (`*.pt`, MP4, JPG) will be committed unless ignored
+- Propósito: controle de versão (repo inicializado em `master`, zero commits, sem `.gitignore`)
+- Fonte: `git init`
+- Commitado: tudo está atualmente não rastreado; binários grandes (`*.pt`, MP4, JPG) serão commitados a menos que sejam ignorados
 
 ---
 
-*Structure analysis: 2026-10-08*
-*Update when directory structure changes*
+*Análise de estrutura: 2026-10-08*
+*Atualize quando a estrutura de diretórios mudar*

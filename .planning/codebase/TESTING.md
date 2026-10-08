@@ -1,37 +1,37 @@
-# Testing Patterns
+# Padrões de Testes
 
-**Analysis Date:** 2026-10-08
+**Data da Análise:** 2026-10-08
 
-## Test Framework
+## Framework de Testes
 
 **Runner:**
-- **None configured.** No pytest, unittest, or nose tests exist; no `pytest.ini`, `conftest.py`, `tox.ini`, `setup.cfg`, `pyproject.toml`, or `requirements.txt`
-- `pytest` is not installed in the environment (Python 3.11.9)
-- No CI config (no `.github/`, no workflow files) — nothing runs tests automatically
+- **Nenhum configurado.** Não existem testes pytest, unittest ou nose; não há `pytest.ini`, `conftest.py`, `tox.ini`, `setup.cfg`, `pyproject.toml` ou `requirements.txt`
+- `pytest` não está instalado no ambiente (Python 3.11.9)
+- Sem configuração de CI (sem `.github/`, sem arquivos de workflow) — nada executa testes automaticamente
 
-**Assertion Library:**
-- Not applicable (no tests). If adding tests, use `pytest` built-in `assert`
+**Biblioteca de Asserções:**
+- Não se aplica (sem testes). Se adicionar testes, use o `assert` embutido do `pytest`
 
-**Run Commands:**
+**Comandos de Execução:**
 ```bash
-python -m pytest                        # would be the standard entry (once added)
-python scripts/validate_body.py         # current de-facto "test": YOLO validation metrics
-python main.py                          # current de-facto "test": webcam smoke test (press q to quit)
-python run_pipeline.py                  # end-to-end pipeline check (download + train, check=True aborts on failure)
+python -m pytest                        # seria a entrada padrão (uma vez adicionado)
+python scripts/validate_body.py         # "teste" de facto atual: métricas de validação do YOLO
+python main.py                          # "teste" de facto atual: teste de fumaça da webcam (pressione q para sair)
+python run_pipeline.py                  # verificação ponta a ponta do pipeline (download + treino, check=True aborta em caso de falha)
 ```
 
-## Test File Organization
+## Organização dos Arquivos de Teste
 
-**Location:**
-- No test files. `test/` at repo root contains **only a sample asset** — `test/gemini_generated_video_8d21d35f.mp4` (6.3 MB). It is data, not a test suite, despite the directory name
-- Do **not** put tests in `test/` without first renaming/clearing it — the directory is ambiguous
+**Localização:**
+- Sem arquivos de teste. `test/` na raiz do repositório contém **apenas um asset de amostra** — `test/gemini_generated_video_8d21d35f.mp4` (6,3 MB). São dados, não uma suíte de testes, apesar do nome do diretório
+- **Não** coloque testes em `test/` sem antes renomeá-lo/limpá-lo — o diretório é ambíguo
 
-**Naming (recommended to match Python norms):**
-- Unit tests: `tests/test_<module>.py` (new `tests/` directory at repo root)
+**Nomenclatura (recomendado para seguir as normas do Python):**
+- Testes unitários: `tests/test_<módulo>.py` (novo diretório `tests/` na raiz do repositório)
 
-**Structure:**
+**Estrutura:**
 ```
-scriptvisaocomput/            # (current)
+scriptvisaocomput/            # (atual)
 ├── main.py
 ├── run_pipeline.py
 ├── treinar_crowdhuman.py
@@ -40,39 +40,39 @@ scriptvisaocomput/            # (current)
 │   ├── train_body.py
 │   ├── validate_body.py
 │   └── setup_colab_ssh.py
-├── test/                     # NOT tests - holds gemini_generated_video_8d21d35f.mp4
-└── (no tests/, no conftest.py)
+├── test/                     # NÃO é testes - contém gemini_generated_video_8d21d35f.mp4
+└── (sem tests/, sem conftest.py)
 ```
 
-## Test Structure
+## Estrutura de Testes
 
-**Suite Organization:**
-- No existing suite pattern to copy. Recommended pattern for new tests (pytest style):
+**Organização da Suíte:**
+- Não há padrão de suíte existente para copiar. Padrão recomendado para testes novos (estilo pytest):
 ```python
 # tests/test_convert_odgt.py
 def test_convert_odgt_writes_yolo_labels(tmp_path):
-    # arrange
+    # preparar
     ...
-    # act
+    # executar
     count = convert_odgt_to_yolo(odgt_path, images_dir, labels_dir)
-    # assert
+    # asserir
     assert count == 1
     assert "0 0.500000 0.500000 0.250000 0.500000" in (labels_dir / "img1.txt").read_text()
 ```
 
-**Patterns:**
-- Setup: pytest fixtures (`tmp_path` for dataset dirs) — no `beforeEach`/`setUp` precedent
-- Teardown: rely on `tmp_path`/`monkeypatch` auto-cleanup; nothing global to restore
-- Structure: arrange/act/assert with explicit comments (matches the codebase's numbered-comment habit)
+**Padrões:**
+- Configuração: fixtures do pytest (`tmp_path` para diretórios de dataset) — sem precedente de `beforeEach`/`setUp`
+- Limpeza: confiar na limpeza automática de `tmp_path`/`monkeypatch`; nada global a restaurar
+- Estrutura: preparar/executar/asserir com comentários explícitos (coincide com o hábito de comentários numerados da base de código)
 
 ## Mocking
 
 **Framework:**
-- None in use. Standard choice: `pytest` + `unittest.mock` (`monkeypatch`, `patch`)
+- Nenhum em uso. Escolha padrão: `pytest` + `unittest.mock` (`monkeypatch`, `patch`)
 
-**Patterns:**
+**Padrões:**
 ```python
-# Recommended for this codebase: patch network + filesystem boundaries
+# Recomendado para esta base de código: mockar as fronteiras de rede + sistema de arquivos
 from unittest.mock import patch, MagicMock
 
 @patch("scripts.download_and_convert_crowdhuman.requests.get")
@@ -82,86 +82,86 @@ def test_download_file_writes_chunks(mock_get, tmp_path):
     assert download_file("f.zip", str(tmp_path / "f.zip")) is True
 ```
 
-**What to Mock:**
-- Network: `requests.get` / `requests.head` (`scripts/download_and_convert_crowdhuman.py:36,51`), `huggingface_hub.snapshot_download` (`treinar_crowdhuman.py:63`)
-- Ultralytics model: `ultralytics.YOLO` (constructor, `.train()`, `.val()`) — training is GPU-hours long
-- Webcam/OpenCV: `cv2.VideoCapture` (`main.py:28`) for any `main.py` test
-- `torch.cuda.is_available()` for hardware-dependent branches (`treinar_crowdhuman.py:28`, `train_body.py` device selection)
-- `subprocess.run` when testing `run_pipeline.py`
+**O que Mockar:**
+- Rede: `requests.get` / `requests.head` (`scripts/download_and_convert_crowdhuman.py:36,51`), `huggingface_hub.snapshot_download` (`treinar_crowdhuman.py:63`)
+- Modelo Ultralytics: `ultralytics.YOLO` (construtor, `.train()`, `.val()`) — o treino dura horas de GPU
+- Webcam/OpenCV: `cv2.VideoCapture` (`main.py:28`) para qualquer teste de `main.py`
+- `torch.cuda.is_available()` para ramos dependentes de hardware (`treinar_crowdhuman.py:28`, seleção de dispositivo em `train_body.py`)
+- `subprocess.run` ao testar `run_pipeline.py`
 
-**What NOT to Mock:**
-- Pure functions: `convert_odgt_to_yolo`, `flatten_directory`, `extract_zip` — test against real files in `tmp_path`
-- JSON/zip parsing logic (use tiny fixture files)
+**O que NÃO Mockar:**
+- Funções puras: `convert_odgt_to_yolo`, `flatten_directory`, `extract_zip` — teste contra arquivos reais em `tmp_path`
+- Lógica de parsing de JSON/zip (use arquivos de fixture pequenos)
 
-## Fixtures and Factories
+## Fixtures e Fábricas
 
-**Test Data:**
+**Dados de Teste:**
 ```python
-# Recommended: minimal ODGT fixture (one line of CrowdHuman JSON)
+# Recomendado: fixture ODGT mínima (uma linha de JSON do CrowdHuman)
 ODGT_LINE = '{"ID": "img1", "gtboxes": [{"tag": "person", "fbox": [100, 50, 200, 400]}]}'
 
-# YOLO label expected output for a 640x400 image:
-# "0 0.250000 0.562500 0.312500 1.000000"  (clamped by max/min guards)
+# Saída esperada do rótulo YOLO para uma imagem de 640x400:
+# "0 0.250000 0.562500 0.312500 1.000000"  (limitado pelas guarda de max/min)
 ```
-- A tiny `.jpg` can be generated with `PIL.Image.new("RGB", (640, 400))` in the fixture rather than shipping binaries
+- Um `.jpg` pequeno pode ser gerado com `PIL.Image.new("RGB", (640, 400))` na fixture em vez de distribuir binários
 
-**Location:**
-- No fixtures exist. Recommended: `tests/fixtures/` for static `.odgt`/`.jpg` samples; inline factories in the test file for generated data
+**Localização:**
+- Não existem fixtures. Recomendado: `tests/fixtures/` para amostras estáticas `.odgt`/`.jpg`; fábricas inline no arquivo de teste para dados gerados
 
-## Coverage
+## Cobertura
 
-**Requirements:**
-- None enforced (no coverage tool, no CI gate, no target)
+**Requisitos:**
+- Nenhum imposto (sem ferramenta de cobertura, sem gate de CI, sem meta)
 
-**Configuration:**
-- Not configured. If added: `pytest-cov` with `--cov=scripts --cov=main` and exclusions for `treinar_crowdhuman_colab.ipynb`
+**Configuração:**
+- Não configurada. Se adicionada: `pytest-cov` com `--cov=scripts --cov=main` e exclusões para `treinar_crowdhuman_colab.ipynb`
 
-**View Coverage:**
+**Ver Cobertura:**
 ```bash
 python -m pytest --cov=scripts --cov-report=term-missing
 ```
 
-## Test Types
+## Tipos de Teste
 
-**Unit Tests:**
-- Scope (recommended): annotation conversion math (`convert_odgt_to_yolo`, clamping at `download_and_convert_crowdhuman.py:136-139`), download resume/size-check logic (`download_file`, `:33-44`), path fallback resolution (`main.py:11-19`, `scripts/train_body.py:9-12`)
-- Mocking: network + filesystem only; feed real small files via `tmp_path`
-- Speed: must run without GPU/model weights
+**Testes Unitários:**
+- Escopo (recomendado): matemática de conversão de anotações (`convert_odgt_to_yolo`, limites em `download_and_convert_crowdhuman.py:136-139`), lógica de retomada de download/verificação de tamanho (`download_file`, `:33-44`), resolução de fallback de caminhos (`main.py:11-19`, `scripts/train_body.py:9-12`)
+- Mocking: apenas rede + sistema de arquivos; alimente arquivos pequenos reais via `tmp_path`
+- Velocidade: deve executar sem GPU/pesos de modelo
 
-**Integration Tests:**
-- Not present. Closest equivalents are script runs with real data:
-  - `python run_pipeline.py` — full download→train orchestration, aborts on first failure (`check=True`)
-  - Ultralytics emits its own training artifacts to `runs/detect/train_crowdhuman_body/` (`args.yaml`, batch images) — inspect these for sanity checks
+**Testes de Integração:**
+- Não presentes. Equivalentes mais próximos são execuções de script com dados reais:
+  - `python run_pipeline.py` — orquestração completa download→treino, aborta na primeira falha (`check=True`)
+  - O Ultralytics emite seus próprios artefatos de treino para `runs/detect/train_crowdhuman_body/` (`args.yaml`, imagens de batch) — inspecione-os para verificações de sanidade
 
-**E2E Tests:**
-- Not used. Manual verification only:
-  - `python main.py` — human-in-the-loop webcam check (HUD shows FPS + person count, `q` to quit; `main.py:73-82`)
-  - `python scripts/validate_body.py` — prints mAP@0.5, mAP@0.5:0.95, P, R, F1 from `model.val()` (`validate_body.py:33-39`)
-  - Notebook `treinar_crowdhuman_colab.ipynb` cell 1 is labeled "Teste de Conexao e Deteccao de GPU" — connectivity/GPU smoke check only
+**Testes E2E:**
+- Não usados. Apenas verificação manual:
+  - `python main.py` — verificação da webcam com humano no loop (o HUD mostra FPS + contagem de pessoas, `q` para sair; `main.py:73-82`)
+  - `python scripts/validate_body.py` — imprime mAP@0.5, mAP@0.5:0.95, P, R, F1 a partir de `model.val()` (`validate_body.py:33-39`)
+  - A célula 1 do notebook `treinar_crowdhuman_colab.ipynb` está rotulada "Teste de Conexao e Deteccao de GPU" — apenas teste de fumaça de conectividade/GPU
 
-## Common Patterns
+## Padrões Comuns
 
-**Async Testing:**
-- Not applicable — codebase is fully synchronous
+**Testes Assíncronos:**
+- Não se aplica — a base de código é totalmente síncrona
 
-**Error Testing:**
+**Testes de Erro:**
 ```python
-# No precedent in repo. Recommended targets for failure-path tests:
+# Sem precedente no repositório. Alvos recomendados para testes de caminho de falha:
 def test_missing_model_returns_early(capsys, monkeypatch):
-    monkeypatch.setattr(os.path, "exists", lambda p: False)   # all candidates missing
+    monkeypatch.setattr(os.path, "exists", lambda p: False)   # todos os candidatos ausentes
     main()
     assert "Erro: Nenhum modelo encontrado" in capsys.readouterr().out   # main.py:21
 ```
 
-**Snapshot Testing:**
-- Not used
+**Testes de Snapshot:**
+- Não usados
 
-**Metric Regression Checks (the domain's version of assertions):**
-- Validated via `model.val()` metrics object: `metrics.box.map50`, `metrics.box.map`, `metrics.box.mp`, `metrics.box.mr` (`scripts/validate_body.py:34-38`)
-- F1 computed inline with `1e-16` epsilon guard (`validate_body.py:38`)
-- If automating: assert thresholds (e.g., `metrics.box.map50 >= 0.50`) after training; results live in `runs/detect/train_crowdhuman_body/results.csv`
+**Verificações de Regressão de Métricas (a versão do domínio das asserções):**
+- Validadas através do objeto de métricas de `model.val()`: `metrics.box.map50`, `metrics.box.map`, `metrics.box.mp`, `metrics.box.mr` (`scripts/validate_body.py:34-38`)
+- F1 calculado inline com guarda de epsilon `1e-16` (`validate_body.py:38`)
+- Se automatizar: asserir limiares (ex.: `metrics.box.map50 >= 0.50`) após o treino; os resultados ficam em `runs/detect/train_crowdhuman_body/results.csv`
 
 ---
 
-*Testing analysis: 2026-10-08*
-*Update when test patterns change*
+*Análise de testes: 2026-10-08*
+*Atualize quando os padrões de teste mudarem*
