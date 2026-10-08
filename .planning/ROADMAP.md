@@ -33,14 +33,14 @@ O sistema nasce do detector existente (`main.py`, YOLO CrowdHuman) e evolui em 9
   3. IDs de rastreamento existem apenas enquanto a pessoa está no quadro — nada de ID, trilha ou log por-pessoa é gravado em arquivo ou banco
   4. Nenhum módulo ou dependência de face/biometria/demografia existe no código (busca no repositório vem vazia)
 
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 Plans:
 **Wave 1**
 - [x] 01-01-PLAN.md — Fundação: requirements + captura.py (fonte + capture_ts) + overlay.py + harness pytest
 - [x] 01-02-PLAN.md — Rastreio efêmero: rastreio.py (YOLO + ByteTrack explícito, só corpo, guard boxes.id)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 01-03-PLAN.md — Integração: main.py como ponto de entrada único (webcam/arquivo por CLI)
+- [x] 01-03-PLAN.md — Integração: main.py como ponto de entrada único (webcam/arquivo por CLI)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 01-04-PLAN.md — Auditoria automatizada de privacidade (nada em disco, sem face) + verificação visual
@@ -157,7 +157,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Fatia vertical single-câmera | 2/4 | In Progress|  |
+| 1. Fatia vertical single-câmera | 3/4 | In Progress|  |
 | 2. Contagem por zona e ocupação | 0/TBD | Not started | - |
 | 3. Persistência PostgreSQL | 0/TBD | Not started | - |
 | 4. API FastAPI + Marco Civil | 0/TBD | Not started | - |
