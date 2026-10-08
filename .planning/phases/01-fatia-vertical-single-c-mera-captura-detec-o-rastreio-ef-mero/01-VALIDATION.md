@@ -40,10 +40,16 @@ created: "2026-10-08"
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 01-01-01 | 01 | 1 | ING-01 | — | N/A | integration/smoke | `python -m pytest tests/test_captura.py::test_abre_video_amostra -x` | ❌ W0 | ⬜ pending |
-| 01-02-01 | 02 | 1 | CNT-01 | — | N/A | static/unit | `python -m pytest tests/test_privacidade.py::test_sem_modulos_de_face -x` | ❌ W0 | ⬜ pending |
-| 01-03-01 | 03 | 2 | CNT-03 | — | IDs morrem ao sair do quadro; nada persistido | unit/integration | `python -m pytest tests/test_rastreio.py::test_ids_efemeros -x` | ❌ W0 | ⬜ pending |
-| 01-04-01 | 04 | 2 | ING-03 | — | Nenhum frame/imagem/crop em disco | integration | `python -m pytest tests/test_privacidade.py::test_sem_escrita_em_disco -x` | ❌ W0 | ⬜ pending |
+| 01-01-01 | 01 | 1 | ING-01 | T-01-02 | Deps sem face/contrib | static | `python -c "import ultralytics, cv2, numpy, lap, pytest"` | ✅ P01 | ⬜ pending |
+| 01-01-02 | 01 | 1 | ING-01 | T-01-03 | Fonte arquivo validada | integration | `python -m pytest tests/test_captura.py -x -q` | ✅ P01 | ⬜ pending |
+| 01-01-03 | 01 | 1 | ING-03 | T-01-01 | Overlay não grava em disco | unit/static | `python -m pytest tests/test_overlay.py -x -q` | ✅ P01 | ⬜ pending |
+| 01-02-01 | 02 | 1 | CNT-01 | T-02-03 | Só corpo (classes=[0]) | static/unit | `python -c "…tracker/classes asserts…"` | ✅ P02 | ⬜ pending |
+| 01-02-02 | 02 | 1 | CNT-03 | T-02-01 | IDs efêmeros, nada persistido | unit/integration | `python -m pytest tests/test_rastreio.py -x -q` | ✅ P02 | ⬜ pending |
+| 01-03-01 | 03 | 2 | ING-01 | T-03-01 | Fonte CLI validada | unit | `python -m pytest tests/test_main.py -x -q` | ✅ P03 | ⬜ pending |
+| 01-03-02 | 03 | 2 | ING-03 | T-03-02 | Laço sem escrita em disco | static | `python -c "…main.py source asserts…"` | ✅ P03 | ⬜ pending |
+| 01-04-01 | 04 | 3 | ING-03, CNT-01 | T-04-01/02 | Nada em disco; sem face | integration/static | `python -m pytest tests/test_privacidade.py -x -q` | ✅ P04 | ⬜ pending |
+| 01-04-02 | 04 | 3 | CNT-03 | T-04-03 | IDs efêmeros ponta a ponta | integration | `python -m pytest tests/test_integracao.py -x -q` | ✅ P04 | ⬜ pending |
+| 01-04-03 | 04 | 3 | ING-01, CNT-01, CNT-03 | — | Verificação visual (backstop) | manual | `python main.py` (webcam + MP4) | ✅ P04 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -51,13 +57,18 @@ created: "2026-10-08"
 
 ## Wave 0 Requirements
 
-- [ ] `tests/test_captura.py` — stubs for ING-01 (abre o MP4 de `test/`, lê ≥ 1 frame)
-- [ ] `tests/test_privacidade.py` — stubs for ING-03 (snapshot de diretório antes/depois) e CNT-01 (varredura de tokens proibidos nos módulos do produto)
-- [ ] `tests/test_rastreio.py` — stubs for CNT-03 (processa ~60 frames, valida `ids` como inteiros e ausência de persistência)
-- [ ] `tests/conftest.py` — shared fixtures (caminho do vídeo-amostra, carregamento do modelo)
-- [ ] `pip install pytest` — adicionar ao `requirements.txt` ou a um `requirements-dev.txt`
+Criados pelo Plano 01 (Task 1) e preenchidos ao longo dos planos:
 
-*If none: "Existing infrastructure covers all phase requirements."*
+- [x] `tests/conftest.py` — fixtures `caminho_video_amostra` e `caminho_modelo` (Plano 01)
+- [x] `tests/test_captura.py` — ING-01 (abre o MP4 de `test/`, lê ≥ 1 frame) (Plano 01)
+- [x] `tests/test_overlay.py` — desenho in-place sem APIs de escrita (Plano 01)
+- [x] `tests/test_rastreio.py` — CNT-01/CNT-03 (~60 frames, IDs inteiros e efêmeros) (Plano 02)
+- [x] `tests/test_main.py` — resolução de fonte/modelo (Plano 03)
+- [x] `tests/test_privacidade.py` — ING-03 + CNT-01 (Plano 04)
+- [x] `tests/test_integracao.py` — CNT-03 ponta a ponta (Plano 04)
+- [x] `pytest` em `requirements-dev.txt` (`-r requirements.txt` + `pytest>=8.0`) (Plano 01)
+
+*Marcação `[x]` = atribuído a um plano; o status de execução é atualizado na fase de execução.*
 
 ---
 
