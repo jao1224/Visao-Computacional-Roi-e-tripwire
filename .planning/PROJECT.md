@@ -19,7 +19,8 @@ Contagem, fluxo e permanência por zona — confiáveis e em tempo real — com 
 - [ ] Processar múltiplas câmeras simultaneamente (webcam/vídeo-amostra no v1 de desenvolvimento, RTSP de DVRs depois)
 - [ ] Associação efêmera de detecções em RAM (ByteTrack, segundos) — obrigatória apenas para não contar a mesma pessoa duas vezes; nada é persistido
 - [ ] Contagem por zona (tripwires) com entradas/saídas em tempo real — saída: apenas números agregados
-- [ ] Tempo de permanência (dwell time) por zona (ROIs poligonais) — v1: apenas dwell; heatmaps adiados
+- [ ] Tempo de permanência (dwell time) por zona (ROIs poligonais)
+- [ ] Heatmap de **densidade agregado** por zona/câmera/janela de tempo (fluxo) — posições efêmeras em RAM somam contadores por célula; nenhum histórico por pessoa
 - [ ] Séries temporais de ocupação (agregadas)
 - [ ] Banco PostgreSQL apenas com tabelas de configuração (câmeras, zonas) e métricas agregadas — derivar do doc 06 **sem** `session_traces`/`sessoes`/`traces`
 - [ ] Backend FastAPI expondo métricas para o dashboard
@@ -32,20 +33,20 @@ Contagem, fluxo e permanência por zona — confiáveis e em tempo real — com 
 
 - Detecção/reconhecimento facial — decisão do usuário: projeto abandonou face detection; todo o fluxo é por corpo
 - Controle de acesso (catracas/portas com chave facial) — não teremos controle de acesso facial
-- **Rastreamento de indivíduos entre câmeras (MTMCT) e Re-ID** — perfil comportamental (LGPD Art. 12 §2º); proibido para sempre
+- **Rastreamento de indivíduos entre câmeras (MTMCT) e Re-ID — inclusive por silhueta/aparência** — perfil comportamental (LGPD Art. 12 §2º); câmera 2 nunca pode "reconhecer" alguém da câmera 1; proibido para sempre
 - **Tabelas `session_traces` e `sessoes` do doc 06** — não implementar: persistem trilha individual = perfil de trajetória (Art. 12 §2º)
 - **Persistência de track_id/session_id, embeddings de aparência, rotas ou jornadas** — qualquer dado por-pessoa, inclusive "para testes"
 - Embeddings biométricos ou snapshots de rostos — sem base legal para analytics (LGPD Art. 11)
 - Identificação nominal de pessoas — apenas contagem anônima agregada
 - Armazenamento de frames/vídeo bruto de clientes — frames são voláteis (RAM), descartados após inferência
-- Heatmaps individuais (traços de movimento por pessoa) — apenas agregados por zona/horário
-- Heatmaps de ocupação no v1 — decisão do usuário ("Só dwell" para v1); reconsiderar depois apenas na forma agregada
+- Heatmaps individuais (traços de movimento por pessoa) — proibidos por LGPD Art. 12 §2º; só densidade agregada (decisão do usuário: "mapa de calor para ver o fluxo")
 
 ## Context
 
 - Código existente: `main.py` (aplicativo principal, inferência webcam), demais arquivos (`run_pipeline.py`, `treinar_crowdhuman.py`, `scripts/`) são apenas para teste
 - Documentação obrigatória: `DOCUMENTACAO_PROJETO_E_LGPD/` (docs 01–08) — fonte primária de verdade para arquitetura, requisitos e restrições legais; notar que os docs ainda mencionam face/catraca e rastreamento/`session_traces` — o escopo vigente é o definido aqui (ou seja: sem face e sem rastreamento persistente)
 - Mapa do codebase: `.planning/codebase/` (7 documentos)
+- Verificação legal completa (LGPD art. por artigo + Marco Civil): `.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md` — 11 condições vinculantes (ROPA, RIPD/LIA, encarregado, logs 6 meses, veto total a rastreio)
 - Arquitetura-alvo (doc 02): 5 camadas — ingestão RTSP → motor YOLO+ByteTrack → estado voláriel em RAM (sem sessões persistentes) → PostgreSQL → FastAPI/dashboard
 - Desenvolvimento começa com webcam/vídeos-amostra; RTSP real vem depois (usuário não tem DVRs disponíveis agora)
 - Banco: derivar do doc 06 **apenas** tabelas de configuração (cameras, zonas) e métricas agregadas (`metricas_fluxo_zona`); **não implementar** `sessoes`/`session_traces`
