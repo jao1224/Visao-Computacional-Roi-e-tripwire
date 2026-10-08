@@ -157,7 +157,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Fatia vertical single-câmera | 4/4 | Complete   | 2026-10-08 |
+| 1. Fatia vertical single-câmera | 4/4 | Complete    | 2026-10-08 |
 | 2. Contagem por zona e ocupação | 0/TBD | Not started | - |
 | 3. Persistência PostgreSQL | 0/TBD | Not started | - |
 | 4. API FastAPI + Marco Civil | 0/TBD | Not started | - |
