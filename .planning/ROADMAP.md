@@ -10,7 +10,7 @@ O sistema nasce do detector existente (`main.py`, YOLO CrowdHuman) e evolui em 9
 - Integer phases (1, 2, 3): planned milestone work
 - Decimal phases (2.1, 2.2): urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Fatia vertical single-câmera (captura, detecção, rastreio efêmero)** - Webcam/vídeo-amostra → YOLO corpo → ByteTrack em RAM com overlay, sem nada em disco
+- [x] **Phase 1: Fatia vertical single-câmera (captura, detecção, rastreio efêmero)** - Webcam/vídeo-amostra → YOLO corpo → ByteTrack em RAM com overlay, sem nada em disco (completed 2026-10-08)
 - [ ] **Phase 2: Contagem por zona e ocupação em tempo real** - Tripwire bidirecional sem dupla contagem e ocupação instantânea por zona (overlay)
 - [ ] **Phase 3: Persistência PostgreSQL (fila + escrita em lote)** - Schema só com configuração e métricas agregadas; I/O de banco fora do loop de vídeo
 - [ ] **Phase 4: API FastAPI de métricas e conformidade Marco Civil** - Endpoints somente-leitura, TTL de retenção e logs de acesso de 6 meses
@@ -33,7 +33,7 @@ O sistema nasce do detector existente (`main.py`, YOLO CrowdHuman) e evolui em 9
   3. IDs de rastreamento existem apenas enquanto a pessoa está no quadro — nada de ID, trilha ou log por-pessoa é gravado em arquivo ou banco
   4. Nenhum módulo ou dependência de face/biometria/demografia existe no código (busca no repositório vem vazia)
 
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 Plans:
 **Wave 1**
 - [x] 01-01-PLAN.md — Fundação: requirements + captura.py (fonte + capture_ts) + overlay.py + harness pytest
@@ -43,7 +43,7 @@ Plans:
 - [x] 01-03-PLAN.md — Integração: main.py como ponto de entrada único (webcam/arquivo por CLI)
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 01-04-PLAN.md — Auditoria automatizada de privacidade (nada em disco, sem face) + verificação visual
+- [x] 01-04-PLAN.md — Auditoria automatizada de privacidade (nada em disco, sem face) + verificação visual
 
 ### Phase 2: Contagem por zona e ocupação em tempo real
 
@@ -157,7 +157,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Fatia vertical single-câmera | 3/4 | In Progress|  |
+| 1. Fatia vertical single-câmera | 4/4 | Complete   | 2026-10-08 |
 | 2. Contagem por zona e ocupação | 0/TBD | Not started | - |
 | 3. Persistência PostgreSQL | 0/TBD | Not started | - |
 | 4. API FastAPI + Marco Civil | 0/TBD | Not started | - |
