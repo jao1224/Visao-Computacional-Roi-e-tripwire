@@ -103,22 +103,24 @@
 
 ## Pontos de Entrada
 
-**Inferência em tempo real:**
+> **Papéis (definido pelo usuário):** `main.py` é o **arquivo principal** (o produto real). `run_pipeline.py`, `treinar_crowdhuman.py`, `treinar_crowdhuman_colab.ipynb` e `scripts/` são **apenas para teste/experimentação**.
+
+**Inferência em tempo real (PRINCIPAL):**
 - Localização: `main.py`
 - Gatilhos: `python main.py`
 - Responsabilidades: resolver pesos, abrir a webcam `cv2.VideoCapture(0)`, executar inferência YOLO com teto de 5 FPS, desenhar caixas/HUD, sair ao pressionar `q`
 
-**Pipeline completo:**
+**Pipeline completo (teste):**
 - Localização: `run_pipeline.py`
 - Gatilhos: `python run_pipeline.py`
 - Responsabilidades: executar o estágio do dataset e depois o estágio de treino como subprocessos (a validação *não* está incluída)
 
-**Estágios individuais:**
+**Estágios individuais (teste):**
 - Localização: `scripts/download_and_convert_crowdhuman.py`, `scripts/train_body.py`, `scripts/validate_body.py`
 - Gatilhos: `python scripts/<name>.py` (documentado nos passos 1-3 do `README.md`)
 - Responsabilidades: um estágio por script; recalcula `base_dir = dirname(dirname(abspath(__file__)))` para localizar a raiz do projeto
 
-**Treinador monolítico/local+Colab:**
+**Treinador monolítico/local+Colab (teste):**
 - Localização: `treinar_crowdhuman.py`, `treinar_crowdhuman_colab.ipynb`
 - Gatilhos: `python treinar_crowdhuman.py` ou execução de células do notebook
 - Responsabilidades: tudo em um único arquivo — verificação de GPU, inicialização de pesos, download, conversão, regeneração do `data.yaml`, treino

@@ -6,14 +6,14 @@
 
 ```
 scriptvisaocomput/
-├── main.py                     # Ponto de entrada de inferência em tempo real na webcam
-├── run_pipeline.py             # Orquestrador de pipeline de 2 estágios (subprocess)
-├── treinar_crowdhuman.py       # Script de treino monolítico ponta a ponta
-├── treinar_crowdhuman_colab.ipynb  # Variante em Colab do treinador
+├── main.py                     # ★ ARQUIVO PRINCIPAL — inferência em tempo real na webcam
+├── run_pipeline.py             # [teste] Orquestrador de pipeline de 2 estágios (subprocess)
+├── treinar_crowdhuman.py       # [teste] Script de treino monolítico ponta a ponta
+├── treinar_crowdhuman_colab.ipynb  # [teste] Variante em Colab do treinador
 ├── data.yaml                   # Config do dataset Ultralytics (class: person)
 ├── README.md                   # Guia passo a passo em português
 ├── yolo26n.pt                  # Pesos base YOLOv26-nano (5.3 MB)
-├── scripts/                    # Scripts de estágios do pipeline
+├── scripts/                    # [teste] Scripts de estágios do pipeline
 │   ├── download_and_convert_crowdhuman.py  # Estágio 1: download do dataset + ODGT→YOLO
 │   ├── train_body.py          # Estágio 2: treino com transfer learning
 │   ├── validate_body.py       # Estágio 3: métricas formais do split de val
@@ -35,6 +35,11 @@ scriptvisaocomput/
 ```
 
 Ausente, mas criado em tempo de execução: `dataset/` (com `images/{train,val}`, `labels/{train,val}`, `downloads_cache/`) — referenciado por `data.yaml` e `scripts/download_and_convert_crowdhuman.py:13-14`.
+
+## Papéis dos Arquivos (definido pelo usuário)
+
+- **`main.py` — ARQUIVO PRINCIPAL.** É o programa real do projeto (inferência na webcam). Todo o desenvolvimento deve convergir para ele.
+- **Demais arquivos são apenas para teste/experimentação:** `run_pipeline.py`, `treinar_crowdhuman.py`, `treinar_crowdhuman_colab.ipynb` e todo o diretório `scripts/`. Servem para testar download/treino/validação, não são o produto.
 
 ## Propósitos dos Diretórios
 
@@ -73,10 +78,10 @@ Ausente, mas criado em tempo de execução: `dataset/` (com `images/{train,val}`
 ## Locais dos Arquivos-Chave
 
 **Pontos de Entrada:**
-- `main.py`: detecção de corpo em tempo real na webcam (`python main.py`, pressione `q` para sair)
-- `run_pipeline.py`: orquestra a preparação do dataset e depois o treino via `subprocess.run(..., check=True)`
-- `treinar_crowdhuman.py`: treino local autossuficiente (download + conversão + treino em um único arquivo)
-- `treinar_crowdhuman_colab.ipynb`: o mesmo fluxo como notebook Colab para execução em GPU
+- `main.py` **(principal)**: detecção de corpo em tempo real na webcam (`python main.py`, pressione `q` para sair)
+- `run_pipeline.py` *(teste)*: orquestra a preparação do dataset e depois o treino via `subprocess.run(..., check=True)`
+- `treinar_crowdhuman.py` *(teste)*: treino local autossuficiente (download + conversão + treino em um único arquivo)
+- `treinar_crowdhuman_colab.ipynb` *(teste)*: o mesmo fluxo como notebook Colab para execução em GPU
 
 **Configuração:**
 - `data.yaml`: especificação de dataset do Ultralytics (`path`, `train`, `val`, `nc: 1`, `names: ['person']`) — `path` é um caminho absoluto fixo de outra máquina e deve ser atualizado em cada host

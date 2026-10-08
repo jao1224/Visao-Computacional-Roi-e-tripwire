@@ -5,7 +5,7 @@
 ## Linguagens
 
 **Principal:**
-- Python 3.11.9 - Todo o código da aplicação (`main.py`, `run_pipeline.py`, `treinar_crowdhuman.py`, `scripts/*.py`). Não existe fixação em `.python-version`/`pyproject.toml`; 3.11.9 é o interpretador na máquina de análise.
+- Python 3.11.9 - Todo o código da aplicação (`main.py` — arquivo principal; `run_pipeline.py`, `treinar_crowdhuman.py`, `scripts/*.py` — apenas para teste). Não existe fixação em `.python-version`/`pyproject.toml`; 3.11.9 é o interpretador na máquina de análise.
 
 **Secundária:**
 - Jupyter Notebook / IPython (variante Google Colab) - variante de treinamento em GPU: `treinar_crowdhuman_colab.ipynb`

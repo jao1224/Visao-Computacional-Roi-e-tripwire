@@ -15,10 +15,12 @@
 **Comandos de Execução:**
 ```bash
 python -m pytest                        # seria a entrada padrão (uma vez adicionado)
-python scripts/validate_body.py         # "teste" de facto atual: métricas de validação do YOLO
-python main.py                          # "teste" de facto atual: teste de fumaça da webcam (pressione q para sair)
-python run_pipeline.py                  # verificação ponta a ponta do pipeline (download + treino, check=True aborta em caso de falha)
+python scripts/validate_body.py         # [teste] métricas de validação do YOLO
+python main.py                          # execução do APLICATIVO PRINCIPAL (verificação manual: webcam, pressione q para sair)
+python run_pipeline.py                  # [teste] verificação ponta a ponta do pipeline (download + treino, check=True aborta em caso de falha)
 ```
+
+> **Papéis (definido pelo usuário):** `main.py` é o arquivo principal; `run_pipeline.py`, `treinar_crowdhuman.py`, `treinar_crowdhuman_colab.ipynb` e `scripts/` são apenas para teste.
 
 ## Organização dos Arquivos de Teste
 
