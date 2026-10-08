@@ -23,7 +23,7 @@
 
 - ❌ **NUNCA proponha salvar fotos de rostos (crops/snapshots) ou extrair vetores biométricos para fins de analytics geral.**
 - ✅ **SEMPRE utilize detecção de corpo humano/silhueta (`yolo_crowdhuman_body`) para métricas de contagem, ocupação e tempo de permanência.**
-- ✅ **Para controle de acesso individual (catracas/portas):** Estruture sempre com suporte a `session_id` temporário associado a um campo `expira_em` (TTL com exclusão no checkout).
+- ❌ **Controle de acesso individual (catracas/portas), face e `session_id`/qualquer identificador associado a um indivíduo: NUNCA implemente.** Proibido para sempre (LGPD art. 11 e art. 12 §2º; decisão do usuário). Não existe schema por-pessoa neste projeto — nem temporário, nem com TTL. Métricas são exclusivamente agregadas.
 - ✅ **Logs de API:** Garanta que os endpoints registrem IP, porta e timestamp com rotina de retenção de 180 dias.
 
 ---

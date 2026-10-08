@@ -17,15 +17,16 @@ O sistema de visão computacional foi concebido para transformar câmeras de seg
 - **Mapas de Calor (Heatmaps):** Identificar horários de pico e áreas subutilizadas.
 - **Previsão de Demanda:** Subsidiar escalas de funcionários (garçons, atendentes, limpeza) com base nos dados de tráfego.
 
-### B. Controle de Acesso & Segurança
-- **Identificação de Hóspedes:** Liberação ágil de catracas ou portas com chave facial inteligente (para hóspedes cadastrados no check-in).
-- **Monitoramento de Áreas Restritas:** Notificar a segurança caso pessoas acessem locais proibidos fora de horário.
+### B. Controle de Acesso & Segurança — 🚫 FORA DO ESCOPO (superado em 2026-10-08)
+> **NÃO implementar nenhuma linha desta seção.** Face/catraca = proibido para sempre (LGPD art. 11; decisão do usuário). Esta seção permanece apenas como histórico do que foi imaginado no início do projeto. Escopo vigente = apenas a seção A (analytics de fluxo).
+- ~~**Identificação de Hóspedes:** Liberação ágil de catracas ou portas com chave facial inteligente (para hóspedes cadastrados no check-in).~~ *(SUPERADO — face/catraca proibidos)*
+- ~~**Monitoramento de Áreas Restritas:** Notificar a segurança caso pessoas acessem locais proibidos fora de horário.~~ *(fora do escopo v1 — ver `PLANO_V1_COMPLETO.md`)*
 
 ---
 
 ## 3. Requisitos Funcionais do Sistema
 
 1. **Ingestão Multi-Câmera:** Processar múltiplos streams de vídeo simultâneos (RTSP de DVRs Intelbras, Hikvision, Dahua).
-2. **Rastreamento Sem Fricção:** Rastrear indivíduos ao longo do estabelecimento sem duplicar contagens a cada aparição em câmera.
+2. ~~**Rastreamento Sem Fricção:** Rastrear indivíduos ao longo do estabelecimento~~ → **Contagem sem duplicação (corrigido 2026-10-08):** não duplicar contagens **dentro da mesma câmera** (ByteTrack efêmero, RAM, intra-câmera). **Rastrear indivíduos "ao longo do estabelecimento" é proibido** — nenhuma associação entre câmeras (LGPD art. 12 §2º).
 3. **Dashboards Gerenciais em Tempo Real:** Interface web intuitiva exibindo taxa de ocupação instantânea e gráficos de tendência.
 4. **Respeito Integral à Privacidade:** Não armazenar biometria de clientes não cadastrados e garantir conformidade com a LGPD e Marco Civil.
