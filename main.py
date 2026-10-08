@@ -1,7 +1,29 @@
 import os
+import sys
 import time
 import cv2
 from ultralytics import YOLO
+import captura
+import rastreio
+import overlay
+
+
+def resolver_fonte(argumentos):
+    """Mapeia o argumento de linha de comando para a fonte (índice de webcam ou arquivo)."""
+    if not argumentos:
+        return 0
+    if argumentos[0].isdigit():
+        return int(argumentos[0])
+    if os.path.exists(argumentos[0]):
+        return argumentos[0]
+    print(f'[Erro] Fonte não encontrada: {argumentos[0]}')
+    return None
+
+
+def resolver_modelo(candidatos):
+    """Devolve o primeiro peso existente da lista de candidatos."""
+    return next((p for p in candidatos if os.path.exists(p)), None)
+
 
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
