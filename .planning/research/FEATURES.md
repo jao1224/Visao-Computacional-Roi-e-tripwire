@@ -1,5 +1,7 @@
 # Feature Research: Hotel People-Flow Analytics (Body-Only, Analytics-Only)
 
+> **[AVISO] OVERRIDE LGPD (2026-10-08, decisao do usuario):** MTMCT, Re-ID, session_traces, sessoes, embeddings de aparencia e qualquer persistencia de track_id/session_id estao **FORA DO ESCOPO para sempre** (LGPD Art. 12, par. 2 - perfil comportamental). Ignore secoes/patterns/roadmap que mencionem rastreamento entre cameras ou trilhas individuais. Permitido apenas: associacao efemera em RAM + metricas agregadas.
+
 **Domain:** Computer vision people counting & zone analytics for hospitality  
 **Researched:** 2026-10-08  
 **Confidence:** HIGH  
@@ -46,17 +48,17 @@ These are commonly requested but create legal/privacy/ scope risk. Explicitly ex
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **Facial recognition/identification** | Access control, loyalty, VIP recognition. | Explicitly out of scope (PROJECT.md). Violates “analytics only, zero biometrics”. High LGPD risk (Art. 11). | Body-only counting/tracking; no identity. |
-| **Face embeddings/templates** | ReID across cameras “by face”. | Biometric data (sensitive). Requires legal basis beyond analytics. Not needed. | Anonymous body ReID (appearance features) with strict no-PII policy; even then treat with caution and avoid persistence of templates. |
+| **Facial recognition/identification** | Access control, loyalty, VIP recognition. | Explicitly out of scope (PROJECT.md). Violates ï¿½analytics only, zero biometricsï¿½. High LGPD risk (Art. 11). | Body-only counting/tracking; no identity. |
+| **Face embeddings/templates** | ReID across cameras ï¿½by faceï¿½. | Biometric data (sensitive). Requires legal basis beyond analytics. Not needed. | Anonymous body ReID (appearance features) with strict no-PII policy; even then treat with caution and avoid persistence of templates. |
 | **Access control/turnstiles** | Hotel wants doors/locks. | Control function, not analytics. Different legal basis/UX. Out of scope. | Keep analytics-only; integration out of v1. |
 | **Demographics (age/gender/race/emotion)** | Marketing insights. | Often inferred from face; even body-based classifiers can be sensitive and create profiling concerns under LGPD. | Do not estimate demographics. Focus on counts/dwell/flow only. |
-| **Video recording/storage of people** | Forensics/replay. | Contradicts “frames discarded after inference”. Creates large PII surface, retention/compliance burden. | Volatile frames in RAM only; export aggregates/reports only. |
+| **Video recording/storage of people** | Forensics/replay. | Contradicts ï¿½frames discarded after inferenceï¿½. Creates large PII surface, retention/compliance burden. | Volatile frames in RAM only; export aggregates/reports only. |
 | **Snapshots/crops of people** | Debugging UI. | Persists identifiable imagery. Easy to leak. | Use bounding boxes + track IDs + metrics in UI; no image previews of individuals. |
 | **Named/guest identification** | Link to PMS/booking. | Re-identifies individuals. Crosses analytics?identity boundary. | Never link tracks to guests/rooms/IDs. Strict anonymization. |
 | **Cross-site tracking** | Chain hotels want global view. | Expands scope massively; identity correlation risk. | Per-site deployment with isolated data stores. |
-| **Emotion/dwell “intent” inference** | Behavioral profiling. | Unreliable + ethically problematic; not necessary for hotel ops KPIs. | Stick to measurable behaviors (zone entry/exit/dwell/queue). |
+| **Emotion/dwell ï¿½intentï¿½ inference** | Behavioral profiling. | Unreliable + ethically problematic; not necessary for hotel ops KPIs. | Stick to measurable behaviors (zone entry/exit/dwell/queue). |
 | **License plate / other biometrics** | Parking integration sometimes asked. | Out of scope (body-only). Separate system with its own basis. | Exclude from v1; document as separate capability. |
-| **Face blur “for storage”** | Tempting to record blurred video. | Still processing/storing derived imagery; increases attack surface; contradicts no-storage principle. | No storage at all. |
+| **Face blur ï¿½for storageï¿½** | Tempting to record blurred video. | Still processing/storing derived imagery; increases attack surface; contradicts no-storage principle. | No storage at all. |
 | **Real-time individual watchlists** | Security use case. | Shifts from aggregate analytics to surveillance/identification. | Explicitly out of scope; keep separation of concerns. |
 
 ## 4. Feature Dependencies
@@ -70,10 +72,10 @@ Ingest (multi-camera, RTSP/webcam)
        +--> Occupancy (real-time)
        +--> Dwell time (per zone)
        +--> MTMCT (cross-camera association)  [depends on stable tracks + ReID by body]
-       ¦     +--> Flow/O-D (origin-destination) [depends on MTMCT]
+       ï¿½     +--> Flow/O-D (origin-destination) [depends on MTMCT]
        +--> Zone analytics (ROIs/tripwires)
-       ¦     +--> Heatmaps (activity/dwell-weighted)
-       ¦     +--> Queue analytics [special ROI semantics]
+       ï¿½     +--> Heatmaps (activity/dwell-weighted)
+       ï¿½     +--> Queue analytics [special ROI semantics]
        +--> Event stream (anonymized)
 
 DB schema (zones/cameras/sessions/session_traces/metricas_fluxo_zona)
@@ -127,11 +129,11 @@ Add once core stable.
 ### v2+ - Future (Only if justified, strict compliance)
 Defer until PMF; require explicit review against LGPD.
 
-- [ ] **Advanced MTMCT tuning** (occlusion-heavy corridors) — complexity high, value incremental.
-- [ ] **Predictive occupancy** (time-series forecasting) — useful for staffing; ensure no profiling.
-- [ ] **Capacity alerts with escalation** — depends on alerting maturity.
-- [ ] **Multi-site aggregation** (tenant/isolation model) — increases compliance surface; avoid identity correlation.
-- [ ] **Integrations (PMS/BI)** — read-only aggregates via API; no PII exchange.
+- [ ] **Advanced MTMCT tuning** (occlusion-heavy corridors) ï¿½ complexity high, value incremental.
+- [ ] **Predictive occupancy** (time-series forecasting) ï¿½ useful for staffing; ensure no profiling.
+- [ ] **Capacity alerts with escalation** ï¿½ depends on alerting maturity.
+- [ ] **Multi-site aggregation** (tenant/isolation model) ï¿½ increases compliance surface; avoid identity correlation.
+- [ ] **Integrations (PMS/BI)** ï¿½ read-only aggregates via API; no PII exchange.
 
 ## 6. Feature Prioritization Matrix
 
@@ -171,13 +173,13 @@ Signals from research (V-Count, DISPL, Verkada, Ariadne, etc.) inform positionin
 
 ## 8. Sources
 
-- PROJECT.md (hotel analytics scope, body-only, constraints, out-of-scope) — HIGH confidence
-- DOCUMENTACAO_PROJETO_E_LGPD/01_VISAO_GERAL_E_NEGOCIO_HOTEL.md (business goals: occupancy/flow/dwell/heatmaps) — HIGH confidence
-- V-Count (people counting + analytics, privacy notes) — MEDIUM (market signal)
-- DISPL (People Counting with Body Shape AI hybrid) — MEDIUM (body-based approach exists)
-- PeopleCountings.com / Ariadne (market landscape, privacy-first) — MEDIUM
-- Verkada People Analytics (feature set reference) — LOW-MED (vendor-specific)
-- MarketsandMarkets People Counting report summary (market context) — MEDIUM
+- PROJECT.md (hotel analytics scope, body-only, constraints, out-of-scope) ï¿½ HIGH confidence
+- DOCUMENTACAO_PROJETO_E_LGPD/01_VISAO_GERAL_E_NEGOCIO_HOTEL.md (business goals: occupancy/flow/dwell/heatmaps) ï¿½ HIGH confidence
+- V-Count (people counting + analytics, privacy notes) ï¿½ MEDIUM (market signal)
+- DISPL (People Counting with Body Shape AI hybrid) ï¿½ MEDIUM (body-based approach exists)
+- PeopleCountings.com / Ariadne (market landscape, privacy-first) ï¿½ MEDIUM
+- Verkada People Analytics (feature set reference) ï¿½ LOW-MED (vendor-specific)
+- MarketsandMarkets People Counting report summary (market context) ï¿½ MEDIUM
 
 ---
 *Feature research for: Hotel people-flow analytics (body-only, LGPD-compliant). Researched: 2026-10-08.*

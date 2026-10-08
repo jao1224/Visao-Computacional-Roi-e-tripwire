@@ -1,5 +1,7 @@
 # Architecture Research
 
+> **[AVISO] OVERRIDE LGPD (2026-10-08, decisao do usuario):** MTMCT, Re-ID, session_traces, sessoes, embeddings de aparencia e qualquer persistencia de track_id/session_id estao **FORA DO ESCOPO para sempre** (LGPD Art. 12, par. 2 - perfil comportamental). Ignore secoes/patterns/roadmap que mencionem rastreamento entre cameras ou trilhas individuais. Permitido apenas: associacao efemera em RAM + metricas agregadas.
+
 **Domain:** Real-time video analytics / people-counting (hotel people-flow)
 **Researched:** 2026-10-08
 **Confidence:** HIGH (pipeline shape, threading, zone logic) / MEDIUM (MTMCT production practice, build order)

@@ -1,5 +1,7 @@
 # Domain Pitfalls Research
 
+> **[AVISO] OVERRIDE LGPD (2026-10-08, decisao do usuario):** MTMCT, Re-ID, session_traces, sessoes, embeddings de aparencia e qualquer persistencia de track_id/session_id estao **FORA DO ESCOPO para sempre** (LGPD Art. 12, par. 2 - perfil comportamental). Ignore secoes/pitfalls/roadmap que mencionem rastreamento entre cameras, retencao de traces ou trilhas individuais. Permitido apenas: associacao efemera em RAM + metricas agregadas.
+
 **Domain:** Real-time video analytics / people counting / RTSP pipelines (hotel flow analytics, LGPD-constrained)
 **Researched:** 2026-10-08
 **Confidence:** MEDIUM-HIGH (HIGH on RTSP/OpenCV, DB batching and counting failure modes — multiple independent sources incl. official docs/issues; MEDIUM on hotel-specific and clock-sync specifics — fewer direct sources)

@@ -1,5 +1,7 @@
 # Project Research Summary
 
+> **[AVISO] OVERRIDE LGPD (2026-10-08, decisao do usuario):** MTMCT, Re-ID, session_traces, sessoes, embeddings de aparencia e qualquer persistencia de track_id/session_id estao **FORA DO ESCOPO para sempre** (LGPD Art. 12, par. 2 - perfil comportamental). Ignore secoes/patterns/roadmap que mencionem rastreamento entre cameras ou trilhas individuais. Permitido apenas: associacao efemera em RAM + metricas agregadas.
+
 **Project:** Visão Computacional para Hotelaria (Analytics de Fluxo)
 **Domain:** Real-time people-counting / zone-flow analytics (RTSP → YOLO+ByteTrack → PostgreSQL → FastAPI → dashboard), body-only, LGPD-compliant
 **Researched:** 2026-10-08
