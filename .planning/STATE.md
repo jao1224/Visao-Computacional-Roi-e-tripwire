@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-10-08T22:17:06.288Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-10-08T22:21:34.149Z"
 last_activity: 2026-10-08
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
-  percent: 25
+  completed_plans: 2
+  percent: 50
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 ## Current Position
 
 Phase: 01 (fatia-vertical-single-c-mera-captura-detec-o-rastreio-ef-mero) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-10-08
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01 P01 | 3min | 3 tasks | 8 files |
+| Phase 01 P02 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Recent decisions affecting current work:
 - [Roadmap]: Fase 3 entrega API-01+QUA-01 (esquema só-agregado + batch writer); Fase 4 entrega API-02..04 (read-only, TTL, logs 6 meses)
 - [Phase 01]: opencv-python (nao opencv-contrib-python) para evitar cv2.face; versoes do requirements fixadas as da maquina
 - [Phase 01]: captura.abrir_fonte nao valida abertura (devolve cap); chamador checa isOpened()
+- [Phase 01]: tracker='bytetrack.yaml' explicito (default do Ultralytics 8.4.121 e TrackTrack)
+- [Phase 01]: extrair_caixas devolve [] se boxes.id None; senao [(id:int, xyxy, conf)]; IDs so em RAM
 
 ### Pending Todos
 
@@ -78,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-08T22:17:06.284Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-10-08T22:21:34.146Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None

@@ -15,9 +15,9 @@
 - [x] **ING-03**: Frames são voláteis (RAM) e descartados após inferência — nenhuma imagem/frame/crop toca disco, log ou backup
 
 ### Contagem (CNT)
-- [ ] **CNT-01**: Detecão de pessoas apenas por corpo (YOLO CrowdHuman) — nenhum módulo de face/biometria no código
+- [x] **CNT-01**: Detecão de pessoas apenas por corpo (YOLO CrowdHuman) — nenhum módulo de face/biometria no código
 - [ ] **CNT-02**: Contagem por zona com tripwire bidirecional (entra/sai), sem dupla contagem da mesma pessoa
-- [ ] **CNT-03**: Associação intra-câmera efêmera (ByteTrack, segundos, RAM) — IDs morrem ao sair do quadro, nunca persistidos, **nunca comparados entre câmeras (nem por silhueta/aparência)**
+- [x] **CNT-03**: Associação intra-câmera efêmera (ByteTrack, segundos, RAM) — IDs morrem ao sair do quadro, nunca persistidos, **nunca comparados entre câmeras (nem por silhueta/aparência)**
 - [ ] **CNT-04**: Ocupação instantânea por zona recalculada em tempo real, com reset/clamp diário e reconciliação após reconexão
 
 ### Permanência e Fluxo (DWL)
@@ -78,8 +78,8 @@
 |-------------|-------|--------|
 | ING-01 | Phase 1: Fatia vertical single-câmera | Complete |
 | ING-03 | Phase 1: Fatia vertical single-câmera | Complete |
-| CNT-01 | Phase 1: Fatia vertical single-câmera | Pending |
-| CNT-03 | Phase 1: Fatia vertical single-câmera | Pending |
+| CNT-01 | Phase 1: Fatia vertical single-câmera | Complete |
+| CNT-03 | Phase 1: Fatia vertical single-câmera | Complete |
 | CNT-02 | Phase 2: Contagem por zona e ocupação | Pending |
 | CNT-04 | Phase 2: Contagem por zona e ocupação | Pending |
 | API-01 | Phase 3: Persistência PostgreSQL | Pending |
