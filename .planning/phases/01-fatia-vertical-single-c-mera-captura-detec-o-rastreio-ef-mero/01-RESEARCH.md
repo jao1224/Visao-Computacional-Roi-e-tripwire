@@ -303,22 +303,19 @@ rg -n -i "face|biometr|demograf|insightface|facenet|retinaface|arcface|cv2\.face
 | A4 | pytest é o framework de teste a adotar | Validação | Conflita com a convenção "sem framework de testes" atual; validar com o usuário antes de adicionar |
 | A5 | `test/gemini_generated_video_8d21d35f.mp4` é fixture válida de ING-01 (contém pessoas: 10 detecções no 1º frame) | ING-01 | Já verificado; baixo risco |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Escopo da auditoria LGPD de "face" no repo**
+1. **Escopo da auditoria LGPD de "face" no repo** — RESOLVED: Fase 1 escopa a auditoria aos **módulos do produto** (e `requirements.txt`); o resíduo de treino (`models/base_face_weights.pt` e scripts `[teste]`) fica registrado como dívida para a Fase 9 (PRV-03). Não renomear pesos agora (risco de quebrar scripts de treino).
    - O que sabemos: `models/base_face_weights.pt` + referências em scripts de treino `[teste]` fazem o grep repo-wide por "face" retornar resultados.
-   - O que é incerto: se a Fase 1 deve limpar/renomear isso agora ou se fica para a Fase 9 (PRV-03).
-   - Recomendação: Fase 1 escopa às **módulos do produto**; registrar o resíduo como dívida para a Fase 9. Não renomear pesos agora (risco de quebrar scripts de treino).
+   - O que era incerto: se a Fase 1 deve limpar/renomear isso agora ou se fica para a Fase 9 (PRV-03).
 
-2. **Valor de `track_buffer` para a cena**
+2. **Valor de `track_buffer` para a cena** — RESOLVED: manter o default de `bytetrack.yaml` (`track_buffer: 30`) na Fase 1; tunar apenas na Fase 2 com cena real.
    - O que sabemos: `bytetrack.yaml` traz `track_buffer: 30` (frames). A 5 FPS isso são ~6 s de keep-alive.
-   - O que é incerto: se ~6 s é adequado sem causar ID switches/dupla contagem na Fase 2.
-   - Recomendação: manter o default na Fase 1; tunar só na Fase 2 com cena real.
+   - O que era incerto: se ~6 s é adequado sem causar ID switches/dupla contagem na Fase 2.
 
-3. **Fonte padrão do `main.py` (webcam vs arquivo)**
+3. **Fonte padrão do `main.py` (webcam vs arquivo)** — RESOLVED: aceitar argumento opcional (`python main.py [caminho|indice]`) com default webcam `0`, preservando o comportamento atual se sem argumento; implementado em `01-03-PLAN.md`.
    - O que sabemos: hoje `main.py` abre a webcam (`VideoCapture(0)`); ING-01 exige ambas.
-   - O que é incerto: como o usuário seleciona a fonte (argumento de CLI? edição de constante?).
-   - Recomendação: aceitar argumento opcional (`python main.py [caminho|indice]`) com default webcam `0`, preservando o comportamento atual se sem argumento.
+   - O que era incerto: como o usuário seleciona a fonte (argumento de CLI? edição de constante?).
 
 ## Environment Availability
 
