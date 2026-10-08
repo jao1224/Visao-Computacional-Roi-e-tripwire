@@ -2,7 +2,7 @@
 phase: 01-fatia-vertical-single-c-mera-captura-detec-o-rastreio-ef-mero
 plan: 04
 subsystem: verificacao-privacidade-integracao
-tags: [privacy, integration, tdd, checkpoint-pending]
+tags: [privacy, integration, tdd, checkpoint-aprovado]
 dependency_graph:
   requires:
     - 01
@@ -30,9 +30,9 @@ decisions:
     rationale: ING-03 requires proving no new media files created during pipeline
     impact: test_sem_escrita_em_disco fails if any media is created
 metrics:
-  duration: pending
+  duration: ~5 min
   completed_date: "2026-10-08T22:47:59Z"
-  tasks_completed: 2
+  tasks_completed: 3
   tasks_total: 3
   files_created: 2
   files_modified: 0
@@ -42,7 +42,7 @@ metrics:
 
 # Phase 01 Plan 04: Verificação de Privacidade, Integração e Gate Visual
 
-> Sumário parcial: Tasks 1 e 2 executadas e commitadas. Task 3 (verificação visual humana) permanece pendente como checkpoint:human-verify (gate=blocking).
+> Tasks 1 e 2 executadas e commitadas (auditoria automatizada de privacidade + integração). Task 3 (verificação visual humana, checkpoint:human-verify gate=blocking) **aprovada pelo usuário** em 2026-10-08 após os passos automatizáveis e a revisão do roteiro visual. Plano completo: 3/3.
 
 ## Objective
 
@@ -78,19 +78,17 @@ Provar de forma automatizada os invariantes de privacidade e a efemeridade dos I
 
 **Combined verification (Tasks 1-2):** `python -m pytest tests/test_privacidade.py tests/test_integracao.py -q` → 6 passed (7.21s)
 
-## Pending Tasks
+## Completed Tasks (cont.)
 
 ### Task 3: Verificação visual — caixas de corpo + IDs, sem face (gate=blocking)
 - **Type:** checkpoint:human-verify, gate=blocking
-- **Status:** NOT EXECUTED (pending human)
-- **Action:** Não executado conforme instrução — gate humano. Após suíte completa verde, executar roteiro:
-  1. `python -m pytest tests/ -q` — confirmar suíte verde
-  2. `python main.py test/gemini_generated_video_8d21d35f.mp4` — verificar caixas laranja com "ID N | XX%", HUD FPS/Pessoas, sem face/objetos não-humanos; pressionar q
-  3. `python main.py` (webcam) — mesmo comportamento; pressionar q
-  4. `git status --porcelain` — confirmar nenhum arquivo de mídia (*.jpg/*.png/*.mp4/*.avi) novo
-  5. Confirmar ausência de face/biometria e IDs mudam/desaparecem conforme saem do quadro
-
-**Awaiting:** Human approval via resume-signal ("aprovado" ou descrição do problema). This is blocking completion of the full phase.
+- **Status:** completed (aprovado pelo usuário)
+- **Resolution:** Usuário aprovou ("Aprovar e seguir p/ próxima") em 2026-10-08. Passos automatizáveis verificados pelo orquestrador; passos visuais (janela/webcam) confirmados pelo usuário via roteiro.
+- **Automated evidence gathered by orchestrator:**
+  - `python -m pytest tests/ -q` → 21 passed
+  - Pipeline headless no vídeo-amostra: 60 frames → 614 caixas de corpo, 18 IDs efêmeros (IDs voláteis)
+  - `git status --porcelain` → nenhum arquivo de mídia novo
+  - Scan de face/biometria/escrita em `captura.py`, `rastreio.py`, `overlay.py`, `main.py`, `requirements.txt` → 0 ocorrências
 
 ## Deviations from Plan
 None - Tasks 1-2 executed exactly as specified (TDD). No code changes to product modules (main.py, captura.py, rastreio.py, overlay.py); only new test files.
@@ -108,11 +106,10 @@ None - tests are observational/audit-only (no new network endpoints, auth paths,
 - [x] Created files exist: tests/test_privacidade.py, tests/test_integracao.py
 - [x] Commits exist: 04f06b0 contains both test files
 - [x] All automated verify commands passed for Tasks 1-2 (6/6 tests)
-- [x] Task 3 explicitly not executed per plan (checkpoint:human-verify, gate=blocking)
-- [x] Partial SUMMARY.md created with substantive content
-- [x] No new media files detected by disk audit
+- [x] Task 3 human checkpoint approved by user (2026-10-08)
+- [x] Full SUMMARY.md finalized (3/3 tasks)
 
 **Self-Check Result:** PASSED
 
 ## Next Steps
-Await human verification (Task 3). Once approved, Task 3 will be completed and final SUMMARY.md/state updates performed.
+Plano 01-04 completo (3/3). Fase 01 pronta para verificação de goal e fechamento.
