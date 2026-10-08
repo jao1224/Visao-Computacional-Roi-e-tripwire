@@ -74,4 +74,36 @@
 
 ## Traceability
 
-_(preenchido pela criação do roadmap — REQ-IDs → fases)_
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| ING-01 | Phase 1: Fatia vertical single-câmera | Pending |
+| ING-03 | Phase 1: Fatia vertical single-câmera | Pending |
+| CNT-01 | Phase 1: Fatia vertical single-câmera | Pending |
+| CNT-03 | Phase 1: Fatia vertical single-câmera | Pending |
+| CNT-02 | Phase 2: Contagem por zona e ocupação | Pending |
+| CNT-04 | Phase 2: Contagem por zona e ocupação | Pending |
+| API-01 | Phase 3: Persistência PostgreSQL | Pending |
+| QUA-01 | Phase 3: Persistência PostgreSQL | Pending |
+| API-02 | Phase 4: API FastAPI + Marco Civil | Pending |
+| API-03 | Phase 4: API FastAPI + Marco Civil | Pending |
+| API-04 | Phase 4: API FastAPI + Marco Civil | Pending |
+| DSH-01 | Phase 5: Dashboard web | Pending |
+| DSH-02 | Phase 5: Dashboard web | Pending |
+| OPS-02 | Phase 5: Dashboard web | Pending |
+| ING-02 | Phase 6: Multi-câmera e RTSP | Pending |
+| OPS-01 | Phase 6: Multi-câmera e RTSP | Pending |
+| DWL-01 | Phase 7: Dwell e heatmap agregado | Pending |
+| DWL-02 | Phase 7: Dwell e heatmap agregado | Pending |
+| DSH-03 | Phase 7: Dwell e heatmap agregado | Pending |
+| QUA-02 | Phase 8: Validação de qualidade | Pending |
+| QUA-03 | Phase 8: Validação de qualidade | Pending |
+| PRV-01 | Phase 9: Conformidade LGPD | Pending |
+| PRV-02 | Phase 9: Conformidade LGPD | Pending |
+| PRV-03 | Phase 9: Conformidade LGPD | Pending |
+| PRV-04 | Phase 9: Conformidade LGPD | Pending |
+| PRV-05 | Phase 9: Conformidade LGPD | Pending |
+| OPS-03 | Phase 9: Conformidade LGPD | Pending |
+
+**Coverage:** 27/27 requisitos v1 mapeados — nenhum órfão, nenhuma duplicação ✓
+
+_(Criado pelo roadmap em 2026-10-08 — ver `.planning/ROADMAP.md`)_
