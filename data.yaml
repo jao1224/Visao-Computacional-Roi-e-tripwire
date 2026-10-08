@@ -1,0 +1,6 @@
+path: C:\Users\ferna\Desktop\visao computacional\yolo_crowdhuman_body\dataset
+train: images/train
+val: images/val
+
+nc: 1
+names: ['person']

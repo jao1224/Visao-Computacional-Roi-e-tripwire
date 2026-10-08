@@ -1,0 +1,58 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": "v1.0",
+  "phases": [
+    {
+      "number": "1",
+      "name": "Fatia vertical single-câmera",
+      "status": "pending"
+    },
+    {
+      "number": "2",
+      "name": "Contagem por zona e ocupação",
+      "status": "pending"
+    },
+    {
+      "number": "3",
+      "name": "Persistência PostgreSQL",
+      "status": "pending"
+    },
+    {
+      "number": "4",
+      "name": "API FastAPI + Marco Civil",
+      "status": "pending"
+    },
+    {
+      "number": "5",
+      "name": "Dashboard web",
+      "status": "pending"
+    },
+    {
+      "number": "6",
+      "name": "Multi-câmera e RTSP",
+      "status": "pending"
+    },
+    {
+      "number": "7",
+      "name": "Dwell e heatmap agregado",
+      "status": "pending"
+    },
+    {
+      "number": "8",
+      "name": "Validação de qualidade",
+      "status": "pending"
+    },
+    {
+      "number": "9",
+      "name": "Conformidade LGPD",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "/gsd:progress --next",
+    "label": "Advance to the next step",
+    "reason": "Phase 01 of 9 · executing"
+  },
+  "updated_at": "2026-10-08T22:06:36.904Z"
+}
