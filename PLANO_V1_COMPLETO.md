@@ -21,6 +21,7 @@ Câmeras de segurança do hotel viram sensores de negócio: **contagem de pessoa
 | **Frames de vídeo nunca tocam disco** — imagem vive só na RAM durante a inferência | LGPD art. 6º III (minimização) |
 | Face, biometria, demografia **nunca** existem no código | LGPD art. 11 (dado sensível) |
 | IDs de rastreamento (ByteTrack) morrem ao sair do quadro, **intra-câmera** | LGPD art. 6º III |
+| **Nenhum stream real com hóspedes antes do gate da Fase 9** — fases 1–8 usam só webcam, vídeos-amostra e MediaMTX local | LGPD art. 7º IX + art. 10 §3 (LIA formal só existe ao fim da Fase 9) |
 
 **Risco se violado:** multa de até **2% do faturamento, teto R$ 50 milhões por infração** (LGPD art. 52), além de bloqueio/eliminação de dados.
 
@@ -124,7 +125,7 @@ Face/biometria/demografia/emoção (art. 11) · controle de acesso/catraca · **
 **Por quê assim:** I/O de banco dentro do loop derruba os FPS (proibido pelo doc 08) — padrão "loop quente / caminho frio" confirmado na pesquisa.
 **Critérios de sucesso:**
 1. Zero operação de banco no loop de vídeo (verificável por review + métrica de FPS)
-2. Schema só com configuração e agregados — nenhuma tabela/coluna por-pessoa
+2. Schema só com configuração e agregados — nenhuma tabela/coluna por-pessoa; eventos ENTROU/SAIU **sem qualquer chave de pessoa** (sem track_id — só zona, direção, timestamp de janela)
 3. Latência ≤ 5 ms/frame em GPU com escritor ativo
 4. Reentrega de lote não duplica contagens (idempotência UUID)
 

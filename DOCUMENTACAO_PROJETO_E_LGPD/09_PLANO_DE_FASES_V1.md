@@ -19,6 +19,7 @@ O sistema transforma câmeras de segurança do hotel em sensores de negócio: co
 | **Frames nunca tocam disco** — imagem vive só na RAM durante a inferência | LGPD art. 6º III |
 | Face/biometria/demografia **nunca** existem no código | LGPD art. 11 |
 | IDs de rastreamento (ByteTrack) morrem ao sair do quadro, **intra-câmera** | LGPD art. 6º III |
+| **Nenhum stream real com hóspedes antes do gate da Fase 9** — fases 1–8 usam só webcam, vídeos-amostra e MediaMTX local (sem titulares reais de hotel em tratamento) | LGPD art. 7º IX + art. 10 §3 (LIA formal entregue na Fase 9) |
 
 **Ordem de execução:** 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9. Cada fase só começa quando a anterior passou nos seus critérios de sucesso.
 
@@ -126,7 +127,7 @@ Loop de vídeo ──(evento agregado)──▶ fila RAM ──▶ batch writer 
 
 ### Critérios de sucesso
 1. Nenhuma operação de banco dentro do loop de vídeo (verificável por código/review e métrica de FPS)
-2. O banco contém **apenas** tabelas de configuração e métricas agregadas — nenhuma tabela/coluna por-pessoa existe no schema
+2. O banco contém **apenas** tabelas de configuração e métricas agregadas — nenhuma tabela/coluna por-pessoa existe no schema; eventos ENTROU/SAIU gravados **sem qualquer chave de pessoa** (sem track_id — só zona, direção e timestamp de janela)
 3. Latência do loop permanece ≤ 5 ms/frame em GPU mesmo com o escritor ativo
 4. Reentregar um lote após interrupção não duplica contagens (idempotência via UUID)
 
