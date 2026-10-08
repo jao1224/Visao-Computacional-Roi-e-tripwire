@@ -1,20 +1,17 @@
 ---
-gsd_state_version: "1.0"
+gsd_state_version: 1.0
 milestone: v1.0
-current_phase: 01
-current_phase_name: fatia-vertical-single-c-mera-captura-detec-o-rastreio-ef-mero
+milestone_name: milestone
 status: executing
-stopped_at: Phase 1 context gathered
-last_updated: "2026-10-08T22:06:36.836Z"
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-10-08T22:17:06.288Z"
 last_activity: 2026-10-08
-last_activity_desc: Phase 01 execution started
-state_head: 963b0b1facb54aeced4881debc6d27cd12131638
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 4
-  completed_plans: 0
-milestone_name: milestone
+  completed_plans: 1
+  percent: 25
 ---
 
 # Project State
@@ -29,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 ## Current Position
 
 Phase: 01 (fatia-vertical-single-c-mera-captura-detec-o-rastreio-ef-mero) — EXECUTING
-Plan: 1 of 4
-Status: Executing Phase 01
-Last activity: 2026-10-08 — Phase 01 execution started
+Plan: 2 of 4
+Status: Ready to execute
+Last activity: 2026-10-08
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -55,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01 P01 | 3min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -67,6 +65,8 @@ Recent decisions affecting current work:
 - [Roadmap]: Requisitos de compliance (PRV-01..05, OPS-03) concentrados na Fase 9 como gate antes de produção; gates de privacidade valem em TODAS as fases
 - [Roadmap]: QUA-01 (latência/batch writer) mapeado à Fase 3; QUA-02/03 (testes/acurácia) à Fase 8 — cobrem tudo que existe até a Fase 7
 - [Roadmap]: Fase 3 entrega API-01+QUA-01 (esquema só-agregado + batch writer); Fase 4 entrega API-02..04 (read-only, TTL, logs 6 meses)
+- [Phase 01]: opencv-python (nao opencv-contrib-python) para evitar cv2.face; versoes do requirements fixadas as da maquina
+- [Phase 01]: captura.abrir_fonte nao valida abertura (devolve cap); chamador checa isOpened()
 
 ### Pending Todos
 
@@ -78,6 +78,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-08T20:32:39.177Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-fatia-vertical-single-c-mera-captura-detec-o-rastreio-ef-mero/01-CONTEXT.md
+Last session: 2026-10-08T22:17:06.284Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: None

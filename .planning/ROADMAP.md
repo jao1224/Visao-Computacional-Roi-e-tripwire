@@ -36,7 +36,7 @@ O sistema nasce do detector existente (`main.py`, YOLO CrowdHuman) e evolui em 9
 **Plans:** 4 plans
 Plans:
 **Wave 1**
-- [ ] 01-01-PLAN.md — Fundação: requirements + captura.py (fonte + capture_ts) + overlay.py + harness pytest
+- [x] 01-01-PLAN.md — Fundação: requirements + captura.py (fonte + capture_ts) + overlay.py + harness pytest
 - [ ] 01-02-PLAN.md — Rastreio efêmero: rastreio.py (YOLO + ByteTrack explícito, só corpo, guard boxes.id)
 
 **Wave 2** *(blocked on Wave 1 completion)*

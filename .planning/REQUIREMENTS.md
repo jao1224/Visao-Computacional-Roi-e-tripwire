@@ -10,9 +10,9 @@
 ## v1 Requirements
 
 ### Ingestão (ING)
-- [ ] **ING-01**: Sistema processa webcam e arquivos de vídeo-amostra como fonte de vídeo (v1 = desenvolvimento)
+- [x] **ING-01**: Sistema processa webcam e arquivos de vídeo-amostra como fonte de vídeo (v1 = desenvolvimento)
 - [ ] **ING-02**: Processa múltiplas câmeras RTSP simultaneamente, com reconexão automática (backoff exponencial) e watchdog de latência/staleness
-- [ ] **ING-03**: Frames são voláteis (RAM) e descartados após inferência — nenhuma imagem/frame/crop toca disco, log ou backup
+- [x] **ING-03**: Frames são voláteis (RAM) e descartados após inferência — nenhuma imagem/frame/crop toca disco, log ou backup
 
 ### Contagem (CNT)
 - [ ] **CNT-01**: Detecão de pessoas apenas por corpo (YOLO CrowdHuman) — nenhum módulo de face/biometria no código
@@ -76,8 +76,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ING-01 | Phase 1: Fatia vertical single-câmera | Pending |
-| ING-03 | Phase 1: Fatia vertical single-câmera | Pending |
+| ING-01 | Phase 1: Fatia vertical single-câmera | Complete |
+| ING-03 | Phase 1: Fatia vertical single-câmera | Complete |
 | CNT-01 | Phase 1: Fatia vertical single-câmera | Pending |
 | CNT-03 | Phase 1: Fatia vertical single-câmera | Pending |
 | CNT-02 | Phase 2: Contagem por zona e ocupação | Pending |
