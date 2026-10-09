@@ -1,70 +1,66 @@
-# Detecção de Corpo Inteiro com YOLO e CrowdHuman
+# YOLO + LGPD — Visão Computacional para Hotelaria
 
-Projeto dedicado ao treinamento e inferência de modelos YOLO especializados na **Detecção de Corpo Inteiro (Pedestres / Pessoas)** utilizando o dataset **CrowdHuman**.
+**Identificação do projeto:** `YOLO + LGPD`  
+Detecção de **corpo/silhueta** com YOLO (CrowdHuman) para analytics de fluxo — **zero biometria**, em conformidade com a LGPD.
 
-Esta pasta é **100% independente** da pasta de detecção de rostos, garantindo total isolamento de pesos, métricas e datasets.
+Sistema que transforma câmeras do hotel em sensores de negócio: contagem, ocupação e (nas próximas fases) permanência por zona. Frames não são gravados; IDs do ByteTrack existem só em RAM.
 
 ---
 
-## 📁 Estrutura da Pasta
+## Recorte LGPD (obrigatório)
+
+- Só detecção de corpo — sem face, Re-ID, embedding ou identificação nominal
+- Frames voláteis: inferência em memória, sem `imwrite` / gravação de vídeo de pessoas
+- Saída apenas agregada (contagens); nenhum `track_id` persistido
+- Dependência `opencv-python` (não `opencv-contrib-python`, para não puxar `cv2.face`)
+
+Documentação legal e de produto: `docs/DOCUMENTACAO_PROJETO_E_LGPD/`.
+
+---
+
+## Estrutura
 
 ```text
-yolo_crowdhuman_body/
-│
-├── main.py                     --> Teste em tempo real na webcam (detecção de corpo)
-├── data.yaml                   --> Configuração do dataset (classe: person)
-├── README.md                   --> Este guia passo a passo
-│
-├── scripts/                    --> Utilitários do pipeline
-│   ├── download_and_convert_crowdhuman.py --> Download e conversão do CrowdHuman (.odgt -> YOLO .txt)
-│   ├── train_body.py           --> Script de treinamento do YOLOv26 para corpo
-│   └── validate_body.py        --> Validação formal no split de teste do CrowdHuman
-│
-├── dataset/                    --> Pasta de imagens e anotações do CrowdHuman
-│   ├── images/ (train / val)
-│   └── labels/ (train / val)
-│
-└── runs/                       --> Pesos e resultados dos treinamentos de corpo
-    └── detect/
-        └── train_crowdhuman_body/
-            ├── weights/best.pt
-            └── results.csv
+yolo-lgpd/
+├── main.py                 --> Webcam / vídeo: captura → rastreio → overlay
+├── captura.py
+├── rastreio.py             --> YOLO + ByteTrack efêmero (classe 0 = corpo)
+├── overlay.py              --> Caixas e HUD in-place, sem escrita em disco
+├── config/data.yaml        --> Dataset (classe: person)
+├── models/                 --> Pesos base (yolo26n.pt)
+├── resultados/best.pt      --> Detector de corpo treinado
+├── scripts/                --> Download CrowdHuman, treino, validação, pipeline
+├── tests/                  --> Privacidade, integração e contratos dos módulos
+└── docs/                   --> LGPD, arquitetura, plano v1
 ```
 
 ---
 
-## 🚀 Como Usar
+## Como usar
 
-### Passo 1: Baixar e Converter o Dataset CrowdHuman
-Para baixar e converter as anotações automaticamente para o padrão YOLO:
-```bash
-python scripts/download_and_convert_crowdhuman.py
-```
-*(Alternativa: Você pode baixar manualmente os arquivos pelo site [crowdhuman.org](https://www.crowdhuman.org/) ou Roboflow Universe).*
+### Inferência em tempo real (webcam)
 
----
-
-### Passo 2: Iniciar o Treinamento do Modelo de Corpo
-Para iniciar o fine-tuning do YOLOv26 com foco em corpos humanos:
-```bash
-python scripts/train_body.py
-```
-
-* **Resolução (`imgsz`):** `640x640` (Ideal para capturar a anatomia completa da cabeça aos pés).
-* **Batch:** `8`
-* **Épocas:** `300` com *cosine learning rate decay*.
-
----
-
-### Passo 3: Avaliar as Métricas do Modelo
-```bash
-python scripts/validate_body.py
-```
-
----
-
-### Passo 4: Testar na Webcam em Tempo Real
 ```bash
 python main.py
 ```
-*(Pressione **`q`** para encerrar).*
+
+Fonte alternativa: `python main.py 1` (índice da câmera) ou `python main.py caminho/do/video.mp4`.  
+Pressione **`q`** para encerrar.
+
+### Testes
+
+```bash
+python -m pytest tests/ -q
+```
+
+### Treinar / validar o detector de corpo
+
+```bash
+python scripts/download_and_convert_crowdhuman.py
+python scripts/train_body.py
+python scripts/validate_body.py
+```
+
+* **Resolução (`imgsz`):** `640x640`
+* **Batch:** `8`
+* **Épocas:** `300` com *cosine learning rate decay*
