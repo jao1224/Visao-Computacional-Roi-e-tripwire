@@ -6,7 +6,7 @@
     {
       "number": "1",
       "name": "Fatia vertical single-câmera",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "2",
@@ -51,8 +51,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 01 of 9 · executing"
+    "label": "Advance to the next step (plan phase 2)",
+    "reason": "Phase 2 of 9 — needs a plan"
   },
-  "updated_at": "2026-10-08T22:06:36.904Z"
+  "updated_at": "2026-10-08T23:15:09.289Z"
 }
