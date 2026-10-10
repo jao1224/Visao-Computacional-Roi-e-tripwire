@@ -42,10 +42,10 @@ created: "2026-10-09"
 | T2-02 (config/zonas.yaml) | 02-01 | 1 | CNT-02/04 | T-02-01 (YAML tampering) | `yaml.safe_load` + validação de schema | unit | `pytest tests/test_zona.py::test_zonas_yaml_camera0 -x` | ❌ W0 | ⬜ pending |
 | T2-03 (zona.py carregar_zonas) | 02-01 | 1 | CNT-02/04 | T-02-01 | coordenadas numéricas finitas | unit | `pytest tests/test_zona.py::test_carregar_zonas -x` | ❌ W0 | ⬜ pending |
 | T2-04 (zona.py verificar_tripwires) | 02-02 | 2 | CNT-02 | T-02-03 (falso evento geométrico) | transição de lado + debounce + hysteresis; eventos não acumulados | unit | `pytest tests/test_zona.py::test_tripwire_entrada_saida -x` | ❌ W0 | ⬜ pending |
-| T2-05 (zona.py atualizar_ocupacao + reset/clamp) | 02-03 | 3 | CNT-04 | T-02-02 (trilha individual em RAM) | clamp `[0, capacidade]`; reset meia-noite + known-empty; nunca entradas − saídas | unit | `pytest tests/test_zona.py::test_ocupacao_roi -x` | ❌ W0 | ⬜ pending |
+| T2-05 (zona.py atualizar_ocupacao + reset/clamp) | 02-03 | 3 | CNT-04 | T-02-13 (trilha individual em RAM) | clamp `[0, capacidade]`; reset meia-noite + known-empty; nunca entradas − saídas | unit | `pytest tests/test_zona.py::test_ocupacao_roi -x` | ❌ W0 | ⬜ pending |
 | T2-06 (overlay contadores/tripwires/rois) | 02-04 | 4 | CNT-02/04 | — | desenho in-place, zero disco | unit | `pytest tests/test_zona.py::test_desenhos_retornam_frame -x` | ✅ Teste no harness; funções no 02-04 | ⬜ pending |
-| T2-07 (main.py wiring + reconciliação) | 02-03 (reconciliar_fonte) + 02-04 (main.py wiring) | 3+4 | CNT-04 | T-02-02 | reconciliação limpa `track_states` inteiro | unit (reconcile) + static/unit (wiring) | `python -m pytest tests/ -x -q` | ❌ W0 | ⬜ pending |
-| T2-08 (privacidade: zona.py no alcance) | 02-04 | 4 | CNT-01/03 | T-02-02/T-02-04 (disco) | zero `imwrite`/`VideoWriter`/face em `zona.py` | unit/static | `pytest tests/test_privacidade.py -x -q` | ✅ | ⬜ pending |
+| T2-07 (main.py wiring + reconciliação) | 02-03 (reconciliar_fonte) + 02-04 (main.py wiring) | 3+4 | CNT-04 | T-02-13/T-02-15 | reconciliação limpa `track_states` inteiro | unit (reconcile) + static/unit (wiring) | `python -m pytest tests/ -x -q` | ❌ W0 | ⬜ pending |
+| T2-08 (privacidade: zona.py no alcance) | 02-04 | 4 | CNT-01/03 | T-02-15/T-02-14 (disco) | zero `imwrite`/`VideoWriter`/face em `zona.py` | unit/static | `pytest tests/test_privacidade.py -x -q` | ✅ | ⬜ pending |
 | T2-09 (integração invariantes MP4) | 02-04 | 4 | CNT-02/04 | — | contagens ≥ 0, monotonicidade, sem exceção | integration | `pytest tests/test_integracao.py -x -q` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
