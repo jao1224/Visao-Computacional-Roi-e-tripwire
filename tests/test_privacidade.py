@@ -20,6 +20,7 @@ def _produto_files():
         os.path.join(root, 'captura.py'),
         os.path.join(root, 'rastreio.py'),
         os.path.join(root, 'overlay.py'),
+        os.path.join(root, 'zona.py'),
         os.path.join(root, 'requirements.txt'),
     ]
 

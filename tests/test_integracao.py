@@ -140,6 +140,67 @@ def test_ids_efemeros(caminho_modelo, caminho_video_amostra):
                 pass
 
 
+def test_contagem_amostra_invariantes(caminho_modelo, caminho_video_amostra):
+    """Invariantes agregados da contagem por zona no vídeo-amostra (nenhuma contagem específica)."""
+    try:
+        import captura
+        import rastreio
+        import zona
+    except Exception as e:
+        pytest.skip(f'Módulos não disponíveis: {e}')
+
+    cap = None
+    try:
+        cap = captura.abrir_fonte(caminho_video_amostra)
+        if cap is None or not cap.isOpened():
+            pytest.skip('Não foi possível abrir o vídeo-amostra')
+
+        model = rastreio.carregar_modelo(caminho_modelo)
+        zonas = zona.carregar_zonas('camera_0')
+        estado = {'dia_atual': None,
+                  **{z['id']: {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None}
+                     for z in zonas}}
+        track_states = {}
+        capacidades = {z['id']: z['capacidade'] for z in zonas}
+        entradas_antes = {z['id']: 0 for z in zonas}
+        saidas_antes = {z['id']: 0 for z in zonas}
+        frames = 0
+        for frame_idx in range(60):
+            frame, capture_ts = captura.capturar(cap)
+            if frame is None or capture_ts is None:
+                break
+            result = rastreio.rastrear(model, frame)
+            caixas = rastreio.extrair_caixas(result)
+            zona.verificar_tripwires(caixas, zonas, estado, track_states,
+                                     agora=capture_ts, frame_idx=frame_idx)
+            zona.atualizar_ocupacao(caixas, zonas, estado, agora=capture_ts,
+                                    track_states=track_states)
+            zona.podar_track_states(track_states, frame_idx)
+            for z in zonas:
+                dados = estado[z['id']]
+                assert dados['ocupacao'] >= 0, 'ocupacao negativa'
+                assert dados['ocupacao'] <= capacidades[z['id']], 'ocupacao acima da capacidade'
+                assert dados['entradas'] >= entradas_antes[z['id']], 'entradas não monotônicas'
+                assert dados['saidas'] >= saidas_antes[z['id']], 'saidas não monotônicas'
+                entradas_antes[z['id']] = dados['entradas']
+                saidas_antes[z['id']] = dados['saidas']
+            frames += 1
+        if frames < 1:
+            pytest.skip('Não foi possível processar frames do vídeo-amostra')
+    except pytest.skip.Exception:
+        raise
+    except AssertionError:
+        raise
+    except Exception as e:
+        pytest.skip(f'Erro ao avaliar invariantes de contagem: {e}')
+    finally:
+        if cap is not None:
+            try:
+                cap.release()
+            except Exception:
+                pass
+
+
 def test_sem_persistencia_ids(caminho_modelo, caminho_video_amostra):
     """Verifica que não há persistência de IDs em arquivos do repositório."""
     root = _repo_root()

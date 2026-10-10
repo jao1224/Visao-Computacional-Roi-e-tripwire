@@ -6,6 +6,7 @@ from ultralytics import YOLO
 import captura
 import rastreio
 import overlay
+import zona
 
 
 def resolver_fonte(argumentos):
@@ -56,6 +57,16 @@ def main():
         return
     print(f'[OK] Fonte: {fonte} — pressione q para sair.')
 
+    camera_id = 'camera_0'
+    zonas = zona.carregar_zonas(camera_id)
+    print(f'[OK] {len(zonas)} zonas carregadas ({camera_id})')
+    estado = {'dia_atual': None,
+              **{z['id']: {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None}
+                 for z in zonas}}
+    track_states = {}
+    frame_idx = 0
+    zona.reconciliar_fonte(estado, track_states)
+
     model = rastreio.carregar_modelo(modelo_path)
 
     target_fps = 5
@@ -73,7 +84,19 @@ def main():
         result = rastreio.rastrear(model, frame)
         caixas = rastreio.extrair_caixas(result)
 
+        eventos = zona.verificar_tripwires(caixas, zonas, estado, track_states,
+                                           agora=capture_ts, frame_idx=frame_idx)
+        zona.atualizar_ocupacao(caixas, zonas, estado, agora=capture_ts,
+                                track_states=track_states)
+        for tipo, zid, tid, ts in eventos:
+            print(f'[OK] Zona {zid}: {tipo} track {tid}')
+        zona.podar_track_states(track_states, frame_idx)
+        frame_idx += 1
+
+        overlay.desenhar_tripwires(frame, zonas)
+        overlay.desenhar_rois(frame, zonas)
         overlay.desenhar_caixas(frame, caixas)
+        overlay.desenhar_contadores(frame, estado)
 
         # Cálculo de FPS real medido (tempo de parede)
         curr_time = time.time()
