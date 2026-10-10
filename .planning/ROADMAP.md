@@ -56,7 +56,19 @@ Plans:
   3. Reiniciar a fonte de vídeo (parar/retomar) não corrompe a ocupação: valores reconciliados, com reset/clamp de dia aplicado
   4. Sob rajada de detecções (flicker de caixa), não há explosão de eventos ENTROU/SAIU — contagem é estável
 
-**Plans**: TBD
+**Plans:** 4 plans planned
+Plans:
+**Wave 1**
+- [ ] 02-01-PLAN.md — Fundação: scaffold de testes (13 RED) + config/zonas.yaml + zona.py (constantes, helpers, carregar_zonas)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 02-02-PLAN.md — Travessia: verificar_tripwires bidirecional (transição de lado + debounce + histerese) + podar_track_states
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 02-03-PLAN.md — Ocupação e reconciliação: atualizar_ocupacao (recontagem + clamp [0, capacidade] + resets) + reconciliar_fonte
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 02-04-PLAN.md — Integração visual: overlay (tripwires/ROIs/cards) + main.py wiring + auditoria de privacidade + checkpoint humano
 
 ### Phase 3: Persistência PostgreSQL (fila + escrita em lote)
 
@@ -158,7 +170,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Fatia vertical single-câmera | 4/4 | Complete    | 2026-10-08 |
-| 2. Contagem por zona e ocupação | 0/TBD | Not started | - |
+| 2. Contagem por zona e ocupação | 0/4 | In progress | - |
 | 3. Persistência PostgreSQL | 0/TBD | Not started | - |
 | 4. API FastAPI + Marco Civil | 0/TBD | Not started | - |
 | 5. Dashboard web | 0/TBD | Not started | - |
