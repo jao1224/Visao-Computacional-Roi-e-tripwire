@@ -163,7 +163,8 @@ def verificar_tripwires(tracks, zonas, estado, track_states, agora=None, frame_i
                         st['crossed'].add(zona_id)
                         eventos.append((tipo, zona_id, tid, agora))
                 else:
-                    if dist > HYSTERESIS_PX:
+                    lado_entrada = 1 if zona['direcao'] == 'entrada' else -1
+                    if lado == -lado_entrada and dist > HYSTERESIS_PX:
                         tipo = _evento_para_travessia(zona['direcao'], lado_anterior, lado)
                         est_z = estado.setdefault(zona_id, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None})
                         if tipo == 'ENTROU':
