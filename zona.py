@@ -2,6 +2,7 @@
 
 import os
 import time
+from datetime import date
 
 import cv2
 import numpy as np
@@ -114,3 +115,142 @@ def carregar_zonas(camera_id, caminho=None):
             continue
         zonas.append(normalizada)
     return zonas
+
+
+def _evento_para_travessia(direcao_tripwire, lado_antes, lado_depois):
+    """Decide o tipo de evento ENTROU/SAIU a partir da direção do tripwire e da transição."""
+    lado_entrada = 1 if direcao_tripwire == 'entrada' else -1
+    if lado_depois == lado_entrada and lado_antes != lado_entrada:
+        return 'ENTROU'
+    return 'SAIU'
+
+
+def verificar_tripwires(tracks, zonas, estado, track_states, agora=None, frame_idx=0):
+    """Verifica travessias de tripwire por transição de lado (sem posição fixa)."""
+    if agora is None:
+        agora = time.time()
+    eventos = []
+    for tid, xyxy, _conf in tracks:
+        st = track_states.setdefault(tid, {'frames_vistos': 0, 'ultimo_frame_visto': frame_idx,
+                                         'crossed': set(), 'posicoes': {}})
+        st['frames_vistos'] += 1
+        st['ultimo_frame_visto'] = frame_idx
+        p = _bottom_center(xyxy)
+        for zona in zonas:
+            if zona['tipo'] != 'tripwire':
+                continue
+            zona_id = zona['id']
+            p1, p2 = zona['pontos'][0], zona['pontos'][1]
+            lado = _lado(p1, p2, p)
+            pos = st['posicoes']
+            pos_z = pos.setdefault(zona_id, {'lado_anterior': lado})
+            lado_anterior = pos_z['lado_anterior']
+            if lado == 0:
+                lado = lado_anterior
+            if st['frames_vistos'] == 1:
+                pos_z['lado_anterior'] = lado
+                continue
+            if lado != lado_anterior:
+                dist = _dist_ponto_segmento(p1, p2, p)
+                if zona_id not in st['crossed']:
+                    if st['frames_vistos'] >= DEBOUNCE_FRAMES:
+                        tipo = _evento_para_travessia(zona['direcao'], lado_anterior, lado)
+                        est_z = estado.setdefault(zona_id, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None})
+                        if tipo == 'ENTROU':
+                            est_z['entradas'] += 1
+                        else:
+                            est_z['saidas'] += 1
+                        st['crossed'].add(zona_id)
+                        eventos.append((tipo, zona_id, tid, agora))
+                else:
+                    if dist > HYSTERESIS_PX:
+                        tipo = _evento_para_travessia(zona['direcao'], lado_anterior, lado)
+                        est_z = estado.setdefault(zona_id, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None})
+                        if tipo == 'ENTROU':
+                            est_z['entradas'] += 1
+                        else:
+                            est_z['saidas'] += 1
+                        st['crossed'].discard(zona_id)
+                        eventos.append((tipo, zona_id, tid, agora))
+            pos_z['lado_anterior'] = lado
+    return eventos
+
+
+def podar_track_states(track_states, frame_idx):
+    """Remove tracks que não apareceram há mais de PRUNE_FRAMES frames."""
+    for tid in list(track_states):
+        st = track_states[tid]
+        if frame_idx - st['ultimo_frame_visto'] > PRUNE_FRAMES:
+            del track_states[tid]
+
+
+def _area_roi(zona):
+    """Retorna os pontos do ROI para esta zona (pode vir em roi_pontos)."""
+    if zona.get('roi_pontos'):
+        return zona['roi_pontos']
+    if zona.get('tipo') == 'roi':
+        return zona['pontos']
+    return None
+
+
+def atualizar_ocupacao(tracks, zonas, estado, agora=None, track_states=None):
+    """Reconta ocupação por frame com clamp e resets (meia-noite + known-empty)."""
+    if agora is None:
+        agora = time.time()
+    if track_states is None:
+        track_states = {}
+
+    # Reset diário
+    lt = time.localtime(agora)
+    dia = date(lt.tm_year, lt.tm_mon, lt.tm_mday)
+    if estado.get('dia_atual') is None:
+        estado['dia_atual'] = dia
+    elif dia != estado['dia_atual']:
+        for zona in zonas:
+            zid = zona['id']
+            est_z = estado.setdefault(zid, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None})
+            est_z['ocupacao'] = est_z['entradas'] = est_z['saidas'] = 0
+            est_z['ultima_ocupacao_ts'] = None
+        for st in track_states.values():
+            st['crossed'] = set()
+        estado['dia_atual'] = dia
+        print('[OK] Reset diário (dia trocou)')
+
+    # Processa zonas com ROI
+    for zona in zonas:
+        pontos_roi = _area_roi(zona)
+        if not pontos_roi:
+            continue
+        zid = zona['id']
+        est_z = estado.setdefault(zid, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None})
+        roi = np.array(pontos_roi, dtype=np.int32)
+        bruta = 0
+        for _tid, xyxy, _conf in tracks:
+            p = _bottom_center(xyxy)
+            if cv2.pointPolygonTest(roi, p, False) >= 0:
+                bruta += 1
+        capacidade = zona['capacidade']
+        est_z['ocupacao'] = max(0, min(bruta, capacidade))
+        if bruta > 0:
+            est_z['ultima_ocupacao_ts'] = agora
+        else:
+            uts = est_z['ultima_ocupacao_ts']
+            if uts is not None and agora - uts > RESET_IDLE_SEG:
+                est_z['ocupacao'] = est_z['entradas'] = est_z['saidas'] = 0
+                est_z['ultima_ocupacao_ts'] = None
+                for st in track_states.values():
+                    if zid in st.get('crossed', set()):
+                        st['crossed'].discard(zid)
+
+
+def reconciliar_fonte(estado, track_states):
+    """Zera todo o estado de contagem, mantendo dia_atual."""
+    for zid, est_z in list(estado.items()):
+        if zid == 'dia_atual':
+            continue
+        if isinstance(est_z, dict):
+            est_z['ocupacao'] = 0
+            est_z['entradas'] = 0
+            est_z['saidas'] = 0
+            est_z['ultima_ocupacao_ts'] = None
+    track_states.clear()
