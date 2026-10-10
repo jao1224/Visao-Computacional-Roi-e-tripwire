@@ -1,0 +1,14 @@
+# Configuração de zonas por câmera (fase single-câmera: camera_0).
+# tripwire: linha [[x1,y1],[x2,y2]] + direcao 'entrada' (verde) | 'saida' (vermelha).
+# roi: polígono 'pontos' com >= 3 pontos (ocupação por recontagem geométrica).
+# capacidade: limite por câmera aplicado a cada zona (clamp).
+camera_0:
+  capacidade: 30
+  zonas:
+    - id: "recepcao"
+      tipo: "tripwire"
+      pontos: [[100, 240], [540, 240]]
+      direcao: "entrada"
+    - id: "hall"
+      tipo: "roi"
+      pontos: [[50, 50], [590, 50], [590, 360], [50, 360]]
