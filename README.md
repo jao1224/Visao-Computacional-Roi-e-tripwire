@@ -22,35 +22,62 @@ Documentação legal e de produto: `docs/DOCUMENTACAO_PROJETO_E_LGPD/`.
 
 ```text
 yolo-lgpd/
-├── main.py                 --> Webcam / vídeo: captura → rastreio → overlay
-├── captura.py
+├── main.py                 --> Orquestração: captura → rastreio → zonas → overlay
+├── captura.py              --> Fonte (webcam/arquivo/RTSP) + capture_ts
 ├── rastreio.py             --> YOLO + ByteTrack efêmero (classe 0 = corpo)
-├── overlay.py              --> Caixas e HUD in-place, sem escrita em disco
-├── config/data.yaml        --> Dataset (classe: person)
+├── overlay.py              --> Caixas, HUD, tripwires, ROIs, contadores in-place
+├── zona.py                 --> Tripwire bidirecional + ocupação ROI + reset/reconciliação
+├── config/
+│   ├── data.yaml           --> Dataset (classe: person)
+│   └── zonas.yaml          --> Zonas por camera_id (tripwire + ROI + capacidade)
 ├── models/                 --> Pesos base (yolo26n.pt)
-├── resultados/best.pt      --> Detector de corpo treinado
+├── resultados/best.pt      --> Detector de corpo treinado (CrowdHuman)
 ├── scripts/                --> Download CrowdHuman, treino, validação, pipeline
-├── tests/                  --> Privacidade, integração e contratos dos módulos
+├── tests/                  --> Privacidade, integração, zonas, contratos
 └── docs/                   --> LGPD, arquitetura, plano v1
 ```
 
 ---
 
+## Funcionalidades (Fase 1 + 2)
+
+| Módulo | O que faz |
+|--------|-----------|
+| **Detecção + Rastreio** | YOLO corpo + ByteTrack em RAM, IDs efêmeros |
+| **Tripwire** | Linha bidirecional (ENTROU/SAIU) com debounce 3 frames + hysteresis 15px |
+| **Ocupação ROI** | Recontagem geométrica frame-a-frame (bottom-center no polígono) |
+| **Resets** | Meia-noite local OU vazio > 10 min → zera contadores + limpa `crossed` |
+| **Reconciliação** | Reabertura de fonte limpa `track_states` inteiro |
+| **Overlay** | Tripwires (verde/vermelho), ROIs (azul alpha 0.2), cards IN/OUT/OCUP |
+| **Privacidade** | Zero escrita em disco, zero biometria, auditoria automatizada |
+
+---
+
 ## Como usar
 
-### Inferência em tempo real (webcam)
+### Inferência em tempo real (webcam ou vídeo)
 
 ```bash
-python main.py
+python main.py                    # webcam padrão (índice 0)
+python main.py 1                  # índice da câmera
+python main.py caminho/video.mp4  # arquivo de vídeo
 ```
 
-Fonte alternativa: `python main.py 1` (índice da câmera) ou `python main.py caminho/do/video.mp4`.  
 Pressione **`q`** para encerrar.
+
+**Configuração de zonas:** edite `config/zonas.yaml` (camera_0, tripwire y=360, ROI y=200..480, capacidade 50).
 
 ### Testes
 
 ```bash
-python -m pytest tests/ -q
+python -m pytest tests/ -q        # suite completa (35 testes)
+python -m pytest tests/test_zona.py -q   # 13 testes de zonas
+```
+
+### Visualizar zonas (sem rodar vídeo)
+
+```bash
+python entender_zonas.py          # gera zonas_visualizacao.png
 ```
 
 ### Treinar / validar o detector de corpo
