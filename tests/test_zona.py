@@ -66,9 +66,9 @@ def test_zonas_yaml_camera0():
     assert 'recepcao' in ids and 'hall' in ids
     recepcao = next(z for z in zonas if z['id'] == 'recepcao')
     assert recepcao['tipo'] == 'tripwire'
-    assert recepcao['pontos'][0] == [100.0, 240.0]
-    assert recepcao['direcao'] == 'entrada'
-    assert recepcao['capacidade'] == 30
+    assert recepcao['pontos'][0] == [100.0, 360.0]
+    assert recepcao['direcao'] == 'saida'
+    assert recepcao['capacidade'] == 50
     hall = next(z for z in zonas if z['id'] == 'hall')
     assert hall['tipo'] == 'roi'
     assert len(hall['pontos']) >= 3

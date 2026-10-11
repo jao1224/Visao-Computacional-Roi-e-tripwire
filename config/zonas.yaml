@@ -3,12 +3,12 @@
 # roi: polígono 'pontos' com >= 3 pontos (ocupação por recontagem geométrica).
 # capacidade: limite por câmera aplicado a cada zona (clamp).
 camera_0:
-  capacidade: 30
+  capacidade: 50
   zonas:
     - id: "recepcao"
       tipo: "tripwire"
-      pontos: [[100, 240], [540, 240]]
-      direcao: "entrada"
+      pontos: [[100, 360], [540, 360]]
+      direcao: "saida"
     - id: "hall"
       tipo: "roi"
-      pontos: [[50, 50], [590, 50], [590, 360], [50, 360]]
+      pontos: [[50, 200], [590, 200], [590, 480], [50, 480]]
