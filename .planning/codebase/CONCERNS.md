@@ -184,6 +184,20 @@ Escopo: repositório completo em `C:\Users\Windows\Desktop\scriptvisaocomput` (p
 
 ## Limites de Escala
 
+### Limitação conhecida: Oclusão frontal não detectada (Fase 2)
+- **Sintoma:** Pessoa atrás de outra (oclução > 50-70%) não recebe caixa do YOLO → ByteTrack não rastreia → não conta.
+- **Causa raiz:** Detector 2D single-view (YOLO) não infere pessoas parciais; não há pose/keypoints nem multi-view.
+- **Impacto:** Contagem subestima fluxo em áreas densas; cards de ocupação ficam abaixo do real.
+- **Mitigação atual:** Nenhuma (aceita-se a limitação do detector).
+- **Caminho realista (fora da Fase 2):**
+  1. Modelo maior (`yolov8m/l`) melhora separação marginalmente.
+  2. Fine-tune no domínio (vídeo do hotel) ajuda.
+  3. **Câmera zenital / top-down** elimina a maioria das oclusões frontais.
+  4. **Fase 6 (Multi-câmera):** ângulos complementares cobrem pontos cegos.
+  5. Re-ID / feature matching (fora de escopo — LGPD proíbe persistir embeddings).
+
+---
+
 **Treinamento em GPU única / máquina única:**
 - Capacidade atual: heurística de batch em `treinar_crowdhuman.py:125` — batch 32 apenas se VRAM > 15 GB, senão batch 8 com `imgsz=640`, 300 epochs, `patience=50`
 - Limite: o treino do CrowdHuman tem ~15k imagens; em uma GPU menor a execução leva horas a dias, e `workers=0` (em `scripts/train_body.py:39`) deixa a E/S da CPU como teto
