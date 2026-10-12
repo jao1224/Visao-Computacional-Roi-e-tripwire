@@ -11,12 +11,12 @@
     {
       "number": "2",
       "name": "Contagem por zona e ocupação",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "3",
       "name": "Persistência PostgreSQL",
-      "status": "pending"
+      "status": "in_progress"
     },
     {
       "number": "4",
@@ -51,8 +51,8 @@
   ],
   "next": {
     "command": "/gsd:progress --next",
-    "label": "Advance to the next step",
-    "reason": "Phase 02 of 9 · executing"
+    "label": "Advance to Phase 3 planning",
+    "reason": "Phase 02 complete · 4/4 plans · 35 tests passing"
   },
-  "updated_at": "2026-10-10T16:02:16.919Z"
+  "updated_at": "2026-10-12T00:00:00.922Z"
 }
