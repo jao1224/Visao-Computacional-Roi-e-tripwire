@@ -26,7 +26,7 @@ yolo-lgpd/
 ├── captura.py              --> Fonte (webcam/arquivo/RTSP) + capture_ts
 ├── rastreio.py             --> YOLO + ByteTrack efêmero (classe 0 = corpo)
 ├── overlay.py              --> Caixas, HUD, tripwires, ROIs, contadores in-place
-├── zona.py                 --> Tripwire bidirecional + ocupação ROI + reset/reconciliação
+├── zona.py                 --> Ocupação ROI (tripwire bidirecional opcional) + reset/reconciliação
 ├── config/
 │   ├── data.yaml           --> Dataset (classe: person)
 │   └── zonas.yaml          --> Zonas por camera_id (tripwire + ROI + capacidade)
@@ -44,7 +44,7 @@ yolo-lgpd/
 | Módulo | O que faz |
 |--------|-----------|
 | **Detecção + Rastreio** | YOLO corpo + ByteTrack em RAM, IDs efêmeros |
-| **Tripwire** | Linha bidirecional (ENTROU/SAIU) com debounce 3 frames + hysteresis 15px |
+| **Tripwire (opcional)** | Linha bidirecional (ENTROU/SAIU) com debounce 3 frames + hysteresis 15px — suporte mantido, desabilitado no padrão atual |
 | **Ocupação ROI** | Recontagem geométrica frame-a-frame (bottom-center no polígono) |
 | **Resets** | Meia-noite local OU vazio > 10 min → zera contadores + limpa `crossed` |
 | **Reconciliação** | Reabertura de fonte limpa `track_states` inteiro |
@@ -65,7 +65,7 @@ python main.py caminho/video.mp4  # arquivo de vídeo
 
 Pressione **`q`** para encerrar.
 
-**Configuração de zonas:** edite `config/zonas.yaml` (camera_0, tripwire y=360, ROI y=200..480, capacidade 50).
+**Configuração de zonas:** edite `config/zonas.yaml` (camera_0, ROI y=200..480, capacidade 50). O formato tripwire também é suportado, caso deseje adicioná-lo.
 
 ### Testes
 
