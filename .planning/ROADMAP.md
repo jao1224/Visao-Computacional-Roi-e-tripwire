@@ -45,16 +45,16 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 - [x] 01-04-PLAN.md — Auditoria automatizada de privacidade (nada em disco, sem face) + verificação visual
 
-### Phase 2: Contagem por zona e ocupação em tempo real
+### Phase 2: Ocupação e contagem por zona em tempo real (ROI-only)
 
-**Goal**: Usuário obtém contagem bidirecional e ocupação instantânea corretas por zona — a incerteza real do projeto ("a contagem está certa?") respondida visualmente, antes de qualquer banco ou dashboard
+**Goal**: Usuário obtém ocupação instantânea e contagem corretas por zona delimitada (ROI) — respondendo à incerteza real do projeto ("a ocupação por área está certa?") visualmente no overlay, antes de qualquer banco ou dashboard. Tripwire torna-se secundário/opcional.
 **Depends on**: Phase 1
 **Requirements**: CNT-02, CNT-04
 **Success Criteria** (what must be TRUE):
-  1. Usuário vê pessoas entrando/saindo pela tripwire e o contador por zona incrementa/descrementa corretamente, sem contar a mesma pessoa duas vezes (inclusive sob jitter/occlusão leve)
-  2. Ocupação instantânea por zona é recalculada em tempo real e exibida no overlay durante a execução
-  3. Reiniciar a fonte de vídeo (parar/retomar) não corrompe a ocupação: valores reconciliados, com reset/clamp de dia aplicado
-  4. Sob rajada de detecções (flicker de caixa), não há explosão de eventos ENTROU/SAIU — contagem é estável
+  1. Usuário vê a área delimitada da zona (ROI) com a ocupação instantânea calculada por presença dentro do polígono exibida no overlay
+  2. Ocupação instantânea por zona é recalculada em tempo real a cada frame e estabilizada sem dupla contagem espúria
+  3. Reiniciar a fonte de vídeo (parar/retomar) não corrompe a ocupação: valores reconciliados, com reset/clamp de capacidade aplicados
+  4. Sob rajada de detecções (flicker de caixa), a métrica de ocupação mantém-se estável e coerente com a presença real dentro do ROI
 
 **Plans:** 4/4 plans complete
 Plans:
