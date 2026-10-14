@@ -63,15 +63,11 @@ def zonas_config():
 def test_zonas_yaml_camera0():
     zonas = zona.carregar_zonas('camera_0')
     ids = [z['id'] for z in zonas]
-    assert 'recepcao' in ids and 'hall' in ids
-    recepcao = next(z for z in zonas if z['id'] == 'recepcao')
-    assert recepcao['tipo'] == 'tripwire'
-    assert recepcao['pontos'][0] == [100.0, 360.0]
-    assert recepcao['direcao'] == 'saida'
-    assert recepcao['capacidade'] == 50
+    assert ids == ['hall']
     hall = next(z for z in zonas if z['id'] == 'hall')
     assert hall['tipo'] == 'roi'
     assert len(hall['pontos']) >= 3
+    assert hall['capacidade'] == 50
 
 
 def test_carregar_zonas(tmp_path):
