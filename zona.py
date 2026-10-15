@@ -117,64 +117,65 @@ def carregar_zonas(camera_id, caminho=None):
     return zonas
 
 
-def _evento_para_travessia(direcao_tripwire, lado_antes, lado_depois):
-    """Decide o tipo de evento ENTROU/SAIU a partir da direção do tripwire e da transição."""
-    lado_entrada = 1 if direcao_tripwire == 'entrada' else -1
-    if lado_depois == lado_entrada and lado_antes != lado_entrada:
-        return 'ENTROU'
-    return 'SAIU'
-
-
-def verificar_tripwires(tracks, zonas, estado, track_states, agora=None, frame_idx=0):
-    """Verifica travessias de tripwire por transição de lado (sem posição fixa)."""
-    if agora is None:
-        agora = time.time()
-    eventos = []
-    for tid, xyxy, _conf in tracks:
-        st = track_states.setdefault(tid, {'frames_vistos': 0, 'ultimo_frame_visto': frame_idx,
-                                         'crossed': set(), 'posicoes': {}})
-        st['frames_vistos'] += 1
-        st['ultimo_frame_visto'] = frame_idx
-        p = _bottom_center(xyxy)
-        for zona in zonas:
-            if zona['tipo'] != 'tripwire':
-                continue
-            zona_id = zona['id']
-            p1, p2 = zona['pontos'][0], zona['pontos'][1]
-            lado = _lado(p1, p2, p)
-            pos = st['posicoes']
-            pos_z = pos.setdefault(zona_id, {'lado_anterior': lado})
-            lado_anterior = pos_z['lado_anterior']
-            if lado == 0:
-                lado = lado_anterior
-            if st['frames_vistos'] == 1:
-                pos_z['lado_anterior'] = lado
-                continue
-            if lado != lado_anterior:
-                dist = _dist_ponto_segmento(p1, p2, p)
-                if zona_id not in st['crossed']:
-                    if st['frames_vistos'] >= DEBOUNCE_FRAMES:
-                        tipo = _evento_para_travessia(zona['direcao'], lado_anterior, lado)
-                        est_z = estado.setdefault(zona_id, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None})
-                        if tipo == 'ENTROU':
-                            est_z['entradas'] += 1
-                        else:
-                            est_z['saidas'] += 1
-                        st['crossed'].add(zona_id)
-                        eventos.append((tipo, zona_id, tid, agora))
-                else:
-                    lado_entrada = 1 if zona['direcao'] == 'entrada' else -1
-                    if lado == -lado_entrada and dist > HYSTERESIS_PX:
-                        tipo = _evento_para_travessia(zona['direcao'], lado_anterior, lado)
-                        est_z = estado.setdefault(zona_id, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None})
-                        if tipo == 'ENTROU':
-                            est_z['entradas'] += 1
-                        else:
-                            est_z['saidas'] += 1
-                        st['crossed'].discard(zona_id)
-                        eventos.append((tipo, zona_id, tid, agora))
-            pos_z['lado_anterior'] = lado
-    return eventos
+# Tripwire desativado temporariamente — foco em ROI
+# def _evento_para_travessia(direcao_tripwire, lado_antes, lado_depois):
+#     """Decide o tipo de evento ENTROU/SAIU a partir da direção do tripwire e da transição."""
+#     lado_entrada = 1 if direcao_tripwire == 'entrada' else -1
+#     if lado_depois == lado_entrada and lado_antes != lado_entrada:
+#         return 'ENTROU'
+#     return 'SAIU'
+#
+#
+# def verificar_tripwires(tracks, zonas, estado, track_states, agora=None, frame_idx=0):
+#     """Verifica travessias de tripwire por transição de lado (sem posição fixa)."""
+#     if agora is None:
+#         agora = time.time()
+#     eventos = []
+#     for tid, xyxy, _conf in tracks:
+#         st = track_states.setdefault(tid, {'frames_vistos': 0, 'ultimo_frame_visto': frame_idx,
+#                                          'crossed': set(), 'posicoes': {}})
+#         st['frames_vistos'] += 1
+#         st['ultimo_frame_visto'] = frame_idx
+#         p = _bottom_center(xyxy)
+#         for zona in zonas:
+#             if zona['tipo'] != 'tripwire':
+#                 continue
+#             zona_id = zona['id']
+#             p1, p2 = zona['pontos'][0], zona['pontos'][1]
+#             lado = _lado(p1, p2, p)
+#             pos = st['posicoes']
+#             pos_z = pos.setdefault(zona_id, {'lado_anterior': lado})
+#             lado_anterior = pos_z['lado_anterior']
+#             if lado == 0:
+#                 lado = lado_anterior
+#             if st['frames_vistos'] == 1:
+#                 pos_z['lado_anterior'] = lado
+#                 continue
+#             if lado != lado_anterior:
+#                 dist = _dist_ponto_segmento(p1, p2, p)
+#                 if zona_id not in st['crossed']:
+#                     if st['frames_vistos'] >= DEBOUNCE_FRAMES:
+#                         tipo = _evento_para_travessia(zona['direcao'], lado_anterior, lado)
+#                         est_z = estado.setdefault(zona_id, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None})
+#                         if tipo == 'ENTROU':
+#                             est_z['entradas'] += 1
+#                         else:
+#                             est_z['saidas'] += 1
+#                         st['crossed'].add(zona_id)
+#                         eventos.append((tipo, zona_id, tid, agora))
+#                 else:
+#                     lado_entrada = 1 if zona['direcao'] == 'entrada' else -1
+#                     if lado == -lado_entrada and dist > HYSTERESIS_PX:
+#                         tipo = _evento_para_travessia(zona['direcao'], lado_anterior, lado)
+#                         est_z = estado.setdefault(zona_id, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None})
+#                         if tipo == 'ENTROU':
+#                             est_z['entradas'] += 1
+#                         else:
+#                             est_z['saidas'] += 1
+#                         st['crossed'].discard(zona_id)
+#                         eventos.append((tipo, zona_id, tid, agora))
+#             pos_z['lado_anterior'] = lado
+#     return eventos
 
 
 def podar_track_states(track_states, frame_idx):
@@ -194,8 +195,43 @@ def _area_roi(zona):
     return None
 
 
-def atualizar_ocupacao(tracks, zonas, estado, agora=None, track_states=None):
-    """Reconta ocupação por frame com clamp e resets (meia-noite + known-empty)."""
+def calcular_intersecao_area_roi(caixas, roi_pontos, frame_shape, modo='base'):
+    """
+    Calcula a interseção entre as regiões ocupadas pelas pessoas e a área do ROI:
+        Interseção = Área(Pessoas) ∩ Área(ROI)
+    Retorna:
+        pct_ocupada: percentual (0.0 a 100.0) da área do ROI coberta por pessoas.
+        area_ocupada_px: quantidade de pixels de interseção.
+        area_roi_px: quantidade total de pixels do ROI.
+        mascara_intersecao: máscara binária uint8 (H, W) da interseção.
+    """
+    h, w = frame_shape[:2]
+    roi_mask = np.zeros((h, w), dtype=np.uint8)
+    roi_pts = np.array(roi_pontos, dtype=np.int32)
+    cv2.fillPoly(roi_mask, [roi_pts], 1)
+    area_roi_px = int(roi_mask.sum())
+    if area_roi_px == 0:
+        return 0.0, 0, 0, np.zeros((h, w), dtype=np.uint8)
+
+    pessoas_mask = np.zeros((h, w), dtype=np.uint8)
+    for _tid, (x1, y1, x2, y2), _conf in caixas:
+        x1, y1, x2, y2 = max(0, int(x1)), max(0, int(y1)), min(w, int(x2)), min(h, int(y2))
+        if modo == 'base':
+            # Usa o terço inferior da bounding box (base de apoio / chão)
+            altura_box = y2 - y1
+            y_base = y2 - int(altura_box * 0.35)
+            cv2.rectangle(pessoas_mask, (x1, y_base), (x2, y2), 1, -1)
+        else:
+            cv2.rectangle(pessoas_mask, (x1, y1), (x2, y2), 1, -1)
+
+    intersecao = np.logical_and(pessoas_mask, roi_mask).astype(np.uint8)
+    area_ocupada_px = int(intersecao.sum())
+    pct_ocupada = 100.0 * (area_ocupada_px / area_roi_px)
+    return pct_ocupada, area_ocupada_px, area_roi_px, intersecao
+
+
+def atualizar_ocupacao(tracks, zonas, estado, agora=None, track_states=None, frame_shape=(480, 640)):
+    """Reconta ocupação por frame com clamp, resets e cálculo de Interseção de Área (Área(Objeto) ∩ Área(ROI))."""
     if agora is None:
         agora = time.time()
     if track_states is None:
@@ -209,9 +245,10 @@ def atualizar_ocupacao(tracks, zonas, estado, agora=None, track_states=None):
     elif dia != estado['dia_atual']:
         for zona in zonas:
             zid = zona['id']
-            est_z = estado.setdefault(zid, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None})
+            est_z = estado.setdefault(zid, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None, 'pct_area': 0.0})
             est_z['ocupacao'] = est_z['entradas'] = est_z['saidas'] = 0
             est_z['ultima_ocupacao_ts'] = None
+            est_z['pct_area'] = 0.0
         for st in track_states.values():
             st['crossed'] = set()
         estado['dia_atual'] = dia
@@ -223,7 +260,7 @@ def atualizar_ocupacao(tracks, zonas, estado, agora=None, track_states=None):
         if not pontos_roi:
             continue
         zid = zona['id']
-        est_z = estado.setdefault(zid, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None})
+        est_z = estado.setdefault(zid, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None, 'pct_area': 0.0})
         roi = np.array(pontos_roi, dtype=np.int32)
         bruta = 0
         for _tid, xyxy, _conf in tracks:
@@ -232,12 +269,18 @@ def atualizar_ocupacao(tracks, zonas, estado, agora=None, track_states=None):
                 bruta += 1
         capacidade = zona['capacidade']
         est_z['ocupacao'] = max(0, min(bruta, capacidade))
+
+        # Cálculo da Interseção de Área: Área(Objeto) ∩ Área(ROI)
+        pct, _area_px, _roi_px, _mask = calcular_intersecao_area_roi(tracks, pontos_roi, frame_shape, modo='base')
+        est_z['pct_area'] = pct
+
         if bruta > 0:
             est_z['ultima_ocupacao_ts'] = agora
         else:
             uts = est_z['ultima_ocupacao_ts']
             if uts is not None and agora - uts > RESET_IDLE_SEG:
                 est_z['ocupacao'] = est_z['entradas'] = est_z['saidas'] = 0
+                est_z['pct_area'] = 0.0
                 est_z['ultima_ocupacao_ts'] = None
                 for st in track_states.values():
                     if zid in st.get('crossed', set()):
