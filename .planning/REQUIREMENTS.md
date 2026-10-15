@@ -18,9 +18,9 @@
 ### Contagem (CNT)
 
 - [x] **CNT-01**: Detecão de pessoas apenas por corpo (YOLO CrowdHuman) — nenhum módulo de face/biometria no código
-- [x] **CNT-02**: Contagem e ocupação por zona com ROI poligonal em tempo real, sem dupla contagem (foco em ocupação por área e presença)
+- [x] **CNT-02**: Contagem e ocupação por zona com ROI poligonal em tempo real, sem dupla contagem (ocupação por área via interseção $\text{Área}(\text{Objeto}) \cap \text{Área}(\text{ROI})$ e presença)
 - [x] **CNT-03**: Associação intra-câmera efêmera (ByteTrack, segundos, RAM) — IDs morrem ao sair do quadro, nunca persistidos, **nunca comparados entre câmeras (nem por silhueta/aparência)**
-- [x] **CNT-04**: Ocupação instantânea por zona recalculada em tempo real, com reset/clamp diário e reconciliação após reconexão
+- [x] **CNT-04**: Ocupação instantânea por zona recalculada em tempo real (número de pessoas e % de área ocupada), com reset/clamp diário e reconciliação após reconexão
 
 ### Permanência e Fluxo (DWL)
 

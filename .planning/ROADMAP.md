@@ -47,12 +47,12 @@ Plans:
 
 ### Phase 2: Ocupação e contagem por zona em tempo real (ROI-only)
 
-**Goal**: Usuário obtém ocupação instantânea e contagem corretas por zona delimitada (ROI) — respondendo à incerteza real do projeto ("a ocupação por área está certa?") visualmente no overlay, antes de qualquer banco ou dashboard. Tripwire torna-se secundário/opcional.
+**Goal**: Usuário obtém ocupação instantânea e contagem corretas por zona delimitada (ROI) — respondendo à incerteza real do projeto ("a ocupação por área está certa?") visualmente no overlay via presença e interseção de área ($\text{Área}(\text{Objeto}) \cap \text{Área}(\text{ROI})$), antes de qualquer banco ou dashboard. Tripwire desativado no momento.
 **Depends on**: Phase 1
 **Requirements**: CNT-02, CNT-04
 **Success Criteria** (what must be TRUE):
-  1. Usuário vê a área delimitada da zona (ROI) com a ocupação instantânea calculada por presença dentro do polígono exibida no overlay
-  2. Ocupação instantânea por zona é recalculada em tempo real a cada frame e estabilizada sem dupla contagem espúria
+  1. Usuário vê a área delimitada da zona (ROI) com a ocupação instantânea calculada por presença dentro do polígono e destacada via interseção de área no overlay
+  2. Ocupação instantânea por zona é recalculada em tempo real a cada frame (contagem e percentual de área ocupada) e estabilizada sem dupla contagem espúria
   3. Reiniciar a fonte de vídeo (parar/retomar) não corrompe a ocupação: valores reconciliados, com reset/clamp de capacidade aplicados
   4. Sob rajada de detecções (flicker de caixa), a métrica de ocupação mantém-se estável e coerente com a presença real dentro do ROI
 
