@@ -167,7 +167,36 @@ Plans:
 **Execution Order:**
 Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9
 
-| Phase | Plans Complete | Status | Completed |
+| Phase | Status | Completion Date |
+|-------|--------|-----------------|
+| 01 | ✅ Complete | 2026-10-08 |
+| 02 | ✅ Complete | 2026-10-12 |
+| 03 | ⏳ Pending | — |
+| ... | ... | ... |
+
+---
+
+## Planning Seeds (Ideias Dormentes para Futuras Fases)
+
+Ideias validadas, documentadas mas não em roadmap imediato — aguardando trigger de implementação:
+
+### SEED-261014-szc: Mapa de ocupação por área (Heatmap de Densidade)
+- **Plantado em:** 2026-10-14
+- **Status:** Dormant
+- **Trigger:** Ao planejar Fase 7 (Analytics de permanência e heatmap agregado — requisito `DWL-02`)
+- **Escopo:** Implementação da fórmula $\text{Interseção} = \text{Área}(\text{Objeto}) \cap \text{Área}(\text{ROI})$ em grade rasterizada (células ocupadas acumuladas no tempo)
+- **Localização:** `.planning/seeds/SEED-261014-szc-mapa-de-ocupacao-por-area.md`
+- **Motivo:** A Fase 2 usa apenas ponto do pé para ocupação instantânea; para heatmap agregado (Fase 7) precisamos rastrear área/silhueta inteira
+
+### SEED-261015-demarcador-zonas-roi: Demarcador Interativo de Zonas ROI por Clique
+- **Plantado em:** 2026-10-15
+- **Status:** Dormant (mas com MVP implementado em `scripts/demarcar_zona.py`)
+- **Trigger:** Preparação para Fase 5 (Dashboard CRUD de zonas com interface gráfica)
+- **Escopo:** Utilitário local (não faz parte do pipeline de produção) com interface OpenCV para demarcar polígonos de ROI por clique, edição de pontos, alinhamento automático (`a`), retângulo perfeito (`r`), desfazer (`u`)
+- **Localização:** `.planning/seeds/SEED-261015-demarcador-zonas-roi.md` e `scripts/demarcar_zona.py`
+- **Motivo:** Eliminar edição manual de coordenadas em YAML; preparar base para futuro dashboard interativo
+
+--- Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Fatia vertical single-câmera | 4/4 | Complete    | 2026-10-08 |
 | 2. Contagem por zona e ocupação | 4/4 | Complete    | 2026-10-12 |
