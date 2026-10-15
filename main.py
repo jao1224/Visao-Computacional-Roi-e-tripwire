@@ -84,17 +84,19 @@ def main():
         result = rastreio.rastrear(model, frame)
         caixas = rastreio.extrair_caixas(result)
 
-        eventos = zona.verificar_tripwires(caixas, zonas, estado, track_states,
-                                           agora=capture_ts, frame_idx=frame_idx)
+        # Tripwires desativados no momento (foco em ocupação por área/ROI)
+        # eventos = zona.verificar_tripwires(caixas, zonas, estado, track_states,
+        #                                    agora=capture_ts, frame_idx=frame_idx)
+        # for tipo, zid, tid, ts in eventos:
+        #     print(f'[OK] Zona {zid}: {tipo} track {tid}')
+
         zona.atualizar_ocupacao(caixas, zonas, estado, agora=capture_ts,
-                                track_states=track_states)
-        for tipo, zid, tid, ts in eventos:
-            print(f'[OK] Zona {zid}: {tipo} track {tid}')
+                                track_states=track_states, frame_shape=frame.shape)
         zona.podar_track_states(track_states, frame_idx)
         frame_idx += 1
 
-        overlay.desenhar_tripwires(frame, zonas)
-        overlay.desenhar_rois(frame, zonas)
+        # overlay.desenhar_tripwires(frame, zonas)
+        overlay.desenhar_rois(frame, zonas, caixas=caixas)
         overlay.desenhar_caixas(frame, caixas)
         overlay.desenhar_contadores(frame, estado)
 
