@@ -15,22 +15,24 @@ def desenhar_caixas(frame, caixas):
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
 
 
-def desenhar_tripwires(frame, zonas):
-    """Desenha tripwires: verde para 'entrada', vermelho para 'saida'."""
-    for zona in zonas:
-        if zona.get('tipo') == 'tripwire':
-            p1 = tuple(int(v) for v in zona['pontos'][0])
-            p2 = tuple(int(v) for v in zona['pontos'][1])
-            cor = (0, 255, 0) if zona.get('direcao') == 'entrada' else (0, 0, 255)
-            cv2.line(frame, p1, p2, cor, 2)
-            mx, my = (int((p1[0] + p2[0]) / 2), int((p1[1] + p2[1]) / 2))
-            ident = zona.get('id', '')
-            cv2.putText(frame, ident, (mx, my), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
-            cv2.putText(frame, ident, (mx, my + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.6, cor, 2)
+# Tripwire desativado temporariamente — foco em ROI
+# def desenhar_tripwires(frame, zonas):
+#     """Desenha tripwires: verde para 'entrada', vermelho para 'saida'."""
+#     for zona in zonas:
+#         if zona.get('tipo') == 'tripwire':
+#             p1 = tuple(int(v) for v in zona['pontos'][0])
+#             p2 = tuple(int(v) for v in zona['pontos'][1])
+#             cor = (0, 255, 0) if zona.get('direcao') == 'entrada' else (0, 0, 255)
+#             cv2.line(frame, p1, p2, cor, 2)
+#             mx, my = (int((p1[0] + p2[0]) / 2), int((p1[1] + p2[1]) / 2))
+#             ident = zona.get('id', '')
+#             cv2.putText(frame, ident, (mx, my), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
+#             cv2.putText(frame, ident, (mx, my + 1), cv2.FONT_HERSHEY_SIMPLEX, 0.6, cor, 2)
 
 
-def desenhar_rois(frame, zonas):
-    """Desenha ROIs semi-transparentes (azul)."""
+def desenhar_rois(frame, zonas, caixas=None):
+    """Desenha ROIs semi-transparentes (azul) e destaca a interseção ocupada em vermelho/laranja."""
+    h, w = frame.shape[:2]
     for zona in zonas:
         pontos_roi = zona.get('roi_pontos') if zona.get('roi_pontos') else zona.get('pontos')
         if not pontos_roi or len(pontos_roi) < 3:
@@ -40,19 +42,34 @@ def desenhar_rois(frame, zonas):
         pts = np.array(pontos_roi, dtype=np.int32)
         overlay = frame.copy()
         cv2.fillPoly(overlay, [pts], (255, 0, 0))
-        cv2.addWeighted(overlay, 0.2, frame, 0.8, 0, frame)
+
+        # Se houver caixas, desenha a interseção da área no ROI
+        if caixas:
+            pessoas_mask = np.zeros((h, w), dtype=np.uint8)
+            roi_mask = np.zeros((h, w), dtype=np.uint8)
+            cv2.fillPoly(roi_mask, [pts], 1)
+            for _tid, (x1, y1, x2, y2), _conf in caixas:
+                x1, y1, x2, y2 = max(0, int(x1)), max(0, int(y1)), min(w, int(x2)), min(h, int(y2))
+                altura_box = y2 - y1
+                y_base = y2 - int(altura_box * 0.35)
+                cv2.rectangle(pessoas_mask, (x1, y_base), (x2, y2), 1, -1)
+            intersecao = np.logical_and(pessoas_mask, roi_mask)
+            overlay[intersecao] = (0, 0, 255)  # Vermelho para a interseção exata
+
+        cv2.addWeighted(overlay, 0.25, frame, 0.75, 0, frame)
         cv2.polylines(frame, [pts], True, (255, 0, 0), 2)
 
 
 def desenhar_contadores(frame, estado):
-    """Desenha cards de contadores no topo-direita."""
+    """Desenha cards de contadores no topo-direita, incluindo ocupação de pessoas e % de área."""
     h, w = frame.shape[:2]
     cards = []
     for zona_id, dados in estado.items():
         if zona_id == 'dia_atual':
             continue
         if isinstance(dados, dict):
-            texto = f'Zona {zona_id}: IN {dados.get('entradas', 0)} | OUT {dados.get('saidas', 0)} | OCUP {dados.get('ocupacao', 0)}'
+            pct_area = dados.get('pct_area', 0.0)
+            texto = f'Zona {zona_id}: OCUP {dados.get("ocupacao", 0)} | AREA {pct_area:.1f}%'
             cards.append(texto)
     cards = cards[:6]
     y = 10
