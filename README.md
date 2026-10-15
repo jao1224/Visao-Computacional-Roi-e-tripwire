@@ -58,20 +58,41 @@ yolo-lgpd/
 ### Inferência em tempo real (webcam ou vídeo)
 
 ```bash
-python main.py                    # webcam padrão (índice 0)
-python main.py 1                  # índice da câmera
-python main.py caminho/video.mp4  # arquivo de vídeo
+./.venv/bin/python main.py                    # webcam padrão (índice 0)
+./.venv/bin/python main.py 1                  # índice da câmera
+./.venv/bin/python main.py caminho/video.mp4  # arquivo de vídeo
 ```
 
-Pressione **`q`** para encerrar.
+Pressione **`q`** para encerrar ou **`r`** para resetar contadores em execução.
 
-**Configuração de zonas:** edite `config/zonas.yaml` (camera_0, ROI y=200..480, capacidade 50). O formato tripwire também é suportado, caso deseje adicioná-lo.
+### Calibrar / Demarcar Zonas ROI Interativamente (com o mouse)
+
+Para demarcar o polígono de uma zona clicando diretamente na tela da webcam ou de um vídeo:
+
+```bash
+# Abre a webcam e permite clicar nos pontos da zona
+./.venv/bin/python scripts/demarcar_zona.py 0
+
+# Ou especificando câmera, nome da zona ou arquivo de vídeo
+./.venv/bin/python scripts/demarcar_zona.py 0 --camera camera_0 --zona hall
+./.venv/bin/python scripts/demarcar_zona.py video.mp4 --camera camera_0 --zona entrada
+```
+
+**Recursos e atalhos na janela de calibração:**
+- **Clique com Botão Esquerdo:** adiciona um novo vértice no polígono.
+- **Clique + Arrastar sobre ponto existente (círculo verde):** edita/move a posição de qualquer ponto sem precisar recomeçar.
+- **`a` (Alinhamento Automático):** alinha arestas ortogonais automaticamente (endireita linhas quase horizontais ou verticais).
+- **`r` (Retângulo Perfeito):** converte instantaneamente os pontos em um retângulo reto perfeito (bounding box).
+- **`u` (Desfazer):** desfaz o último ponto adicionado.
+- **`s` (Salvar):** salva as coordenadas em `config/zonas.yaml` e encerra.
+- **`c` (Limpar):** apaga todos os pontos.
+- **`q` ou ESC:** cancela e sai sem salvar alterações.
 
 ### Testes
 
 ```bash
-python -m pytest tests/ -q        # suite completa (35 testes)
-python -m pytest tests/test_zona.py -q   # 13 testes de zonas
+./.venv/bin/python -m pytest                  # suite completa de testes
+./.venv/bin/python -m pytest tests/test_zona.py -q  # testes de zona e interseção
 ```
 
 ### Visualizar zonas (sem rodar vídeo)
