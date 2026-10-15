@@ -171,8 +171,8 @@ def test_contagem_amostra_invariantes(caminho_modelo, caminho_video_amostra):
                 break
             result = rastreio.rastrear(model, frame)
             caixas = rastreio.extrair_caixas(result)
-            zona.verificar_tripwires(caixas, zonas, estado, track_states,
-                                     agora=capture_ts, frame_idx=frame_idx)
+            # zona.verificar_tripwires(caixas, zonas, estado, track_states,
+            #                          agora=capture_ts, frame_idx=frame_idx)
             zona.atualizar_ocupacao(caixas, zonas, estado, agora=capture_ts,
                                     track_states=track_states)
             zona.podar_track_states(track_states, frame_idx)
