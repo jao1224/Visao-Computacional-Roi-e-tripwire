@@ -7,7 +7,8 @@ encarregado (DPO) do hotel.
 
 | Documento | Data | Descrição |
 |-----------|------|-----------|
-| `RELATORIO-CONFORMIDADE-LGPD-v1.0-2026-10-21.pdf` | 21/10/2026 | Relatório técnico-jurídico de conformidade com a LGPD (Lei nº 13.709/2018) e o Marco Civil da Internet (Lei nº 12.965/2014). Cobre: o que já foi implementado (Fases 1 e 2), o que será implementado (Fases 3 a 9), a matriz de conformidade artigo a artigo, as lacunas de conformidade antes de produção e as recomendações ao gestor de projeto. 24 páginas. |
+| **`RELATORIO-CONFORMIDADE-LGPD-v1.1-2026-10-21.pdf`** | 21/10/2026 | **Versão vigente.** Relatório técnico-jurídico de conformidade com a LGPD (Lei nº 13.709/2018) e o Marco Civil da Internet (Lei nº 12.965/2014). Cobre: o que já foi implementado (Fases 1 e 2), o que será implementado (Fases 3 a 9), a matriz de conformidade artigo a artigo, as lacunas de conformidade antes de produção e as recomendações ao gestor de projeto. **26 páginas.** |
+| `RELATORIO-CONFORMIDADE-LGPD-v1.0-2026-10-21.pdf` | 21/10/2026 | Versão anterior, mantida como registro histórico. 24 páginas. Diferença para a v1.1: nova seção **5.7 — "Como o sistema garante a não-identificação na prática"** (ciclo de vida de uma pessoa no enquadramento, exemplo concreto do que a Fase 7 persiste sobre um dwell, e o teste legal do ByteTrack), stack-alvo no Anexo E e contagem de commits agora apurada no momento da geração. |
 
 ## Fontes do relatório
 
@@ -22,15 +23,18 @@ declarativa sem evidência:
 | `.planning/phases/01-*/`, `.planning/phases/02-*/` | Planos, resumos e contrato de validação das fases concluídas |
 | `.planning/STATE.md` | Estado do projeto e progresso |
 | `.planning/debug/` | Diagnóstico e plano de correção do filtro visual por ROI |
+| `.planning/codebase/` | Mapa do código: arquitetura, stack, estrutura, testes, riscos, convenções |
 | `docs/DOCUMENTACAO_PROJETO_E_LGPD/` | Documentação legal e técnica de origem (docs 01 a 09) |
-| `docs/PLANO_V1_COMPLETO.md` | Plano maestro aprovado com as invariantes legais |
+| `docs/PLANO_V1_COMPLETO.md` | Plano mestre aprovado com as invariantes legais |
 | Suíte de testes (`tests/`) | Evidência automatizada das garantias de privacidade (33 testes) |
-| `git log` | Evidência de processo: 81 commits atômicos |
+| `git log` | Evidência de processo: commits atômicos (contagem apurada na geração) |
 
-> **Nota de contagem:** o número de commits citado no PDF (81) é o de **21/10/2026, imediatamente
-> antes da publicação do próprio relatório** — os 3 commits que versionam este documento e o
-> gerador elevate o total do repositório para 84. Os demais indicadores do relatório (33 testes,
-> 608 linhas de código, 2 de 9 fases, 6 de 27 requisitos) refletem o estado do código e não mudam.
+> **Nota de contagem (v1.1):** a partir da v1.1 o número de commits citado no PDF é lido
+> diretamente do repositório no momento da geração (`git rev-list --count HEAD`), eliminando a
+> defasagem entre o snapshot e a publicação. Na v1.0 o número era fixo (81) e refletia o
+> repositório imediatamente antes da publicação do próprio relatório. Os demais indicadores
+> (33 testes, 608 linhas de código de produto, 2 de 9 fases, 6 de 27 requisitos) refletem o
+> estado do código e não mudam.
 
 ## Como regenerar
 
@@ -43,7 +47,7 @@ python3 -m venv .venv-relatorio
 ./.venv-relatorio/bin/python scripts/gerar_relatorio_lgpd.py
 ```
 
-Saída: `docs/relatorios/RELATORIO-CONFORMIDADE-LGPD-v1.0-<AAAA-MM-DD>.pdf`.
+Saída: `docs/relatorios/RELATORIO-CONFORMIDADE-LGPD-v<versão>-<AAAA-MM-DD>.pdf`.
 
 > **Nota de privacidade:** o gerador apenas lê arquivos de texto do repositório e escreve um PDF.
 > `reportlab` é uma dependência **opcional** de geração de documentação e não consta em
@@ -51,6 +55,9 @@ Saída: `docs/relatorios/RELATORIO-CONFORMIDADE-LGPD-v1.0-<AAAA-MM-DD>.pdf`.
 
 ## Nota sobre versões
 
-O relatório é um **snapshot**. Ao reexecutar o gerador após novas fases, atualize a data e a versão no
-cabeçalho do PDF e o número da versão no rodapé (campo "Versão" da capa). A matriz de conformidade
-da seção 6 e as lacunas da seção 7 devem ser reavaliadas a cada avanço de fase.
+O relatório é um **snapshot**. Ao reexecutar o gerador após novas fases:
+
+1. Atualize `VERSAO` e o campo "Versão" da capa em `scripts/gerar_relatorio_lgpd.py`.
+2. Renumere as tabelas adicionadas (as legendas "Tabela N" são sequenciais e referenciadas no texto).
+3. Reavalie a matriz de conformidade da seção 6 e as lacunas da seção 7 a cada avanço de fase.
+4. Publique o PDF nesta pasta e acrescente a linha correspondente à tabela "Conteúdo" acima.

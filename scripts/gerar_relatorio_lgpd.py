@@ -17,9 +17,10 @@ Uso (ambiente com reportlab instalado):
     ./.venv-relatorio/bin/pip install reportlab
     ./.venv-relatorio/bin/python scripts/gerar_relatorio_lgpd.py
 
-Saida: docs/relatorios/RELATORIO-CONFORMIDADE-LGPD-v1.0-<AAAA-MM-DD>.pdf
+Saida: docs/relatorios/RELATORIO-CONFORMIDADE-LGPD-v1.1-<AAAA-MM-DD>.pdf
 """
 import os
+import subprocess
 import sys
 from datetime import date
 
@@ -46,8 +47,24 @@ BORDER = HexColor('#C3D0DC')
 GREY = HexColor('#55636F')
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-NOME = 'RELATORIO-CONFORMIDADE-LGPD-v1.0-%s.pdf' % date.today().strftime('%Y-%m-%d')
+VERSAO = '1.1'
+NOME = 'RELATORIO-CONFORMIDADE-LGPD-v%s-%s.pdf' % (VERSAO, date.today().strftime('%Y-%m-%d'))
 OUT = os.path.join(RAIZ, 'docs', 'relatorios', NOME)
+
+
+def contar_commits():
+    """Conta os commits do repositorio no momento da geracao (fallback: 0)."""
+    try:
+        proc = subprocess.run(['git', 'rev-list', '--count', 'HEAD'],
+                              cwd=RAIZ, capture_output=True, text=True, timeout=15)
+        if proc.returncode == 0 and proc.stdout.strip().isdigit():
+            return int(proc.stdout.strip())
+    except Exception:
+        pass
+    return 0
+
+
+COMMITS = contar_commits()
 
 # ---------------------------------------------------------------- estilos
 ss = getSampleStyleSheet()
@@ -268,11 +285,12 @@ ident = [
     ['Destinatário', 'Gestão de Projeto / Encarregado (DPO) — LTD-Parangaba'],
     ['Emitido por', 'Equipe de Engenharia de Visão Computacional (autor do sistema)'],
     ['Data de emissão', DATA],
-    ['Versão', '1.0 — snapshot de progresso (Fases 1 e 2 concluídas)'],
+    ['Versão', '1.1 — snapshot de progresso (Fases 1 e 2 concluídas; escopo ROI-only)'],
     ['Base normativa', 'Lei nº 13.709/2018 (LGPD); Lei nº 12.965/2014 (Marco Civil); '
                        'Res. CD/ANPD nº 18/2024; Guia orientativo ANPD de 19/12/2024'],
-    ['Base de evidências', 'Repositório Git, 81 commits; suíte automatizada com 33 testes '
-                           'verdes; roadmap GSD de 9 fases; parecer interno de compliance'],
+    ['Base de evidências', 'Repositório Git, %d commits; suíte automatizada com 33 testes '
+                           'verdes; roadmap GSD de 9 fases; parecer interno de compliance'
+                           % COMMITS],
     ['Classificação', 'Uso interno do controlador. Não contém dado pessoal de hóspedes.'],
 ]
 A(mk_table(None, ident, [38 * mm, 132 * mm], fs=8.6, zebra=True,
@@ -356,7 +374,8 @@ A(mk_table(
      ['Linhas de código do produto', '608 linhas',
       'main.py (124), zona.py (313), overlay.py (129), rastreio.py (23), captura.py (19)'],
      ['Linhas de teste', '846 linhas', '7 arquivos de teste + conftest.py'],
-     ['Commits no repositório', '81 commits', 'Commits atômicos, com documentação antes da implementação'],
+     ['Commits no repositório', '%d commits' % COMMITS,
+       'Commits atômicos, com documentação antes da implementação (contagem no momento da geração)'],
      ['Documentos técnicos e legais', '10 documentos + 1 plano maestro',
       '<i>docs/DOCUMENTACAO_PROJETO_E_LGPD/</i> (docs 01 a 09 + README) e <i>docs/PLANO_V1_COMPLETO.md</i>'],
      ['Módulos de face / biometria / escrita de mídia', '<b>0</b>',
@@ -728,7 +747,7 @@ A(mk_table(
       'Diagnóstico e plano de correção do filtro visual por ROI, com verificação e testes'],
      ['Sementes de roadmap', '<i>.planning/seeds/</i>',
       'Ideias validadas ainda dormentes (heatmap agregado; demarcador de zonas)'],
-     ['Histórico Git', '81 commits',
+     ['Histórico Git', '%d commits' % COMMITS,
       'Commits atômicos com mensagem convencional; documentação precede a implementação']],
     [38 * mm, 52 * mm, 80 * mm], fs=8.0))
 A(caption('Tabela 12 — Artefatos de rastreabilidade do projeto.'))
@@ -904,6 +923,123 @@ A(mk_table(
     [46 * mm, 66 * mm, 38 * mm, 20 * mm], fs=8.0))
 A(caption('Tabela 16 — Sementes registradas em .planning/seeds/ e referenciadas no ROADMAP.md.'))
 
+A(h2('5.7 Como o sistema garante a não-identificação na prática'))
+A(p('As seções anteriores descrevem <i>o que</i> é vetado. Esta seção descreve <i>como</i> a '
+    'não-identificação é assegurada em operação — o que existe em memória enquanto uma pessoa está '
+    'no enquadramento, o que acontece um segundo depois, e o que efetivamente chega ao disco. '
+    'É a resposta operacional à pergunta da gestão: <b>"como eu sei que o sistema não está '
+    'identificando ninguém?"</b>'))
+
+A(callout('O teste de conformidade em uma frase',
+          'Se, ao a pessoa sair do quadro, <b>não sobra nada gravado dela</b> — nem imagem, nem ID, '
+          'nem trilha, nem embedding — o sistema está na lei. Se sobra qualquer coisa rastreável, '
+          'há infração do art. 12 §2º.<br/><br/>'
+          'Esse é o critério que <font face="Courier">tests/test_privacidade.py</font> executa a cada '
+          'build, e que a Fase 9 transformará em auditoria formal (requisito PRV-01).',
+          accent=ACCENT, bg=LIGHT))
+
+A(h3('5.7.1 O ciclo de vida de uma pessoa no enquadramento'))
+A(p('Tomemos como exemplo o caso mais crítico do produto: uma pessoa que entra no hall, permanece '
+    'quatro minutos e sai. Veja o que existe em cada instante:'))
+A(mk_table(
+    ['Instante', 'O que existe em RAM', 'O que existe em disco'],
+    [['<b>T0</b> — a pessoa entra no quadro',
+      'Uma bounding box e um <font face="Courier">track_id</font> inteiro, atribuído pelo ByteTrack. '
+      'O ID serve a uma única coisa: <b>evitar contar a mesma pessoa duas vezes</b>.',
+      '<b>Nada.</b> Nenhuma imagem, nenhum ID, nenhuma linha.'],
+     ['<b>T0 → T0+4 min</b> — a pessoa permanece',
+      'O <font face="Courier">track_id</font> é podado se a pessoa sumir por mais de 60 frames. '
+      'A ocupação da zona é <b>recalculada a cada frame</b> (presença + interseção de área) — não é '
+      'acumulada, não gera histórico.',
+      '<b>Nada.</b> O estado da ocupação vive em RAM e é sobrescrito a cada frame.'],
+     ['<b>T0+4 min</b> — a pessoa sai do quadro',
+      'O <font face="Courier">track_id</font> é liberado. Não há um contador, um buffer ou uma '
+      'estrutura que guarde a identidade, a posição ou o trajeto.',
+      '<b>Nada.</b> Se o sistema parasse aqui, não haveria dado algum para apagar.'],
+     ['<b>Ao longo de toda a janela</b>',
+      'O tracker pertence a <b>uma única câmera</b>. Não existe código que compare a câmera do hall '
+      'com a do restaurante — nem por ID, nem por silhueta, nem por aparência.',
+      '<b>Nada.</b> Nenhuma câmera entrega frame a outra, e nenhuma comparação é possível.'],
+     ['<b>Fim do dia (Fases 3 e 7)</b>',
+      '—',
+      'Somente <b>agregados</b>: contagem por zona, percentual de área ocupada, soma/n/histograma de '
+      'permanência e contadores de célula do heatmap. Nenhuma linha por pessoa — ver o exemplo da '
+      'seção 5.7.2.']],
+    [40 * mm, 66 * mm, 64 * mm], fs=8.0))
+A(caption('Tabela 17 — Ciclo de vida de uma pessoa no enquadramento: o que existe em RAM e o que '
+          'chega ao disco. A coluna da direita é a mesma em todos os instantes.'))
+
+A(h3('5.7.2 Exemplo concreto: o que a Fase 7 vai persistir sobre um dwell'))
+A(p('A Fase 7 (dwell e heatmap agregado) é a fase em que mais dados poderiam ser gravados — e, por '
+    'isso, a que exige o exemplo mais explícito. Para a mesma pessoa de quatro minutos, a diferença '
+    'entre o que é gravado e o que é vetado é a seguinte:'))
+A(code_block([
+    'Pessoa "A" fica 4 min 12 s na zona "hall", entre 14h05 e 14h09.',
+    '',
+    '[X] VETADO — o que NUNCA será gravado:',
+    '   INSERT INTO sessao_pessoa (track_id, camera_id, zona_id, entrada, saida, ...)',
+    '   INSERT INTO trilhas (track_id, x, y, timestamp)            -- trajetória',
+    '   INSERT INTO embeddings (embedding, id_pessoa)          -- biometria',
+    '   INSERT INTO jornada_cameras (id, cam_hall, cam_restaurante)  -- inter-câmeras',
+    '',
+    '[OK] PERMITIDO — o que será gravado (agregado, irreversível):',
+    '   INSERT INTO dwell_agregado_zona',
+    '     (zona_id, janela_inicio, janela_fim, n_permanencias, soma_segundos,',
+    '      min_segundos, max_segundos, histograma)',
+    '   VALUES (1, 14:00, 15:00, 37, 91340, 12, 1870, {"0-2min": 9, ...});',
+]))
+A(p('Na tabela acima, a pessoa <b>"A"</b> simplesmente não existe. Ela aparece como o número '
+    '<font face="Courier">1</font> dentro de <font face="Courier">soma_segundos = 91340</font>, '
+    'junto com outras 36 permanência da mesma janela. O histograma guarda <b>faixas</b> de tempo '
+    '(quantas permanência ficaram entre 0 e 2 minutos), nunca <b>instantes</b> individuais. '
+    'Nenhuma consulta ao banco, nenhum relatório e nenhuma auditoria interna consegue reconstruir '
+    'quem esteve onde: <b>a informação não existe</b>, não está "protegida" ou "criptografada". '
+    'Essa é a diferença entre anonimização (art. 5º, XI) e dado pessoal pseudonimizado.'))
+A(callout('Por que isso importa na prática',
+          'O risco jurídico de um sistema de analytics não está no banco de dados — está no '
+          '<b>momento em que alguém com acesso combina dois agregados</b> para chegar a uma pessoa. '
+          'Um contador de ocupação por zona e janela <b>não</b> permite essa combinação: não há '
+          'chave de junção, não há identificador, não há trilha. Por isso a arquitetura do schema '
+          '(seção 3.7 e documento 06) é, ela mesma, a medida de proteção.',
+          accent=OK, bg=HexColor('#F1F7F3')))
+
+A(h3('5.7.3 O teste legal do ByteTrack'))
+A(p('O único identificador que o sistema produz em operação é o <font face="Courier">track_id</font> '
+    'do ByteTrack. Ele merece, portanto, um teste específico — o mesmo critério que um auditor '
+    'aplicaria ao ByteTrack de qualquer sistema de contagem:'))
+A(mk_table(
+    ['Pergunta de auditoria', 'Resposta do sistema', 'Verificação'],
+    [['Qual é a finalidade do ID?',
+      'Exclusivamente evitar dupla contagem (mesma pessoa contada duas vezes por tremor de caixa). '
+      'Não é usado para identificar, classificar ou traçar.',
+      '<i>rastreio.py</i> — o ID é extraído da tupla e descartado após o cálculo de ocupação'],
+     ['Quanto tempo ele vive?',
+      'Segundos. É podado quando a pessoa não é vista há mais de 60 frames, e descartado por completo '
+      'quando sai do quadro.',
+      '<i>zona.py</i> — <font face="Courier">podar_track_states()</font>'],
+     ['É gravado em algum lugar?',
+      'Não. Não existe coluna, arquivo, log ou fila que receba <font face="Courier">track_id</font>.',
+      '<i>test_privacidade.py</i> — varredura por identificadores persistidos'],
+     ['É comparado entre câmeras?',
+      'Não. Cada câmera tem seu próprio tracker; não existe rotina de correspondência entre fluxos. '
+      'Reconstruir a rota de um indivíduo seria exatamente o perfil comportamental do art. 12 §2º.',
+      '<i>test_privacidade.py</i> — ausência de qualquer código de MTMCT/Re-ID'],
+     ['Sustenta alguma decisão individual?',
+      'Não. Nenhuma condição do código age sobre "a pessoa X": sem isso não existe tratamento '
+      'diferenciado, alerta nominal ou bloqueio.',
+      'Revisão de código + ausência de módulo de face/biometria'],
+     ['O que o gestor pode extrair dele?',
+      'Nada. Ele não sai do processo: nunca é exibido, exportado ou transmitido. É um contador '
+      'interno.',
+      'Execução do pipeline real com auditoria de disco antes/depois']],
+    [40 * mm, 76 * mm, 54 * mm], fs=8.0))
+A(caption('Tabela 18 — Teste legal do identificador efêmero (ByteTrack): seis perguntas de '
+          'auditoria e as respostas verificáveis do sistema.'))
+A(p('A conclusão do teste é direta: o ByteTrack é um <b>recurso técnico de contagem</b>, não um '
+    'identificador. Ele é removido assim que cumpre sua função, e nada no sistema depende de ele '
+    'sobreviver. É o exemplo canônico da minimização de dados prevista no art. 6º, III — '
+    '<i>"coletar apenas o necessário, e somente pelo tempo necessário"</i>.'))
+
 A(PageBreak())
 
 # =========================================================== 6. MATRIZ
@@ -983,7 +1119,7 @@ A(mk_table(
       'Não há trilha individual a fornecer; entrega-se somente dado agregado.',
       'Tabela 6', '<b>Conforme</b>']],
     [40 * mm, 58 * mm, 42 * mm, 30 * mm], fs=7.6))
-A(caption('Tabela 17 — Matriz de conformidade artigo a artigo. Status: "Conforme" = verificado em '
+A(caption('Tabela 19 — Matriz de conformidade artigo a artigo. Status: "Conforme" = verificado em '
           'código e teste; "Previsto" = escopo aprovado e fase definida; "Parcial" = parte entregue.'))
 
 A(PageBreak())
@@ -1028,7 +1164,7 @@ A(mk_table(
      ['L-13', '<b>Política de privacidade e procedimento de direitos do titular</b> publicados para '
       'consulta', 'Art. 9 e art. 18', '9', 'Média', 'Controlador']],
     [11 * mm, 58 * mm, 32 * mm, 12 * mm, 17 * mm, 40 * mm], fs=7.7))
-A(caption('Tabela 18 — Lacunas de conformidade. As cinco lacunas críticas são de responsabilidade '
+A(caption('Tabela 20 — Lacunas de conformidade. As cinco lacunas críticas são de responsabilidade '
           'do controlador e destravam a entrada em produção.'))
 
 A(h2('7.2 Riscos residuais (aceitos de forma consciente)'))
@@ -1059,7 +1195,7 @@ A(mk_table(
       'Requisito API-04 com prazo de 6 meses',
       'Definir o requisito de exposição antes da Fase 4']],
     [46 * mm, 28 * mm, 52 * mm, 44 * mm], fs=7.9))
-A(caption('Tabela 19 — Riscos residuais identificados, com o tratamento já existente e o plano '
+A(caption('Tabela 21 — Riscos residuais identificados, com o tratamento já existente e o plano '
           'associado.'))
 
 A(h2('7.3 Cronograma de conformidade'))
@@ -1078,7 +1214,7 @@ A(mk_table(
       'plano de incidente (L-08); política de privacidade e direitos do titular (L-13).',
       'Gate da Fase 9 aprovado — liberação para operação com hóspedes reais.']],
     [36 * mm, 92 * mm, 42 * mm], fs=8.0))
-A(caption('Tabela 20 — Sequenciamento das ações de conformidade ao longo do roadmap.'))
+A(caption('Tabela 22 — Sequenciamento das ações de conformidade ao longo do roadmap.'))
 
 A(PageBreak())
 
@@ -1256,8 +1392,11 @@ A(mk_table(
      ['Fork de trabalho', 'jao1224/Visao-Computacional-Roi-e-tripwire (desenvolvimento)'],
      ['Branches', '<font face="Courier">main</font>, <font face="Courier">develop</font>, '
       '<font face="Courier">feat/intersecao-area-roi</font> (branch de trabalho atual)'],
-     ['Linguagem e runtime', 'Python 3.14 (ambiente <font face="Courier">.venv</font>); '
-      'OpenCV 5.0; Ultralytics 8.4; NumPy 2.5; PyYAML 6.0.3'],
+     ['Linguagem e runtime', 'Python 3.14.4 (ambiente <font face="Courier">.venv</font>); '
+      'OpenCV 5.0.0.93; Ultralytics 8.4.121; NumPy 2.5.2; PyYAML 6.0.3; lap 0.5.13'],
+     ['Stack-alvo (Fases 3–7, planejada)', 'PyAV (ingestão RTSP — OpenCV corrompe frames RTSP após '
+      '15–35 s) · MediaMTX (RTSP local de teste) · PostgreSQL 18 + asyncpg · FastAPI + WebSocket · '
+      'React + Vite + ECharts · docker-compose'],
      ['Modelo', 'YOLO treinado no CrowdHuman para detecção de corpo (classe 0 = person); '
       'pesos em <font face="Courier">resultados/best.pt</font>'],
      ['Configuração de zonas', '<font face="Courier">config/zonas.yaml</font> — câmera '
@@ -1271,7 +1410,12 @@ A(mk_table(
       '(documentos 01 a 09 + README) e <font face="Courier">docs/PLANO_V1_COMPLETO.md</font>'],
      ['Planejamento e auditoria', '<font face="Courier">.planning/</font> — ROADMAP, REQUIREMENTS, '
       'STATE, research (incluindo a verificação legal), phases, seeds, debug'],
-     ['Histórico', '81 commits atômicos; documentação precede a implementação em todas as entregas']],
+     ['Mapa do código', '<font face="Courier">.planning/codebase/</font> — architecture, concerns, '
+      'conventions, integrations, stack, structure, testing'],
+     ['Relatórios para a gestão', '<font face="Courier">docs/relatorios/</font> — este relatório e '
+      'suas versões anteriores, com índice e instruções de reprodução'],
+     ['Histórico', '%d commits atômicos; documentação precede a implementação em todas as entregas'
+      % COMMITS]],
     [42 * mm, 128 * mm], fs=8.0))
 
 A(spacer(6))
