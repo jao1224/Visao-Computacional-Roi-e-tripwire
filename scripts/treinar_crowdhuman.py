@@ -20,7 +20,7 @@ def main():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     DATASET_DIR = os.path.join(BASE_DIR, 'dataset')
     RUNS_DIR = os.path.join(BASE_DIR, 'runs', 'detect')
-    WEIGHTS_INIT = os.path.join(BASE_DIR, 'models', 'base_face_weights.pt')
+    WEIGHTS_INIT = os.path.join(os.path.dirname(BASE_DIR), 'models', 'yolo26n.pt')
     
     os.makedirs(RUNS_DIR, exist_ok=True)
     
@@ -33,16 +33,10 @@ def main():
         print("[AVISO] GPU não detectada no momento (usando CPU)", flush=True)
     print("==================================================", flush=True)
 
-    # 2. Pesos Anteriores (Transfer Learning)
+    # 2. Pesos Iniciais (Transfer Learning a partir do modelo base COCO)
     if not os.path.exists(WEIGHTS_INIT):
-        alt_path = os.path.join(os.path.dirname(BASE_DIR), 'runs', 'detect', 'train-14', 'weights', 'best.pt')
-        if os.path.exists(alt_path):
-            os.makedirs(os.path.dirname(WEIGHTS_INIT), exist_ok=True)
-            import shutil
-            shutil.copy2(alt_path, WEIGHTS_INIT)
-            print(f"[OK] Pesos copiados para: {WEIGHTS_INIT}", flush=True)
-        else:
-            WEIGHTS_INIT = 'yolo26n.pt'
+        WEIGHTS_INIT = 'yolo26n.pt'  # Ultralytics baixa o modelo base COCO
+        print(f"[Aviso] Pesos base locais não encontrados. Usando: {WEIGHTS_INIT}", flush=True)
     
     print(f"[OK] Modelo inicial carregado: {WEIGHTS_INIT}", flush=True)
     model = YOLO(WEIGHTS_INIT)

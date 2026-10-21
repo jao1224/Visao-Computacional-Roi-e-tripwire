@@ -39,7 +39,7 @@ Visao-Computacional-Roi-e-tripwire/
 ├── config/
 │   ├── data.yaml           --> Dataset (classe: person) — treino
 │   └── zonas.yaml          --> ROIs por camera_id (id, tipo, pontos, capacidade)
-├── models/                 --> Pesos base (yolo26n.pt) e pesos de face (dívida PRV-03)
+├── models/                 --> Pesos base COCO (yolo26n.pt): fallback do runtime e init de treino
 ├── resultados/best.pt      --> Detector de corpo treinado (CrowdHuman)
 ├── scripts/                --> Ferramentas de DEV: demarcador de ROI, treino, relatório PDF
 ├── tests/                  --> 33 testes: privacidade, integração, zonas, overlay, contratos

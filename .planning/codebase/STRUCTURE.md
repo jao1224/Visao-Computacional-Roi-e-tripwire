@@ -61,8 +61,7 @@ Visao-Computacional-Roi-e-tripwire/
 │   └── seeds/                       # Ideias capturadas
 │
 ├── models/                          # Pesos versionados
-│   ├── yolo26n.pt                   # Modelo nano (fallback)
-│   └── base_face_weights.pt         # ⚠️ pesos de FACE — dívida PRV-03 (fora do pipeline)
+│   └── yolo26n.pt                   # Modelo nano (fallback do runtime + init de treino)
 │
 ├── resultados/                      # Saída do treino do detector de corpo
 │   ├── best.pt                      # ✅ detector de corpo (usado por main.py)
@@ -89,7 +88,7 @@ Visao-Computacional-Roi-e-tripwire/
 | **Utilitário** | `entender_zonas.py` | Só gera `zonas_visualizacao.png` (polígonos, sem pessoas) |
 | **Desenvolvimento** | `scripts/` | Fora do pipeline; `scripts/gerar_relatorio_lgpd.py` só produz documentação |
 | **Testes** | `tests/` | O único lugar que cria arquivos temporários (e os remove) |
-| **Resíduo de treino** | `models/base_face_weights.pt`, `runs/`, `resultados/` | Fora do escopo do produto; `base_face_weights.pt` é **dívida PRV-03** (Fase 9) |
+| **Resíduo de treino** | `runs/`, `resultados/` | Fora do escopo do produto. A dívida PRV-03 (pesos de face) foi **paga em 2026-10-21** — `models/base_face_weights.pt` saiu do repositório e os scripts de treino inicializam com `models/yolo26n.pt` |
 
 ---
 

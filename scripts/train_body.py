@@ -5,11 +5,11 @@ from ultralytics import YOLO
 def main():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     
-    # 1. Usar a CÓPIA ISOLADA dos pesos treinados de rosto para transfer learning
-    weights_path = os.path.join(base_dir, 'models', 'base_face_weights.pt')
+    # 1. Pesos base COCO para transfer learning (modelo nano versionado no repo)
+    weights_path = os.path.join(base_dir, 'models', 'yolo26n.pt')
     if not os.path.exists(weights_path):
-        weights_path = os.path.join(base_dir, 'models', 'yolo26n.pt')
-        print(f"[Aviso] Cópia de pesos não encontrada. Usando modelo base: {weights_path}")
+        weights_path = 'yolo26n.pt'  # Ultralytics baixa o modelo base COCO
+        print(f"[Aviso] Pesos base locais não encontrados. Usando: {weights_path}")
         
     # 2. Descritor do dataset (YOLO): prefere o arquivo gerado pelo script de
     # download/treino (scripts/data.yaml, com o caminho absoluto do dataset local)
@@ -29,12 +29,12 @@ def main():
     print("==================================================================")
     print("      TREINAMENTO YOLOv26 - CORPO INTEIRO (TRANSFER LEARNING)")
     print("==================================================================")
-    print(f"--> Pesos Iniciais (Cópia Isolada): {weights_path}")
+    print(f"--> Pesos Iniciais (Base COCO): {weights_path}")
     print(f"--> Configuração Dataset:           {data_yaml}")
     print(f"--> Pasta de Saída (Isolada):       {runs_dir}")
     print("==================================================================")
 
-    # Carrega a cópia dos pesos na memória (sem alterar o arquivo original de rosto)
+    # Carrega os pesos base na memória (somente leitura; o arquivo do repo não é alterado)
     model = YOLO(weights_path)
 
     # Hiperparâmetros otimizados para detecção de corpo inteiro
