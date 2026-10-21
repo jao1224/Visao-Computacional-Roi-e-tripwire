@@ -1,8 +1,10 @@
 # 09 — Plano de Fases v1: Detalhamento Completo
 
-**Data:** 2026-10-08
-**Status:** aprovado pelo usuário junto com o roadmap (`.planning/ROADMAP.md`)
+**Data:** 2026-10-08 · **Última atualização: 2026-10-21**
+**Status:** aprovado pelo usuário junto com o roadmap (`.planning/ROADMAP.md`) — **Fases 1 e 2 concluídas**
 **Público-alvo:** leitor técnico/negócio que quer entender exatamente o que cada fase constrói, por quê, e como ela respeita a LGPD.
+
+> 📌 **Escopo vigente (2026-10-21):** a Fase 2 é **ROI-only** — o tripwire bidirecional foi **desativado** (código comentado, não removido). As fases 3–9 seguem o mesmo recorte: **ocupação por área**, sem eventos de travessia de linha. Ver o [status de execução](#status-de-execução-2026-10-21) no fim do documento.
 
 ---
 
@@ -67,40 +69,47 @@ ING-01, ING-03, CNT-01, CNT-03
 ## Fase 2 — Contagem por zona e ocupação em tempo real
 
 ### Objetivo
-Responder à pergunta central do projeto — *"a contagem está certa?"* — com tripwire bidirecional e ocupação instantânea, **visualmente validáveis na tela** antes de existir banco ou dashboard.
+Responder à pergunta central do projeto — *"a ocupação por área está certa?"* — com **ROIs poligonais e ocupação instantânea**, **visualmente validáveis na tela** antes de existir banco ou dashboard.
 
 ### Por que antes da infra
-Um bug de tripwire é 100× mais barato de descobrir aqui (tela, sem infra) do que depois reprocessando dados no PostgreSQL. É a lógica de maior risco do sistema.
+Um bug de contagem/ocupação é 100× mais barato de descobrir aqui (tela, sem infra) do que depois reprocessando dados no PostgreSQL. É a lógica de maior risco do sistema.
 
-### O que será construído
-1. **Zonas (ROIs):** polígonos nomeados desenhados sobre a imagem (Recepção, Restaurante, Spa…), configurados em arquivo/config no início
-2. **Tripwire bidirecional:** linha virtual dentro de cada zona; o cruzamento incrementa (entrou) ou decrementa (saiu) conforme a direção
-3. **Ocupação instantânea:** contador por zona = entradas − saídas, recalculado em tempo real e exibido no overlay
-4. **Proteções de estabilidade:** régua de histerese (anti-flicker), reset/clamp diário, reconciliação ao reiniciar a fonte
+### O que foi construído
+1. **Zonas (ROIs):** polígonos nomeados desenhados sobre a imagem (Recepção, Restaurante, Spa…), configurados em `config/zonas.yaml` por câmera
+2. **Ocupação instantânea por zona:** recontagem a cada frame — quantas pessoas estão dentro do polígono (pé, centro ou sobreposição de borda) — com clamp `[0, capacidade]`
+3. **Interseção de área:** `Interseção = Área(Objeto) ∩ Área(ROI)` — percentual da área do ROI efetivamente coberta pelas pessoas, exibido no overlay
+4. **Proteções de estabilidade:** reset diário (meia-noite local), reset por inatividade (> 10 min vazia), reconciliação total ao reabrir a fonte
 
 ### Como funciona
 ```
-Zona RECEPÇÃO com tripwire vertical:
+Zona HALL (polígono ROI):
 
-        │ tripwire (virtual)
-   ─────┼────────────────────
-        │   ↗ pessoa cruza para dentro → RECEPÇÃO +1
-        │   ← sai para fora            → RECEPÇÃO −1
+   ┌───────────────────────────┐
+   │        ▓▓▓                │   ▓ = interseção da área ocupada
+   │       ▓▓▓▓▓      ▓▓       │       com o ROI (destacada no overlay)
+   │───────────────────────────│
+   │  ▓▓▓                     │   Ocupação(HALL) = nº de pessoas presentes
+   └───────────────────────────┘   % Área(HALL) = área ocupada / área do ROI
 
-Ocupação(Recepção) = soma(entradas) − soma(saídas)  → exibida ao vivo
+   Toda pessoa é recontada a cada frame → nada é acumulado,
+   nada é gravado, não há "trava" de entrada/saída.
 ```
-- **Sem dupla contagem:** só conta quem completou o cruzamento real; a trilha efêmera da Fase 1 garante que "a mesma pessoa" não gera 2 eventos por causa de tremor na caixa
-- **Sem explosão:** rajadas de detecção (flicker) viram no máximo 1 evento
+- **Sem dupla contagem:** a ocupação é um *estado recalculado*, não um contador incremental — a mesma pessoa não gera 2 eventos por tremor de caixa
+- **Sem explosão:** rajadas de detecção (flicker) não geram eventos, apenas atualizam o valor do frame
 - **Sem fantasma:** reiniciar o vídeo → a ocupação é reconciliada (nunca fica "47 pessoas numa sala vazia")
+- **Tripwire:** previsto na versão original desta fase, **desativado por decisão do usuário** (código comentado em `zona.py`, `overlay.py` e `main.py` — mantido para reativação futura)
 
 ### Critérios de sucesso
-1. Contador incrementa/descrementa corretamente, sem contar a mesma pessoa duas vezes (mesmo sob jitter/occlusão leve)
-2. Ocupação instantânea por zona é exibida no overlay durante a execução, em tempo real
+1. Ocupação instantânea por zona é exibida no overlay durante a execução, em tempo real, coerente com a presença real dentro do ROI
+2. A interseção de área é calculada por frame (percentual de área ocupada) e permanece estável sob flicker de caixa
 3. Reiniciar a fonte de vídeo não corrompe a ocupação (reset/clamp/reconciliação aplicados)
-4. Sob rajada de detecções não há explosão de eventos ENTROU/SAIU — contagem estável
+4. Sob rajada de detecções a métrica mantém-se estável e coerente — sem contagem espúria
 
 ### Requisitos
 CNT-02, CNT-04
+
+### Status (2026-10-21)
+✅ **Concluída** — 4/4 planos (`02-01` a `02-04`), 10 testes em `tests/test_zona.py` + 4 em `tests/test_overlay.py`.
 
 ---
 
@@ -113,7 +122,7 @@ Dar verdade durável aos números **sem nunca tocar o loop de vídeo**: eventos 
 Escrever no banco dentro do loop de vídeo derruba os FPS (o doc 08 proíbe I/O no loop). A separação "loop quente / caminho frio" é o padrão de todos os sistemas de contagem em produção (confirmado na pesquisa).
 
 ### O que será construído
-1. **Fila em memória:** o loop publica eventos agregados (ENTROU/SAIU/ocupação) e segue — nunca espera o banco
+1. **Fila em memória:** o loop publica eventos agregados (ocupação por zona) e segue — nunca espera o banco
 2. **Batch writer idempotente:** worker que acumula N eventos ou T segundos e grava em lote, com UUID por lote para que reentrega não duplique
 3. **Schema mínimo:** tabelas de **configuração** (câmeras, zonas) + **métricas agregadas** (`metricas_fluxo_zona`, séries) — derivado do doc 06 **sem** `sessoes`/`session_traces`
 4. **Métrica de latência:** FPS/latência monitorados para provar que o banco não afeta o loop
@@ -127,7 +136,7 @@ Loop de vídeo ──(evento agregado)──▶ fila RAM ──▶ batch writer 
 
 ### Critérios de sucesso
 1. Nenhuma operação de banco dentro do loop de vídeo (verificável por código/review e métrica de FPS)
-2. O banco contém **apenas** tabelas de configuração e métricas agregadas — nenhuma tabela/coluna por-pessoa existe no schema; eventos ENTROU/SAIU gravados **sem qualquer chave de pessoa** (sem track_id — só zona, direção e timestamp de janela)
+2. O banco contém **apenas** tabelas de configuração e métricas agregadas — nenhuma tabela/coluna por-pessoa existe no schema; eventos de ocupação gravados **sem qualquer chave de pessoa** (sem track_id — só zona, contagem, % de área e timestamp de janela)
 3. Latência do loop permanece ≤ 5 ms/frame em GPU mesmo com o escritor ativo
 4. Reentregar um lote após interrupção não duplica contagens (idempotência via UUID)
 
@@ -275,7 +284,7 @@ DWL-01, DWL-02, DSH-03
 Cobrir as regras críticas com testes automatizados e **medir a acurácia real** da contagem contra marcação manual em condições de pico.
 
 ### O que será construído
-1. **Suíte de testes:** tripwire, dwell+timeout, fila, ocupação e reconexão — rodando com um comando
+1. **Suíte de testes:** ocupação por área/interseção, dwell+timeout, fila e reconexão — rodando com um comando
 2. **Protocolo de marcação manual:** alguém assiste o vídeo de pico e anota a contagem "ground truth"; o sistema compara
 3. **Relatório de acurácia:** erro médio + faixa documentados
 4. **Definição escrita de "quem conta"** (ex.: equipe do hotel conta ou não?) — aplicada consistentemente na validação
@@ -288,7 +297,7 @@ vídeo de pico ──▶ pipeline do sistema ──▶ contagem automática
 ```
 
 ### Critérios de sucesso
-1. Suíte cobre tripwire, dwell+timeout, fila, ocupação e reconexão; passa ponta a ponta com um comando
+1. Suíte cobre ocupação por área/interseção, dwell+timeout, fila e reconexão; passa ponta a ponta com um comando
 2. Contagem validada contra marcação manual em vídeo de pico, com relatório de acurácia documentado
 3. Definição de "quem conta" escrita e aplicada no relatório
 
@@ -350,3 +359,36 @@ PRV-01, PRV-02, PRV-03, PRV-04, PRV-05, OPS-03
 ## Fora do escopo para sempre (lembrete permanente)
 
 Face, biometria, demografia, emoção, controle de acesso (catracas), **MTMCT/Re-ID/associação entre câmeras (inclusive por silhueta)**, `session_traces`/`sessoes`, IDs persistidos, embeddings, rota/jornada, heatmap por indivíduo, gravação de vídeo. Base: LGPD art. 11 (sensível) e art. 12 §2º (perfil comportamental) + decisão do usuário.
+
+---
+
+## Status de execução (2026-10-21)
+
+| Fase | Status | Data | Requisitos |
+|---|---|---|---|
+| 1 — Fatia vertical single-câmera | ✅ Concluída | 2026-10-08 | ING-01, ING-03, CNT-01, CNT-03 |
+| 2 — Contagem por zona e ocupação (ROI-only) | ✅ Concluída | 2026-10-12 | CNT-02, CNT-04 |
+| 3 — Persistência PostgreSQL | ⏳ Não iniciada | — | API-01, QUA-01 |
+| 4 — API FastAPI + Marco Civil | ⏳ Não iniciada | — | API-02, API-03, API-04 |
+| 5 — Dashboard web | ⏳ Não iniciada | — | DSH-01, DSH-02, OPS-02 |
+| 6 — Multi-câmera e RTSP | ⏳ Não iniciada | — | ING-02, OPS-01 |
+| 7 — Dwell e heatmap agregado | ⏳ Não iniciada | — | DWL-01, DWL-02, DSH-03 |
+| 8 — Validação de qualidade | ⏳ Não iniciada | — | QUA-02, QUA-03 |
+| 9 — Conformidade LGPD (gate) | ⏳ Não iniciada | — | PRV-01..05, OPS-03 |
+
+**Progresso: 2/9 fases (22%) · 6/27 requisitos concluídos · 33 testes verdes.**
+
+### Stack
+
+**Implementada hoje (Fases 1–2):** Python 3.14.4 · `ultralytics==8.4.121` (YOLO + ByteTrack) · `opencv-python==5.0.0.93` · `numpy==2.5.2` · `lap==0.5.13` · `pyyaml==6.0.3` · `pytest>=8.0` (dev).
+
+**Planejada (Fases 3–7, ainda não implementada):** PyAV (ingestão RTSP) · MediaMTX (RTSP local de teste) · PostgreSQL 18 + `asyncpg` · FastAPI + WebSocket · React + Vite + ECharts · docker-compose.
+
+> ⚠️ Alerta técnico (consta da pesquisa de 2026-10-08): **OpenCV corrompe frames RTSP após 15–35 s** — por isso a Fase 6 prevê PyAV, e não `cv2.VideoCapture`, para ingestingão RTSP multi-stream.
+
+### Onde ver o resultado
+
+- Código e testes: `main.py`, `captura.py`, `rastreio.py`, `zona.py`, `overlay.py`, `tests/`
+- Roadmap e rastreabilidade: `.planning/ROADMAP.md`, `.planning/REQUIREMENTS.md`
+- Mapa do código: `.planning/codebase/`
+- Relatório de conformidade para a gestão: `docs/relatorios/`
