@@ -1,4 +1,14 @@
-path: C:\Users\ferna\Desktop\visao computacional\yolo_crowdhuman_body\dataset
+# Descritor do dataset CrowdHuman convertido para o formato YOLO (1 classe: person).
+#
+# `path` e RELATIVO ao diretorio de trabalho (raiz do repositorio) e aponta para o
+# dataset extraido por scripts/treinar_crowdhuman.py em <repo>/scripts/dataset.
+# Ajuste este valor se o dataset estiver em outro lugar nesta maquina.
+#
+# ATENCAO: nao grave caminho absoluto de maquina neste arquivo (ele quebra em
+# qualquer outra instalacao). O script scripts/treinar_crowdhuman.py gera o
+# proprio descritor em scripts/data.yaml, com o caminho absoluto correto do
+# dataset local — ele e a fonte autoritativa para o treino.
+path: scripts/dataset
 train: images/train
 val: images/val
 

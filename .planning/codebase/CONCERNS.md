@@ -51,7 +51,7 @@ Motivo: a travessia de linha é frágil sob oclusão e perspectiva, e o modelo v
 | `models/base_face_weights.pt` — pesos de **detecção de face** (`names: {0: 'face'}`), usados apenas como inicialização de *transfer learning* no treino do detector de corpo | `scripts/train_body.py`, `scripts/treinar_crowdhuman.py` | 🚫 **Dívida para a Fase 9 (PRV-03)** — fora do escopo do produto, mas faz o grep repo-wide por "face" não vir vazio | Registro em `.planning/phases/01-*/01-04-PLAN.md` |
 | `runs/detect/train_crowdhuman_body/` — artefatos do treino (`train_batch*.jpg` com pessoas do dataset público CrowdHuman, `labels.jpg`, `args.yaml`) | raiz do repositório | Resíduo de treino versionado. `args.yaml` contém **caminhos absolutos da máquina original** (Windows) — registro histórico do run, não deve ser reescrito | — |
 | `resultados/best (1).pt` — cópia idêntica de `resultados/best.pt` (mesmo md5) | raiz | Duplicata sem uso; candidata a remoção | — |
-| `config/data.yaml` — aponta para `C:\Users\ferna\Desktop\...` (caminho absoluto da máquina de treino original) | `config/` | 🔧 **A corrigir** — quebrado em qualquer outra máquina; trocar por caminho relativo | — |
+| `config/data.yaml` — apontava para `C:\Users\ferna\Desktop\...` (caminho absoluto da máquina de treino original) | `config/` | ✅ **Corrigido em 2026-10-21** — `path` passou a ser relativo (`scripts/dataset`), o mesmo destino gerado por `scripts/treinar_crowdhuman.py`; nenhum caminho absoluto de máquina em arquivos versionados | — |
 | `test/gemini_generated_video_8d21d35f.mp4` — vídeo-amostra versionado | `test/` | Usado pelos testes de integração; sem pessoas identificáveis | — |
 
 ---
