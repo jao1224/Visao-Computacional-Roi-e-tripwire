@@ -19,6 +19,20 @@ def test_desenha_hud_in_place():
     assert frame[:40, :].any()
 
 
+def test_desenha_caixas_filtra_fora_do_roi():
+    frame = numpy.zeros((480, 640, 3), dtype=numpy.uint8)
+    zonas = [{'id': 'hall', 'tipo': 'roi', 'pontos': [[100, 100], [200, 100], [200, 200], [100, 200]]}]
+    # Caixa 1: pé em (500, 400) -> FORA do ROI
+    caixas_fora = [(1, [450, 300, 550, 400], 0.9)]
+    overlay.desenhar_caixas(frame, caixas_fora, zonas=zonas)
+    assert not frame.any(), "Nenhuma caixa deveria ser desenhada para pessoa fora do ROI"
+
+    # Caixa 2: pé em (150, 180) -> DENTRO do ROI
+    caixas_dentro = [(2, [120, 120, 180, 180], 0.9)]
+    overlay.desenhar_caixas(frame, caixas_dentro, zonas=zonas)
+    assert frame.any(), "Caixa deveria ser desenhada para pessoa dentro do ROI"
+
+
 def test_sem_apis_de_escrita():
     caminho = os.path.join(RAIZ, 'overlay.py')
     with open(caminho, encoding='utf-8') as arquivo:
