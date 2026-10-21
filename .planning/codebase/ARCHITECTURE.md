@@ -1,6 +1,6 @@
 # Arquitetura do Sistema
 
-**Atualizado em:** 2026-10-21 · **Estado real do repositório** (94 commits, branch `feat/intersecao-area-roi`)
+**Atualizado em:** 2026-10-21 · **Estado real do repositório** (Fases 1 e 2 concluídas, branch `feat/intersecao-area-roi`)
 **Escopo:** analytics de fluxo por câmera — contagem e ocupação por zona ROI, **sem identificação, sem gravação em disco**.
 
 ---

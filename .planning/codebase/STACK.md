@@ -1,6 +1,6 @@
 # Pilha Tecnológica (Stack)
 
-**Atualizado em:** 2026-10-21 · **Estado real do repositório** (94 commits)
+**Atualizado em:** 2026-10-21 · **Estado real do repositório** (Fases 1 e 2 concluídas)
 Ambiente: venv local em `./.venv/` — usar **sempre** `./.venv/bin/python`.
 
 ---

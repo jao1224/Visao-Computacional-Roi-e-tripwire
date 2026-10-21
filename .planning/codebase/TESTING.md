@@ -1,6 +1,6 @@
 # Estratégia e Cobertura de Testes
 
-**Atualizado em:** 2026-10-21 · **Estado real do repositório** (94 commits)
+**Atualizado em:** 2026-10-21 · **Estado real do repositório** (Fases 1 e 2 concluídas)
 **Resultado:** ✅ **33/33 testes verdes** em ~6–10 s
 
 ---

@@ -1,6 +1,6 @@
 # Integrações Externas
 
-**Atualizado em:** 2026-10-21 · **Estado real do repositório** (94 commits)
+**Atualizado em:** 2026-10-21 · **Estado real do repositório** (Fases 1 e 2 concluídas)
 
 ---
 

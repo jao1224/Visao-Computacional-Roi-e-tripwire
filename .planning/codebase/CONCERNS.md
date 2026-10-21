@@ -1,6 +1,6 @@
 # Preocupações e Riscos do Código-Fonte
 
-**Atualizado em:** 2026-10-21 · **Estado real do repositório** (94 commits)
+**Atualizado em:** 2026-10-21 · **Estado real do repositório** (Fases 1 e 2 concluídas)
 Escopo: analytics de fluxo por ROI, LGPD *by design*.
 
 ---

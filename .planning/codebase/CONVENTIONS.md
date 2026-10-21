@@ -1,6 +1,6 @@
 # Convenções de Código
 
-**Atualizado em:** 2026-10-21 · **Estado real do repositório** (94 commits)
+**Atualizado em:** 2026-10-21 · **Estado real do repositório** (Fases 1 e 2 concluídas)
 
 ---
 
@@ -56,7 +56,7 @@
 - **Conventional Commits**, em português, com escopo quando aplicável:
   `feat(overlay):`, `fix(main):`, `docs(plano):`, `test(zona):`, `refactor(main/zona):`, `chore(config):`.
 - **Um commit por mudança coerente** (atômico); documentação/plano antes da implementação.
-- Branch de trabalho: `feat/intersecao-area-roi` (94 commits na branch).
+- Branch de trabalho: `feat/intersecao-area-roi`.
 
 ## 8. Testes
 
