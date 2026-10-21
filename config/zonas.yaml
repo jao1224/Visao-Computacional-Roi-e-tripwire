@@ -1,11 +1,10 @@
-# Configuração de zonas por câmera (fase single-câmera: camera_0).
-# roi: polígono 'pontos' com >= 3 pontos (ocupação por recontagem geométrica).
-# capacidade: limite por câmera aplicado a cada zona (clamp).
-# Obs.: o formato 'tripwire' (linha [[x1,y1],[x2,y2]] + direcao 'entrada'|'saida')
-# continua suportado pelo zona.py, mas não está configurado nesta câmera.
 camera_0:
   capacidade: 50
   zonas:
-    - id: "hall"
-      tipo: "roi"
-      pontos: [[50, 200], [590, 200], [590, 480], [50, 480]]
+  - id: hall
+    tipo: roi
+    pontos:
+    - [29, 44]
+    - [611, 44]
+    - [611, 429]
+    - [29, 429]
