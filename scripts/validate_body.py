@@ -1,4 +1,5 @@
 import os
+import sys
 from ultralytics import YOLO
 
 def main():
@@ -8,14 +9,25 @@ def main():
     model_path = os.path.join(base_dir, 'runs', 'detect', 'train_crowdhuman_body', 'weights', 'best.pt')
     if not os.path.exists(model_path):
         # Fallback para o modelo base se ainda não treinou
-        root_dir = os.path.dirname(base_dir)
-        model_path = os.path.join(root_dir, 'models', 'yolo26n.pt')
+        model_path = os.path.join(base_dir, 'models', 'yolo26n.pt')
         print(f"[Aviso] Modelo treinado não encontrado. Avaliando modelo base: {model_path}")
     else:
         print(f"--> Carregando modelo treinado: {model_path}")
         
-    data_yaml = os.path.join(base_dir, 'data.yaml')
+    # Descritor do dataset (YOLO): prefere o arquivo gerado pelo script de
+    # download/treino (scripts/data.yaml, com o caminho absoluto do dataset local)
+    # e cai para o modelo versionado em config/data.yaml (caminho relativo).
+    data_yaml = os.path.join(base_dir, 'scripts', 'data.yaml')
+    if not os.path.exists(data_yaml):
+        data_yaml = os.path.join(base_dir, 'config', 'data.yaml')
     val_output_dir = os.path.join(base_dir, 'runs', 'detect', 'val_results')
+
+    if not os.path.exists(data_yaml):
+        print(f"[ERRO] Descritor do dataset não encontrado em "
+              f"{os.path.join(base_dir, 'scripts', 'data.yaml')} nem em "
+              f"{os.path.join(base_dir, 'config', 'data.yaml')}")
+        print("       Rode scripts/treinar_crowdhuman.py para baixar o dataset e gerar o descritor.")
+        sys.exit(1)
 
     print(f"--> Executando validação oficial (model.val) no dataset CrowdHuman...")
     model = YOLO(model_path)

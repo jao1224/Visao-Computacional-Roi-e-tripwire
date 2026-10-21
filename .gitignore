@@ -4,3 +4,9 @@ __pycache__/
 /docs/AGENTS.md
 /docs/CONVERSAS_EXPORTADAS.md
 .venv/
+
+# Artefatos gerados pelo fluxo de treino — nunca versionar:
+# contêm caminhos absolutos da máquina e o dataset público (grande).
+/scripts/data.yaml
+/scripts/dataset/
+/scripts/runs/
