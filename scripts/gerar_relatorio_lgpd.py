@@ -47,7 +47,7 @@ BORDER = HexColor('#C3D0DC')
 GREY = HexColor('#55636F')
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VERSAO = '1.2'
+VERSAO = '1.3'
 NOME = 'RELATORIO-CONFORMIDADE-LGPD-v%s-%s.pdf' % (VERSAO, date.today().strftime('%Y-%m-%d'))
 OUT = os.path.join(RAIZ, 'docs', 'relatorios', NOME)
 
@@ -285,7 +285,7 @@ ident = [
     ['Destinatário', 'Gestão de Projeto / Encarregado (DPO) — LTD-Parangaba'],
     ['Emitido por', 'Equipe de Engenharia de Visão Computacional (autor do sistema)'],
     ['Data de emissão', DATA],
-    ['Versão', '1.2 — snapshot de progresso (Fases 1 e 2 concluídas; escopo ROI-only; documentação consolidada em um único planejamento)'],
+    ['Versão', '1.3 — snapshot de progresso (Fases 1 e 2 concluídas; escopo ROI-only; documentação consolidada em um único planejamento; material de biometria facial removido do repositório)'],
     ['Base normativa', 'Lei nº 13.709/2018 (LGPD); Lei nº 12.965/2014 (Marco Civil); '
                        'Res. CD/ANPD nº 18/2024; Guia orientativo ANPD de 19/12/2024'],
     ['Base de evidências', 'Repositório Git, %d commits; suíte automatizada com 33 testes '
@@ -795,7 +795,7 @@ A(callout('Nota de consistência documental',
           'requisitos) e o <i>.planning/STATE.md</i> (estado de execução). O material de apoio vive '
           'em <i>.planning/context/</i> (negócio, arquitetura, plantas/câmeras, modelagem do banco, '
           'parecer LGPD/Marco Civil, diretrizes para agentes e design por fase) e o material '
-          'superado foi arquivado em <i>.planning/historico/</i> (04 — Face vs. Body; 05 — MTMCT), '
+          'superado foi arquivado em <i>.planning/historico/</i> (05 — MTMCT), '
           'com aviso de superação no cabeçalho e um índice que registra o descarte e a base legal. '
           '<b>Não há mais duas fontes de verdade</b>: a pesquisa de domínio de 2026-10-08 foi '
           'indexada em <i>.planning/research/README.md</i>, que marca explicitamente o que nela está '
