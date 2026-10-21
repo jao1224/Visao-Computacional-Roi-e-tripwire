@@ -5,6 +5,9 @@ Detecção de **corpo/silhueta** com YOLO (CrowdHuman) para analytics de fluxo �
 
 Sistema que transforma câmeras do hotel em sensores de negócio: contagem, ocupação e (nas próximas fases) permanência por zona. Frames não são gravados; IDs do ByteTrack existem só em RAM.
 
+> **Estado atual (2026-10-21):** Fases **1 e 2 concluídas** (2/9) · **33 testes** verdes · foco em **ocupação por área (ROI)**.
+> Plano mestre: [`docs/PLANO_V1_COMPLETO.md`](docs/PLANO_V1_COMPLETO.md) · Roadmap: [`.planning/ROADMAP.md`](.planning/ROADMAP.md)
+
 ---
 
 ## Recorte LGPD (obrigatório)
@@ -13,28 +16,38 @@ Sistema que transforma câmeras do hotel em sensores de negócio: contagem, ocup
 - Frames voláteis: inferência em memória, sem `imwrite` / gravação de vídeo de pessoas
 - Saída apenas agregada (contagens); nenhum `track_id` persistido
 - Dependência `opencv-python` (não `opencv-contrib-python`, para não puxar `cv2.face`)
+- **Vetado para sempre:** face/biometria, catraca/controle de acesso, MTMCT/Re-ID (inclusive por silhueta), `sessoes`/`session_traces`, IDs persistidos, embeddings, trilha individual, heatmap por indivíduo, gravação de vídeo
+
+Verificado automaticamente por `tests/test_privacidade.py` a cada build.
 
 Documentação legal e de produto: `docs/DOCUMENTACAO_PROJETO_E_LGPD/`.
+Parecer regulatório: [`07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md`](docs/DOCUMENTACAO_PROJETO_E_LGPD/07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md).
+Relatório para a gestão: [`docs/relatorios/`](docs/relatorios/).
 
 ---
 
 ## Estrutura
 
 ```text
-yolo-lgpd/
+Visao-Computacional-Roi-e-tripwire/
 ├── main.py                 --> Orquestração: captura → rastreio → zonas → overlay
-├── captura.py              --> Fonte (webcam/arquivo/RTSP) + capture_ts
+├── captura.py              --> Fonte (webcam/arquivo) + capture_ts
 ├── rastreio.py             --> YOLO + ByteTrack efêmero (classe 0 = corpo)
-├── overlay.py              --> Caixas, HUD, tripwires, ROIs, contadores in-place
-├── zona.py                 --> Ocupação ROI (tripwire bidirecional opcional) + reset/reconciliação
+├── zona.py                 --> Ocupação ROI + interseção de área + reset/reconciliação
+├── overlay.py              --> Caixas filtradas por ROI, HUD, cards de ocupação (in-place)
+├── entender_zonas.py       --> Utilitário: gera zonas_visualizacao.png
 ├── config/
-│   ├── data.yaml           --> Dataset (classe: person)
-│   └── zonas.yaml          --> Zonas por camera_id (tripwire + ROI + capacidade)
-├── models/                 --> Pesos base (yolo26n.pt)
+│   ├── data.yaml           --> Dataset (classe: person) — treino
+│   └── zonas.yaml          --> ROIs por camera_id (id, tipo, pontos, capacidade)
+├── models/                 --> Pesos base (yolo26n.pt) e pesos de face (dívida PRV-03)
 ├── resultados/best.pt      --> Detector de corpo treinado (CrowdHuman)
-├── scripts/                --> Download CrowdHuman, treino, validação, pipeline
-├── tests/                  --> Privacidade, integração, zonas, contratos
-└── docs/                   --> LGPD, arquitetura, plano v1
+├── scripts/                --> Ferramentas de DEV: demarcador de ROI, treino, relatório PDF
+├── tests/                  --> 33 testes: privacidade, integração, zonas, overlay, contratos
+├── docs/
+│   ├── PLANO_V1_COMPLETO.md      --> Plano mestre: 27 requisitos + 9 fases + status
+│   ├── DOCUMENTACAO_PROJETO_E_LGPD/  --> Pacote documental (docs 01–09) + parecer LGPD
+│   └── relatorios/                --> Relatórios para a gestão (PDF)
+└── .planning/              --> Roadmap, requisitos, mapa do codebase, pesquisa
 ```
 
 ---
@@ -43,13 +56,15 @@ yolo-lgpd/
 
 | Módulo | O que faz |
 |--------|-----------|
-| **Detecção + Rastreio** | YOLO corpo + ByteTrack em RAM, IDs efêmeros |
-| **Tripwire (opcional)** | Linha bidirecional (ENTROU/SAIU) com debounce 3 frames + hysteresis 15px — suporte mantido, desabilitado no padrão atual |
-| **Ocupação ROI** | Recontagem geométrica frame-a-frame (bottom-center no polígono) |
-| **Resets** | Meia-noite local OU vazio > 10 min → zera contadores + limpa `crossed` |
+| **Detecção + Rastreio** | YOLO corpo + ByteTrack em RAM, IDs efêmeros (≤ 15 s) |
+| **Ocupação ROI** | Recontagem geométrica frame-a-frame (pé/centro/borda dentro do polígono), com clamp `[0, capacidade]` |
+| **Interseção de área** | `Área(Objeto) ∩ Área(ROI)` → % da área da zona efetivamente ocupada, exibido no overlay |
+| **Filtro de renderização** | Só desenha (e destaca) quem intersecta a zona configurada |
+| **Resets** | Meia-noite local OU vazio > 10 min → zera a ocupação da zona |
 | **Reconciliação** | Reabertura de fonte limpa `track_states` inteiro |
-| **Overlay** | Tripwires (verde/vermelho), ROIs (azul alpha 0.2), cards IN/OUT/OCUP |
-| **Privacidade** | Zero escrita em disco, zero biometria, auditoria automatizada |
+| **Tripwire** | Linha bidirecional (ENTROU/SAIU) — **desativado por decisão**: o código existe, comentado, em `zona.py`, `overlay.py` e `main.py` |
+| **Overlay** | ROIs (azul alpha 0.2), interseção (vermelho), cards de ocupação e HUD de FPS |
+| **Privacidade** | Zero escrita em disco, zero biometria, auditoria automatizada em `tests/test_privacidade.py` |
 
 ---
 
@@ -91,24 +106,61 @@ Para demarcar o polígono de uma zona clicando diretamente na tela da webcam ou 
 ### Testes
 
 ```bash
-./.venv/bin/python -m pytest                  # suite completa de testes
+./.venv/bin/python -m pytest                  # suite completa de testes (33)
 ./.venv/bin/python -m pytest tests/test_zona.py -q  # testes de zona e interseção
+./.venv/bin/python -m pytest tests/test_privacidade.py -q  # auditoria LGPD
 ```
+
+> Use sempre `./.venv/bin/python` — o `pytest` do sistema não tem as dependências do projeto.
 
 ### Visualizar zonas (sem rodar vídeo)
 
 ```bash
-python entender_zonas.py          # gera zonas_visualizacao.png
+./.venv/bin/python entender_zonas.py          # gera zonas_visualizacao.png
 ```
 
 ### Treinar / validar o detector de corpo
 
 ```bash
-python scripts/download_and_convert_crowdhuman.py
-python scripts/train_body.py
-python scripts/validate_body.py
+./.venv/bin/python scripts/download_and_convert_crowdhuman.py
+./.venv/bin/python scripts/train_body.py
+./.venv/bin/python scripts/validate_body.py
 ```
 
 * **Resolução (`imgsz`):** `640x640`
 * **Batch:** `8`
 * **Épocas:** `300` com *cosine learning rate decay*
+
+---
+
+## Estado atual (2026-10-21)
+
+| Fase | Status |
+|---|---|
+| 1 — Fatia vertical single-câmera (captura → detecção → rastreio efêmero) | ✅ Concluída |
+| 2 — Contagem por zona e ocupação (ROI + interseção de área) | ✅ Concluída |
+| 3 — Persistência PostgreSQL (fila em RAM + escrita em lote) | ⏳ Não iniciada |
+| 4 — API FastAPI + conformidade Marco Civil | ⏳ Não iniciada |
+| 5 — Dashboard web | ⏳ Não iniciada |
+| 6 — Multi-câmera e RTSP (PyAV + MediaMTX) | ⏳ Não iniciada |
+| 7 — Dwell e heatmap agregado | ⏳ Não iniciada |
+| 8 — Validação de qualidade (marcação manual) | ⏳ Não iniciada |
+| 9 — Conformidade LGPD (RIPD/LIA/ROPA, encarregado, incidente) | ⏳ Não iniciada |
+
+**2/9 fases (22%) · 6/27 requisitos concluídos · 33 testes verdes.**
+
+> Nenhuma câmera real com hóspedes deve ser ligada antes do gate da **Fase 9**.
+
+---
+
+## Documentação e relatórios
+
+| Documento | Para quê |
+|---|---|
+| [`docs/PLANO_V1_COMPLETO.md`](docs/PLANO_V1_COMPLETO.md) | Plano mestre: 27 requisitos, 9 fases, status de execução |
+| [`docs/DOCUMENTACAO_PROJETO_E_LGPD/`](docs/DOCUMENTACAO_PROJETO_E_LGPD/README.md) | Pacote documental (docs 01–09) + parecer LGPD/Marco Civil |
+| [`docs/relatorios/`](docs/relatorios/) | Relatórios para a gestão do projeto (PDF) |
+| [`.planning/ROADMAP.md`](.planning/ROADMAP.md) · [`.planning/REQUIREMENTS.md`](.planning/REQUIREMENTS.md) | Roadmap e rastreabilidade requisito → fase |
+| [`.planning/codebase/`](.planning/codebase/) | Mapa do código: arquitetura, stack, estrutura, testes, riscos, convenções |
+
+O relatório de conformidade em PDF é gerado por `scripts/gerar_relatorio_lgpd.py` — que usa `reportlab`, uma **dependência opcional** mantida fora do `requirements.txt` do produto.
