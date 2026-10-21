@@ -7,7 +7,8 @@ encarregado (DPO) do hotel.
 
 | Documento | Data | Descrição |
 |-----------|------|-----------|
-| **`RELATORIO-CONFORMIDADE-LGPD-v1.1-2026-10-21.pdf`** | 21/10/2026 | **Versão vigente.** Relatório técnico-jurídico de conformidade com a LGPD (Lei nº 13.709/2018) e o Marco Civil da Internet (Lei nº 12.965/2014). Cobre: o que já foi implementado (Fases 1 e 2), o que será implementado (Fases 3 a 9), a matriz de conformidade artigo a artigo, as lacunas de conformidade antes de produção e as recomendações ao gestor de projeto. **26 páginas.** |
+| **`RELATORIO-CONFORMIDADE-LGPD-v1.2-2026-10-21.pdf`** | 21/10/2026 | **Versão vigente.** Relatório técnico-jurídico de conformidade com a LGPD (Lei nº 13.709/2018) e o Marco Civil da Internet (Lei nº 12.965/2014). Cobre: o que já foi implementado (Fases 1 e 2), o que será implementado (Fases 3 a 9), a matriz de conformidade artigo a artigo, as lacunas de conformidade antes de produção e as recomendações ao gestor de projeto. **26 páginas.** Diferença para a v1.1: todos os caminhos de documentação apontam para o planejamento canônico (`.planning/ROADMAP.md`, `.planning/REQUIREMENTS.md`, `.planning/STATE.md`, `.planning/context/`, `.planning/historico/`) e a "nota de consistência documental" descreve a consolidação da documentação em um único planejamento. |
+| `RELATORIO-CONFORMIDADE-LGPD-v1.1-2026-10-21.pdf` | 21/10/2026 | Versão anterior, mantida como registro histórico. 26 páginas. Diferença para a v1.2: citava os caminhos antigos de `docs/` (`docs/PLANO_V1_COMPLETO.md` e `docs/DOCUMENTACAO_PROJETO_E_LGPD/`), que foram dissolvidos na consolidação de 2026-10-21. |
 | `RELATORIO-CONFORMIDADE-LGPD-v1.0-2026-10-21.pdf` | 21/10/2026 | Versão anterior, mantida como registro histórico. 24 páginas. Diferença para a v1.1: nova seção **5.7 — "Como o sistema garante a não-identificação na prática"** (ciclo de vida de uma pessoa no enquadramento, exemplo concreto do que a Fase 7 persiste sobre um dwell, e o teste legal do ByteTrack), stack-alvo no Anexo E e contagem de commits agora apurada no momento da geração. |
 
 ## Fontes do relatório
@@ -25,7 +26,8 @@ declarativa sem evidência:
 | `.planning/debug/` | Diagnóstico e plano de correção do filtro visual por ROI |
 | `.planning/codebase/` | Mapa do código: arquitetura, stack, estrutura, testes, riscos, convenções |
 | `.planning/context/` | Contexto do projeto: negócio, arquitetura, plantas/câmeras, modelagem do banco, parecer LGPD e diretrizes |
-| `.planning/ROADMAP.md` · `.planning/REQUIREMENTS.md` | Roadmap e requisitos canônicos com as invariantes legais |
+| `.planning/research/README.md` | Índice da pesquisa datada de 2026-10-08: o que nela é válido e o que está superado |
+| `.planning/historico/` | Escopos superados (face-vs-body, MTMCT), com o motivo do descarte e a base legal |
 | Suíte de testes (`tests/`) | Evidência automatizada das garantias de privacidade (33 testes) |
 | `git log` | Evidência de processo: commits atômicos (contagem apurada na geração) |
 

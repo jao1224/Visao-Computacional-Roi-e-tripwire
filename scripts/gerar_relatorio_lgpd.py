@@ -17,7 +17,7 @@ Uso (ambiente com reportlab instalado):
     ./.venv-relatorio/bin/pip install reportlab
     ./.venv-relatorio/bin/python scripts/gerar_relatorio_lgpd.py
 
-Saida: docs/relatorios/RELATORIO-CONFORMIDADE-LGPD-v1.1-<AAAA-MM-DD>.pdf
+Saida: docs/relatorios/RELATORIO-CONFORMIDADE-LGPD-v1.2-<AAAA-MM-DD>.pdf
 """
 import os
 import subprocess
@@ -47,7 +47,7 @@ BORDER = HexColor('#C3D0DC')
 GREY = HexColor('#55636F')
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-VERSAO = '1.1'
+VERSAO = '1.2'
 NOME = 'RELATORIO-CONFORMIDADE-LGPD-v%s-%s.pdf' % (VERSAO, date.today().strftime('%Y-%m-%d'))
 OUT = os.path.join(RAIZ, 'docs', 'relatorios', NOME)
 
@@ -285,7 +285,7 @@ ident = [
     ['Destinatário', 'Gestão de Projeto / Encarregado (DPO) — LTD-Parangaba'],
     ['Emitido por', 'Equipe de Engenharia de Visão Computacional (autor do sistema)'],
     ['Data de emissão', DATA],
-    ['Versão', '1.1 — snapshot de progresso (Fases 1 e 2 concluídas; escopo ROI-only)'],
+    ['Versão', '1.2 — snapshot de progresso (Fases 1 e 2 concluídas; escopo ROI-only; documentação consolidada em um único planejamento)'],
     ['Base normativa', 'Lei nº 13.709/2018 (LGPD); Lei nº 12.965/2014 (Marco Civil); '
                        'Res. CD/ANPD nº 18/2024; Guia orientativo ANPD de 19/12/2024'],
     ['Base de evidências', 'Repositório Git, %d commits; suíte automatizada com 33 testes '
@@ -376,8 +376,8 @@ A(mk_table(
      ['Linhas de teste', '846 linhas', '7 arquivos de teste + conftest.py'],
      ['Commits no repositório', '%d commits' % COMMITS,
        'Commits atômicos, com documentação antes da implementação (contagem no momento da geração)'],
-     ['Documentos técnicos e legais', '10 documentos + 1 plano maestro',
-      '<i>docs/DOCUMENTACAO_PROJETO_E_LGPD/</i> (docs 01 a 09 + README) e <i>docs/PLANO_V1_COMPLETO.md</i>'],
+     ['Documentos técnicos e legais', '9 de contexto + 2 históricos',
+      '<i>.planning/context/</i> (negócio, arquitetura, plantas/câmeras, modelagem do banco, parecer LGPD, diretrizes, design por fase) e <i>.planning/historico/</i> (escopos superados)'],
      ['Módulos de face / biometria / escrita de mídia', '<b>0</b>',
       'Verificado por varredura de tokens proibidos em todo o código de produto (teste automatizado)'],
      ['Arquivos de imagem/vídeo gerados pelo pipeline', '<b>0</b>',
@@ -739,10 +739,10 @@ A(mk_table(
       'O mapa de verificação por tarefa, com critérios de aceite automatizados'],
      ['Verificação legal', '<i>.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md</i>',
       'Análise artigo a artigo da LGPD e do Marco Civil, com as 11 condições vinculantes'],
-     ['Parecer de compliance', '<i>docs/DOCUMENTACAO_PROJETO_E_LGPD/07_*.md</i>',
-      'Diagnóstico de risco e quadro de sanções, na versão original do projeto'],
-     ['Plano maestro v1', '<i>docs/PLANO_V1_COMPLETO.md</i>',
-      'Documento único de aprovação: requisitos + roadmap + 9 fases + invariantes legais'],
+     ['Parecer de compliance', '<i>.planning/context/PARECER_LGPD_E_MARCO_CIVIL.md</i>',
+      'Diagnóstico de risco e quadro de sanções, revisado em 2026-10-21 para o escopo vigente'],
+     ['Contexto e design por fase', '<i>.planning/context/</i>',
+      'Material de apoio ao plano: rationale e mecanismo de cada fase (rascunho pré-planejamento)'],
      ['Registro de depuração', '<i>.planning/debug/</i>',
       'Diagnóstico e plano de correção do filtro visual por ROI, com verificação e testes'],
      ['Sementes de roadmap', '<i>.planning/seeds/</i>',
@@ -790,15 +790,17 @@ A(mk_table(
 A(caption('Tabela 13 — Vetos permanentes do projeto (fonte: REQUIREMENTS.md, seção "Out of Scope", '
           'e COMPLIANCE-LGPD-MARCO-CIVIL.md, seção 5).'))
 A(callout('Nota de consistência documental',
-          'A pasta <i>docs/DOCUMENTACAO_PROJETO_E_LGPD/</i> preserva, de forma proposital, quatro '
-          'documentos <b>superados</b> (04 — Face vs. Body; 05 — MTMCT; 06 — Modelagem de banco; '
-          '07 — Parecer original), que descreviam o escopo inicial mais amplo. Todos eles trazem '
-          'aviso de superação no cabeçalho. <b>A fonte da verdade do escopo vigente</b> é o trio: '
-          '<i>docs/PLANO_V1_COMPLETO.md</i>, <i>.planning/REQUIREMENTS.md</i> e '
-          '<i>.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md</i>. Recomenda-se, antes da '
-          'apresentação formal, reforçar os avisos de superação nos documentos 04, 05, 06 e 07 — '
-          'especialmente no 07, cuja tabela de temporalidade ainda cita snapshots de face e '
-          'embeddings faciais que não existem e não serão implementados.',
+          'A documentação técnica e legal do projeto foi consolidada em <b>um único planejamento</b>: '
+          'o <i>.planning/ROADMAP.md</i> (9 fases), o <i>.planning/REQUIREMENTS.md</i> (27 '
+          'requisitos) e o <i>.planning/STATE.md</i> (estado de execução). O material de apoio vive '
+          'em <i>.planning/context/</i> (negócio, arquitetura, plantas/câmeras, modelagem do banco, '
+          'parecer LGPD/Marco Civil, diretrizes para agentes e design por fase) e o material '
+          'superado foi arquivado em <i>.planning/historico/</i> (04 — Face vs. Body; 05 — MTMCT), '
+          'com aviso de superação no cabeçalho e um índice que registra o descarte e a base legal. '
+          '<b>Não há mais duas fontes de verdade</b>: a pesquisa de domínio de 2026-10-08 foi '
+          'indexada em <i>.planning/research/README.md</i>, que marca explicitamente o que nela está '
+          'superado (roadmap de 6 fases, MTMCT como fase própria, <font face="Courier">sessoes</font> '
+          'e <font face="Courier">session_traces</font>, Python 3.12).',
           accent=WARN, bg=HexColor('#FBF3E8')))
 
 A(PageBreak())
@@ -1406,10 +1408,11 @@ A(mk_table(
       'alvo de 5 FPS; tecla <font face="Courier">q</font> encerra'],
      ['Calibração de zonas', '<font face="Courier">./.venv/bin/python scripts/demarcar_zona.py 0</font>'],
      ['Testes', '<font face="Courier">./.venv/bin/python -m pytest</font> — 33 testes, ~10 s'],
-     ['Documentação legal', '<font face="Courier">docs/DOCUMENTACAO_PROJETO_E_LGPD/</font> '
-      '(documentos 01 a 09 + README) e <font face="Courier">docs/PLANO_V1_COMPLETO.md</font>'],
+     ['Documentação legal e de contexto', '<font face="Courier">.planning/context/</font> '
+      '(parecer LGPD/Marco Civil, arquitetura, plantas/câmeras, banco, diretrizes) e '
+      '<font face="Courier">.planning/historico/</font> (escopos superados)'],
      ['Planejamento e auditoria', '<font face="Courier">.planning/</font> — ROADMAP, REQUIREMENTS, '
-      'STATE, research (incluindo a verificação legal), phases, seeds, debug'],
+      'STATE, context, historico, research (incluindo a verificação legal), phases, seeds, debug'],
      ['Mapa do código', '<font face="Courier">.planning/codebase/</font> — architecture, concerns, '
       'conventions, integrations, stack, structure, testing'],
      ['Relatórios para a gestão', '<font face="Courier">docs/relatorios/</font> — este relatório e '
