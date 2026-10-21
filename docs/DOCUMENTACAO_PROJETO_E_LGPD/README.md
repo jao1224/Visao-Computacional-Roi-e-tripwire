@@ -20,7 +20,7 @@
 | :--- | :--- | :--- |
 | **[`01_VISAO_GERAL_E_NEGOCIO_HOTEL.md`](01_VISAO_GERAL_E_NEGOCIO_HOTEL.md)** | Visão de produto, dor do cliente, objetivos de negócio e requisitos funcionais. | ⚠ Partes de face/catraca superadas |
 | **[`02_ARQUITETURA_TECNICA_E_ENGENHARIA.md`](02_ARQUITETURA_TECNICA_E_ENGENHARIA.md)** | Arquitetura em camadas, pipelines de vídeo RTSP, filas assíncronas e hardware. | ✅ Válido (com invariantes do aviso) |
-| **[`03_MAPEAMENTO_CAMERAS_E_PLANTAS.md`](03_MAPEAMENTO_CAMERAS_E_PLANTAS.md)** | Planta física do hotel, divisão por andares (Recepção, Lazer, Corredores) e ROIs. | ✅ Válido |
+| **[`03_MAPEAMENTO_CAMERAS_E_PLANTAS.md`](03_MAPEAMENTO_CAMERAS_E_PLANTAS.md)** | Planta física do hotel, divisão por andares (Recepção, Lazer, Corredores) e ROIs. | ✅ **Vigente** (revisado em 2026-10-21 — tripwire desativado; ver `config/zonas.yaml`) |
 | **[`04_MODELOS_IA_FACE_VS_BODY.md`](04_MODELOS_IA_FACE_VS_BODY.md)** | Comparativo dos modelos: YOLO Face vs. YOLO Body/CrowdHuman. | 🚫 **SUPERADO** — só body (histórico) |
 | **[`05_RASTREAMENTO_MULTICAMERAS_MTMCT.md`](05_RASTREAMENTO_MULTICAMERAS_MTMCT.md)** | Arquitetura de rastreamento entre câmeras (Re-ID, fusão de trilhas). | 🚫 **SUPERADO — não implementar** |
 | **[`06_MODELAGEM_BANCO_DE_DADOS.md`](06_MODELAGEM_BANCO_DE_DADOS.md)** | DDL PostgreSQL, MER, tabelas de zonas, câmeras, sessões e traces. | ⚠ **Adaptar**: sem `sessoes`/`session_traces` |
