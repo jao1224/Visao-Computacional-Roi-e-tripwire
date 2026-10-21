@@ -1,9 +1,11 @@
 # REQUIREMENTS — Visão Computacional para Hotelaria (Analytics de Fluxo)
 
 **Milestone:** v1 (primeiro release)
-**Data:** 2026-10-08 — aprovado pelo usuário
+**Data:** 2026-10-08 — aprovado pelo usuário · **Atualizado: 2026-10-21**
 **Base:** PROJECT.md + pesquisa (`.planning/research/`) + verificação legal (`COMPLIANCE-LGPD-MARCO-CIVIL.md`, 11 condições vinculantes)
 **Regra de ouro:** saída exclusivamente agregada; qualquer dado por-pessoa é proibido (LGPD art. 12 §2º).
+
+**Status atual (2026-10-21):** **6/27 requisitos concluídos** (ING-01, ING-03, CNT-01, CNT-02, CNT-03, CNT-04) · Fases 1 e 2 concluídas · 33 testes verdes. O escopo vigente da contagem é **ROI-only** (ocupação por área) — o tripwire bidirecional foi desativado por decisão do usuário (código comentado, não removido).
 
 ---
 
@@ -51,7 +53,7 @@
 ### Qualidade (QUA)
 
 - [ ] **QUA-01**: Latência ≤ 5 ms/frame em GPU; I/O de banco sempre fora do loop de vídeo (fila em lote/batch writer)
-- [ ] **QUA-02**: Testes automatizados das regras críticas (tripwire, dwell+timeout, fila, ocupação, reconexão)
+- [ ] **QUA-02**: Testes automatizados das regras críticas (ocupação por área/interseção, dwell+timeout, fila, reconexão)
 - [ ] **QUA-03**: Contagem validada contra marcação manual em condições de pico (webcam/amostra; validação em campo real depois)
 
 ### Operação (OPS)
