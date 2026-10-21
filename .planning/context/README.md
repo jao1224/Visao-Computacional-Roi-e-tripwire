@@ -66,7 +66,7 @@ removido, o que era único foi movido para cá.
 | `06_MODELAGEM_BANCO_DE_DADOS.md` | [`MODELAGEM_BANCO_DE_DADOS.md`](MODELAGEM_BANCO_DE_DADOS.md) |
 | `07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md` | [`PARECER_LGPD_E_MARCO_CIVIL.md`](PARECER_LGPD_E_MARCO_CIVIL.md) |
 | `08_PROMPT_E_DIRETRIZES_PARA_AGENTE_IA.md` | [`DIRETRIZES_PARA_AGENTE_IA.md`](DIRETRIZES_PARA_AGENTE_IA.md) |
-| `04_MODELOS_IA_FACE_VS_BODY.md` | [`../historico/`](../historico/) — **SUPERADO** |
+| `04_MODELOS_IA_FACE_VS_BODY.md` | **removido** (2026-10-21) — material de biometria facial não permanece no repositório |
 | `05_RASTREAMENTO_MULTICAMERAS_MTMCT.md` | [`../historico/`](../historico/) — **SUPERADO** |
 | `09_PLANO_DE_FASES_V1.md` | [`DESENHO_POR_FASE.md`](DESENHO_POR_FASE.md) (*rationale* + mecanismo) · o resto (objetivo, requisitos, critérios, mapeamento) é [`../ROADMAP.md`](../ROADMAP.md) + [`../REQUIREMENTS.md`](../REQUIREMENTS.md) |
 | `docs/PLANO_V1_COMPLETO.md` | §5/§6 → [`PERGUNTAS_FREQUENTES_TECNICAS.md`](PERGUNTAS_FREQUENTES_TECNICAS.md) · §8 → [`PONTOS_DE_ATENCAO.md`](PONTOS_DE_ATENCAO.md) · §1/§2/§3/§4/§7/§9 são duplicatas de [`../ROADMAP.md`](../ROADMAP.md), [`../REQUIREMENTS.md`](../REQUIREMENTS.md) e [`../STATE.md`](../STATE.md) |

@@ -59,7 +59,8 @@ Esses documentos foram movidos na consolidação de 2026-10-21:
 | doc 01 | [`../context/NEGOCIO_E_OBJETIVOS.md`](../context/NEGOCIO_E_OBJETIVOS.md) |
 | doc 02 | [`../context/ARQUITETURA_TECNICA_E_ENGENHARIA.md`](../context/ARQUITETURA_TECNICA_E_ENGENHARIA.md) |
 | doc 03 | [`../context/CAMERAS_E_PLANTAS.md`](../context/CAMERAS_E_PLANTAS.md) |
-| doc 04, doc 05 | [`../historico/`](../historico/) — **superados, não implementar** |
+| doc 04 | **removido** (2026-10-21) — material de biometria facial não permanece no repositório |
+| doc 05 | [`../historico/`](../historico/) — **superado, não implementar** |
 | doc 06 | [`../context/MODELAGEM_BANCO_DE_DADOS.md`](../context/MODELAGEM_BANCO_DE_DADOS.md) |
 | doc 07 | [`../context/PARECER_LGPD_E_MARCO_CIVIL.md`](../context/PARECER_LGPD_E_MARCO_CIVIL.md) |
 | doc 08 | [`../context/DIRETRIZES_PARA_AGENTE_IA.md`](../context/DIRETRIZES_PARA_AGENTE_IA.md) |

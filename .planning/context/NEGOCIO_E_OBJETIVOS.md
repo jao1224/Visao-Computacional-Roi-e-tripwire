@@ -18,8 +18,7 @@ O sistema de visão computacional foi concebido para transformar câmeras de seg
 - **Previsão de Demanda:** Subsidiar escalas de funcionários (garçons, atendentes, limpeza) com base nos dados de tráfego.
 
 ### B. Controle de Acesso & Segurança — 🚫 FORA DO ESCOPO (superado em 2026-10-08)
-> **NÃO implementar nenhuma linha desta seção.** Face/catraca = proibido para sempre (LGPD art. 11; decisão do usuário). Esta seção permanece apenas como histórico do que foi imaginado no início do projeto. Escopo vigente = apenas a seção A (analytics de fluxo).
-- ~~**Identificação de Hóspedes:** Liberação ágil de catracas ou portas com chave facial inteligente (para hóspedes cadastrados no check-in).~~ *(SUPERADO — face/catraca proibidos)*
+> **NÃO implementar nenhuma linha desta seção.** Controle de acesso e biometria = proibidos para sempre (LGPD art. 11; decisão do usuário). Esta seção permanece apenas como registro do que foi imaginado no início do projeto. Escopo vigente = apenas a seção A (analytics de fluxo).
 - ~~**Monitoramento de Áreas Restritas:** Notificar a segurança caso pessoas acessem locais proibidos fora de horário.~~ *(fora do escopo v1 — ver `../REQUIREMENTS.md` §Out of Scope)*
 
 ---

@@ -27,7 +27,7 @@ declarativa sem evidência:
 | `.planning/codebase/` | Mapa do código: arquitetura, stack, estrutura, testes, riscos, convenções |
 | `.planning/context/` | Contexto do projeto: negócio, arquitetura, plantas/câmeras, modelagem do banco, parecer LGPD e diretrizes |
 | `.planning/research/README.md` | Índice da pesquisa datada de 2026-10-08: o que nela é válido e o que está superado |
-| `.planning/historico/` | Escopos superados (face-vs-body, MTMCT), com o motivo do descarte e a base legal |
+| `.planning/historico/` | Escopo superado (MTMCT), com o motivo do descarte e a base legal |
 | Suíte de testes (`tests/`) | Evidência automatizada das garantias de privacidade (33 testes) |
 | `git log` | Evidência de processo: commits atômicos (contagem apurada na geração) |
 

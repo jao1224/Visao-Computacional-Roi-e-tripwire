@@ -47,7 +47,7 @@ Contagem, fluxo e permanência por zona — confiáveis e em tempo real — com 
 
 - Código existente: `main.py` (aplicativo principal, inferência webcam/arquivo), `captura.py`, `rastreio.py`, `zona.py`, `overlay.py` (pipeline de produção) e `entender_zonas.py` (utilitário). `scripts/` contém ferramentas de desenvolvimento e documentação (download/treino/validação do detector, demarcador interativo de ROI, gerador do relatório LGPD) — **fora do pipeline de produção**.
 - Contexto do projeto: `.planning/context/` (negócio, arquitetura técnica, plantas/câmeras, modelagem do banco, parecer LGPD/Marco Civil e diretrizes para agentes) — material de apoio, revisado em 2026-10-21 para refletir o escopo vigente (sem face, sem catraca, sem MTMCT, sem `session_traces`).
-- Documentos de escopo superado (registro histórico, não implementar): `.planning/historico/` (face-vs-body, MTMCT/Re-ID).
+- Documentos de escopo superado (registro histórico, não implementar): `.planning/historico/` (MTMCT/Re-ID).
 - Plano mestre: `.planning/ROADMAP.md` (9 fases) + `.planning/REQUIREMENTS.md` (27 requisitos com rastreabilidade) — **fonte canônica**; estado de execução em `.planning/STATE.md`.
 - Mapa do codebase: `.planning/codebase/` (7 documentos, atualizados em 2026-10-21)
 - Verificação legal completa (LGPD art. por artigo + Marco Civil): `.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md` — 11 condições vinculantes (ROPA, RIPD/LIA, encarregado, logs 6 meses, veto total a rastreio)

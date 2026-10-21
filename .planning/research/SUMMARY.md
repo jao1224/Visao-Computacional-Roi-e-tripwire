@@ -179,7 +179,7 @@ Phases with standard patterns (skip research-phase):
 - **MTMCT production maturity:** academic evidence is strong (HIGH) but online production fusion patterns are MEDIUM — budget deeper research at Phase 5 start; degenerate session_id de-risks the MVP.
 - **Legal interpretation of session_traces retention:** movement traces as closest thing to a movement profile (Art. 12 §2º) — needs legal review, not technical (Phase 6).
 - **Staff exclusion:** definitional problem (staff inflate counts); decide "who counts" in writing before any manual audit; avoid building any identity database.
-- **Docs 01–08 face/catraca residue:** some project docs still mention out-of-scope features — agents/devs must follow PROJECT.md scope, not the stale doc mentions.
+- **Docs 01–08 residue:** resolvido em 2026-10-21 — a documentação duplicada foi dissolvida em um único planejamento (`.planning/`) e o material de biometria facial foi removido do repositório. Agents/devs must follow PROJECT.md scope.
 
 ## Sources
 

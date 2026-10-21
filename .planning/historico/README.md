@@ -14,7 +14,6 @@
 
 | Arquivo | Assunto | Motivo do descarte | Base legal |
 | :--- | :--- | :--- | :--- |
-| [`04_MODELOS_IA_FACE_VS_BODY.md`](04_MODELOS_IA_FACE_VS_BODY.md) | Comparativo YOLO Face (WiderFace) × YOLO Body (CrowdHuman). | O escopo do projeto passou a ser **apenas detecção de corpo**. Face/reconhecimento/biometria são **fora do escopo para sempre**. | LGPD art. 11 (dado sensível sem base legal para analytics) + decisão do usuário (2026-10-08) |
 | [`05_RASTREAMENTO_MULTICAMERAS_MTMCT.md`](05_RASTREAMENTO_MULTICAMERAS_MTMCT.md) | Arquitetura de MTMCT / Re-ID / fusão de trilhas entre câmeras. | Reconstruir a rota de um indivíduo = **perfil comportamental**. Cada câmera tem seu próprio tracker; "câmera 2 nunca pode reconhecer alguém da câmera 1, nem por silhueta". | LGPD art. 12 §2º + ordem explícita do usuário |
 
 ---
@@ -27,6 +26,14 @@
    descartado e *por quê*, não apenas o que sobrou.
 3. **Prevenção de recaída** — o padrão "voltar a implementar MTMCT porque o documento antigo
    ainda existe" é exatamente o que estes arquivos registram.
+
+> **Material removido em 2026-10-21:** o comparativo de modelos de biometria facial
+> (WiderFace × CrowdHuman) foi **apagado** por decisão do usuário — nenhum material de
+> biometria facial permanece no repositório, nem como referência de projeto. A base legal
+> que sustentava a exclusão continua registrada em
+> [`../context/PARECER_LGPD_E_MARCO_CIVIL.md`](../context/PARECER_LGPD_E_MARCO_CIVIL.md) e
+> [`../research/COMPLIANCE-LGPD-MARCO-CIVIL.md`](../research/COMPLIANCE-LGPD-MARCO-CIVIL.md)
+> (LGPD art. 11) — a trilha de auditoria permanece, o material da técnica descartada não.
 
 > **Reinstalação proibida:** qualquer proposta de reativar face, biometria, MTMCT/Re-ID,
 > `sessoes`/`session_traces`, track_id persistido, embeddings, rota/jornada, heatmap por

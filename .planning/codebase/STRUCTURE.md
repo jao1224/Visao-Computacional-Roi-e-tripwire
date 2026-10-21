@@ -54,7 +54,7 @@ Visao-Computacional-Roi-e-tripwire/
 │   │                               # CONVENTIONS, INTEGRATIONS, STACK, STRUCTURE, TESTING
 │   ├── context/                     # Contexto: negócio, arquitetura, plantas/câmeras,
 │   │                               # banco, parecer LGPD, diretrizes, design por fase
-│   ├── historico/                   # Docs superados (face-vs-body, MTMCT) — não implementar
+│   ├── historico/                   # Docs superados (MTMCT) — não implementar
 │   ├── phases/                      # Snapshots históricos de fase (PLAN/SUMMARY/RESEARCH)
 │   ├── research/                    # Pesquisas (compliance legal, stack, stack-alvo…)
 │   ├── debug/                       # Diagnósticos de debug (filtro visual por ROI)

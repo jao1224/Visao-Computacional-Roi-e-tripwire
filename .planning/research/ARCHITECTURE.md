@@ -238,9 +238,9 @@ funciona mas erra mais; **feature bank** com vários embeddings por pessoa
 (por pose/ângulo) reduz trocas de identidade sob oclusão (CVPRW'24, 2º lugar
 AI City) — vale copiar, é barato.
 
-**Sem face:** Re-ID de pessoa é *por natureza* de corpo inteiro — os datasets
-padrão (Market-1501, DukeMTMC) são silhuetas de corpo. Nenhum dos métodos
-citados usa face. Zero conflito com o escopo LGPD do projeto.
+**Escopo LGPD:** Re-ID de pessoa é *por natureza* de corpo inteiro — os datasets
+padrão (Market-1501, DukeMTMC) são silhuetas de corpo. Zero conflito com o
+escopo LGPD do projeto.
 
 **LGPD — ressalva de projeto (MEDIUM):** embedding de aparência corporal é
 dado pessoal se permitir reidentificação. Mitigação já prevista no doc 05

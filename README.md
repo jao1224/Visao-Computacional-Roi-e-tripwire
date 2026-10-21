@@ -160,7 +160,7 @@ Para demarcar o polígono de uma zona clicando diretamente na tela da webcam ou 
 | [`.planning/REQUIREMENTS.md`](.planning/REQUIREMENTS.md) | **Requisitos canônicos** (27) e rastreabilidade requisito → fase |
 | [`.planning/STATE.md`](.planning/STATE.md) | Estado de execução do planejamento |
 | [`.planning/context/`](.planning/context/) | Contexto: negócio, arquitetura, plantas/câmeras, modelagem do banco, parecer LGPD/Marco Civil, diretrizes e design por fase |
-| [`.planning/historico/`](.planning/historico/) | Documentos superados (face-vs-body, MTMCT) — registro histórico, não implementar |
+| [`.planning/historico/`](.planning/historico/) | Documentos superados (MTMCT) — registro histórico, não implementar |
 | [`.planning/codebase/`](.planning/codebase/) | Mapa do código: arquitetura, stack, estrutura, testes, riscos, convenções |
 | [`docs/relatorios/`](docs/relatorios/) | Relatórios para a gestão do projeto (PDF) |
 

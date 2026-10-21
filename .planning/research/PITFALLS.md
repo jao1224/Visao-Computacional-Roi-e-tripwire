@@ -344,7 +344,7 @@ often a single debug line.
 
 **Why it happens:**
 Privacy rules are written in docs 07/08 but not enforced in code. Frame persistence is the default debugging tool for
-CV engineers. Also: the repo docs still mention face/catraca in places (PROJECT.md Context) — an agent or new dev
+CV engineers. Also: repo docs have mentioned out-of-scope features in places (PROJECT.md Context) — an agent or new dev
 "restoring" a removed feature is a live risk.
 
 **How to avoid:**
