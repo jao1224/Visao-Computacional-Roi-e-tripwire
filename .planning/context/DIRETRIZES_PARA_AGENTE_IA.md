@@ -75,7 +75,7 @@ python3 -m venv .venv
 | Necesidade | Arquivo |
 |---|---|
 | Escopo e plano vigente | `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md` |
-| Fases detalhadas e status | `.planning/ROADMAP.md` |
+| Fases detalhadas e status | `.planning/ROADMAP.md` · rascunho de design: `.planning/context/DESENHO_POR_FASE.md` |
 | Roadmap e rastreabilidade | `.planning/ROADMAP.md`, `.planning/REQUIREMENTS.md` |
 | Mapa do código | `.planning/codebase/` |
 | Verificação legal (11 condições vinculantes) | `.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md` |

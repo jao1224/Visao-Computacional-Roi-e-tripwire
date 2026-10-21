@@ -29,6 +29,9 @@
 | **[`MODELAGEM_BANCO_DE_DADOS.md`](MODELAGEM_BANCO_DE_DADOS.md)** | DDL PostgreSQL, MER, tabelas de zonas, câmeras e métricas agregadas. | ✅ **Vigente** (revisado em 2026-10-21 — schema conforme na §2.2; `sessoes`/`session_traces` marcados como vetados) |
 | **[`PARECER_LGPD_E_MARCO_CIVIL.md`](PARECER_LGPD_E_MARCO_CIVIL.md)** | Parecer regulatório completo: artigo por artigo, multas, TTLs e pendências da Fase 9. | ✅ **Vigente** (revisado em 2026-10-21 — ver também [`../research/COMPLIANCE-LGPD-MARCO-CIVIL.md`](../research/COMPLIANCE-LGPD-MARCO-CIVIL.md)) |
 | **[`DIRETRIZES_PARA_AGENTE_IA.md`](DIRETRIZES_PARA_AGENTE_IA.md)** | Instruções e restrições de escopo para agentes de IA. | ✅ **Vigente** (revisado em 2026-10-21 — comandos obsoletos removidos) |
+| **[`DESENHO_POR_FASE.md`](DESENHO_POR_FASE.md)** | Rascunho de design por fase — *rationale* (por que assim) e mecanismo (como funciona). | 📝 **Rascunho** — a versão oficial de cada fase é o `PLAN.md` criado pelo GSD no momento da fase; o que a fase **é** está em [`../ROADMAP.md`](../ROADMAP.md) |
+| **[`PERGUNTAS_FREQUENTES_TECNICAS.md`](PERGUNTAS_FREQUENTES_TECNICAS.md)** | Como a permanência é persistida e como o ByteTrack se adequa à LGPD (respostas curtas). | ✅ **Vigente** |
+| **[`PONTOS_DE_ATENCAO.md`](PONTOS_DE_ATENCAO.md)** | Pontos de atenção práticos para a equipe ao longo do projeto. | ✅ **Vigente** |
 
 Documentos **superados** — mantidos apenas como registro histórico, com os banners `SUPERADO` —
 estão em [`../historico/`](../historico/).
@@ -65,6 +68,8 @@ removido, o que era único foi movido para cá.
 | `08_PROMPT_E_DIRETRIZES_PARA_AGENTE_IA.md` | [`DIRETRIZES_PARA_AGENTE_IA.md`](DIRETRIZES_PARA_AGENTE_IA.md) |
 | `04_MODELOS_IA_FACE_VS_BODY.md` | [`../historico/`](../historico/) — **SUPERADO** |
 | `05_RASTREAMENTO_MULTICAMERAS_MTMCT.md` | [`../historico/`](../historico/) — **SUPERADO** |
+| `09_PLANO_DE_FASES_V1.md` | [`DESENHO_POR_FASE.md`](DESENHO_POR_FASE.md) (*rationale* + mecanismo) · o resto (objetivo, requisitos, critérios, mapeamento) é [`../ROADMAP.md`](../ROADMAP.md) + [`../REQUIREMENTS.md`](../REQUIREMENTS.md) |
+| `docs/PLANO_V1_COMPLETO.md` | §5/§6 → [`PERGUNTAS_FREQUENTES_TECNICAS.md`](PERGUNTAS_FREQUENTES_TECNICAS.md) · §8 → [`PONTOS_DE_ATENCAO.md`](PONTOS_DE_ATENCAO.md) · §1/§2/§3/§4/§7/§9 são duplicatas de [`../ROADMAP.md`](../ROADMAP.md), [`../REQUIREMENTS.md`](../REQUIREMENTS.md) e [`../STATE.md`](../STATE.md) |
 
 ---
 
