@@ -16,7 +16,7 @@
     {
       "number": "3",
       "name": "Persistência PostgreSQL",
-      "status": "in_progress"
+      "status": "pending"
     },
     {
       "number": "4",
@@ -52,7 +52,7 @@
   "next": {
     "command": "/gsd:progress --next",
     "label": "Advance to Phase 3 planning",
-    "reason": "Phase 02 complete · 4/4 plans · 35 tests passing"
+    "reason": "Phase 02 complete · 4/4 plans · 33 tests passing"
   },
-  "updated_at": "2026-10-12T00:00:00.922Z"
+  "updated_at": "2026-10-21T19:34:00.000Z"
 }

@@ -4,16 +4,16 @@ milestone: v1.0
 current_phase: 02
 current_phase_name: Contagem por zona e ocupação em tempo real
 status: Phase 02 finished, ready for Phase 03
-last_updated: "2026-10-21T18:50:00.000Z"
+last_updated: "2026-10-21T19:34:00.000Z"
 last_activity: 2026-10-21
-state_head: 33a2190fc2f43c575317cac8c9a796ffbcbd740b
+state_head: cb8f1ec0b8df28345e20f9c7b5f20420ac5e0d1c
 progress:
   total_phases: 9
   completed_phases: 2
   total_plans: 8
   completed_plans: 8
 stopped_at: Phase 2 complete
-last_activity_desc: "Relatório de conformidade LGPD/MCI gerado para apresentação ao gestor de projeto e ao encarregado (docs/relatorios/) — 24 páginas, 33 testes verdes; Fase 3 (persistência PostgreSQL) ainda não iniciada"
+last_activity_desc: "Reconciliação documental completa com o planejamento vigente (16 commits): plano mestre, docs 01-09, parecer LGPD/MCI, roadmap, requisitos, mapa do codebase e README realinhados ao escopo ROI-only (ocupação por área, tripwire desativado). Relatório de conformidade v1.1 publicado (26 pág., nova seção 5.7 sobre não-identificação). Implementação: config/data.yaml sem caminho absoluto de máquina e scripts de treino/validação com resolução correta do descritor. Fase 3 (persistência PostgreSQL) ainda não iniciada"
 milestone_name: milestone
 ---
 
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 Phase: 02 (Contagem por zona e ocupação em tempo real) — COMPLETE
 Plan: 4 of 4 completed
 Status: Phase 02 finished, ready for Phase 03
-Last activity: 2026-10-14
+Last activity: 2026-10-21
 
 Progress: [██░░░░░░░░] 22%
 
@@ -80,4 +80,7 @@ Recent decisions affecting current work:
 ### Tasks Completed
 
 - Phase 02 tasks (02-01 a 02-04) marcados como completos em `.planning/phases/02-contagem-por-zona-e-ocupa-o-em-tempo-real/`
-- Suite de testes: 35 passando
+- Reconciliação documental com o planejamento vigente (16 commits, 2026-10-21): plano mestre, docs 01–09, parecer LGPD/MCI, ROADMAP, REQUIREMENTS, PROJECT, mapa do codebase e README
+- Relatório de conformidade LGPD/MCI v1.1 publicado em `docs/relatorios/` (26 pág.)
+- Correção de implementação: `config/data.yaml` sem caminho absoluto de máquina; scripts de treino/validação com resolução correta do descritor de dataset
+- Suite de testes: 33 passando (100% verdes)
