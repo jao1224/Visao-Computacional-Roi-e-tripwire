@@ -97,14 +97,15 @@ def main():
 
         # overlay.desenhar_tripwires(frame, zonas)
         overlay.desenhar_rois(frame, zonas, caixas=caixas)
-        overlay.desenhar_caixas(frame, caixas)
+        overlay.desenhar_caixas(frame, caixas, zonas=zonas)
         overlay.desenhar_contadores(frame, estado)
 
         # Cálculo de FPS real medido (tempo de parede)
         curr_time = time.time()
         fps = 1.0 / (curr_time - prev_time) if (curr_time - prev_time) > 0 else 0
         prev_time = curr_time
-        overlay.desenhar_hud(frame, fps, len(caixas))
+        ocupacao_total = sum(d.get('ocupacao', 0) for k, d in estado.items() if isinstance(d, dict))
+        overlay.desenhar_hud(frame, fps, ocupacao_total)
 
         cv2.imshow('YOLO - Corpo + ByteTrack (CrowdHuman)', frame)
 

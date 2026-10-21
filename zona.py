@@ -263,10 +263,23 @@ def atualizar_ocupacao(tracks, zonas, estado, agora=None, track_states=None, fra
         est_z = estado.setdefault(zid, {'ocupacao': 0, 'entradas': 0, 'saidas': 0, 'ultima_ocupacao_ts': None, 'pct_area': 0.0})
         roi = np.array(pontos_roi, dtype=np.int32)
         bruta = 0
+        rx, ry, rw, rh = cv2.boundingRect(roi)
         for _tid, xyxy, _conf in tracks:
             p = _bottom_center(xyxy)
-            if cv2.pointPolygonTest(roi, p, False) >= 0:
+            centro = ((xyxy[0] + xyxy[2]) / 2.0, (xyxy[1] + xyxy[3]) / 2.0)
+            
+            # Conta se o pé, o centro ou se houver sobreposição substancial com o ROI
+            if (cv2.pointPolygonTest(roi, p, False) >= 0 or
+                cv2.pointPolygonTest(roi, centro, False) >= 0):
                 bruta += 1
+            else:
+                # Caso a pessoa seja cortada pela borda inferior da câmera
+                x1_t, y1_t, x2_t, y2_t = int(xyxy[0]), int(xyxy[1]), int(xyxy[2]), int(xyxy[3])
+                if not (x2_t < rx or x1_t > rx + rw or y2_t < ry or y1_t > ry + rh):
+                    if cv2.pointPolygonTest(roi, (float(x1_t), float(y1_t)), False) >= 0 or \
+                       cv2.pointPolygonTest(roi, (float(x2_t), float(y1_t)), False) >= 0:
+                        bruta += 1
+
         capacidade = zona['capacidade']
         est_z['ocupacao'] = max(0, min(bruta, capacidade))
 
