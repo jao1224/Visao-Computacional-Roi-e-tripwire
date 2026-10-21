@@ -27,6 +27,11 @@ declarativa sem evidência:
 | Suíte de testes (`tests/`) | Evidência automatizada das garantias de privacidade (33 testes) |
 | `git log` | Evidência de processo: 81 commits atômicos |
 
+> **Nota de contagem:** o número de commits citado no PDF (81) é o de **21/10/2026, imediatamente
+> antes da publicação do próprio relatório** — os 3 commits que versionam este documento e o
+> gerador elevate o total do repositório para 84. Os demais indicadores do relatório (33 testes,
+> 608 linhas de código, 2 de 9 fases, 6 de 27 requisitos) refletem o estado do código e não mudam.
+
 ## Como regenerar
 
 O relatório é gerado por `scripts/gerar_relatorio_lgpd.py` — ferramenta de documentação, **fora do
