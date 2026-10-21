@@ -4,7 +4,7 @@
 >
 > Documento normativo vivo. Última atualização: **2026-10-21**.
 > Verificação normativa completa (artigo por artigo + 11 condições vinculantes): `.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md`.
-> Escopo e plano de referência: `../PLANO_V1_COMPLETO.md` e `09_PLANO_DE_FASES_V1.md`.
+> Escopo e plano de referência: `../REQUIREMENTS.md` e `../ROADMAP.md`.
 
 ---
 

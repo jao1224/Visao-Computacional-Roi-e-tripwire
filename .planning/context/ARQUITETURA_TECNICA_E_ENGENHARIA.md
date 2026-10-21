@@ -1,7 +1,7 @@
 # 02. ARQUITETURA TÉCNICA E ENGENHARIA DO SISTEMA
 
 > **⚠ Escopo vigente (2026-10-21):** esta arquitetura vale **exceto** os módulos de face/catraca, MTMCT/Re-ID e sessões persistidas — todos **fora do escopo para sempre**. Invariantes: zero tracking entre câmeras, frames nunca em disco, saída só agregada.
-> Ver `../PLANO_V1_COMPLETO.md` e o aviso no `README.md` desta pasta.
+> Ver `../REQUIREMENTS.md`, `../ROADMAP.md` e o aviso no `README.md` desta pasta.
 >
 > Documento normativo vivo. Última atualização: **2026-10-21**.
 

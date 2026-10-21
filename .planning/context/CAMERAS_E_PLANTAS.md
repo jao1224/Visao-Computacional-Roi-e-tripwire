@@ -1,6 +1,6 @@
 # 03. MAPEAMENTO DE CÂMERAS, PLANTAS E ZONAS DE INTERESSE (ROIs)
 
-> **Escopo vigente (2026-10-21):** o mapeamento abaixo é o **planejamento de cobertura** do hotel. A implementação atual opera com **uma câmera por vez** (`camera_0`) e **ROIs poligonais** — o tripwire bidirecional foi **desativado** (código comentado, não removido). Ver `../PLANO_V1_COMPLETO.md` e o aviso no `README.md` desta pasta.
+> **Escopo vigente (2026-10-21):** o mapeamento abaixo é o **planejamento de cobertura** do hotel. A implementação atual opera com **uma câmera por vez** (`camera_0`) e **ROIs poligonais** — o tripwire bidirecional foi **desativado** (código comentado, não removido). Ver `../REQUIREMENTS.md`, `../ROADMAP.md` e o aviso no `README.md` desta pasta.
 >
 > Documento normativo vivo. Última atualização: **2026-10-21**.
 

@@ -1,6 +1,6 @@
 # 08. PROMPT E DIRETRIZES DE ENGENHARIA PARA AGENTES DE IA
 
-> **⚠ Escopo vigente (2026-10-21):** em caso de conflito, o escopo do `../PLANO_V1_COMPLETO.md` prevalece: **sem face, sem catraca, sem MTMCT/Re-ID, sem `session_traces`/`sessoes`, sem rastreio por silhueta** — apenas detecção de corpo, ByteTrack intra-câmera em RAM e saída agregada. Ver aviso no `README.md` desta pasta.
+> **⚠ Escopo vigente (2026-10-21):** em caso de conflito, o escopo canônico de [`../REQUIREMENTS.md`](../REQUIREMENTS.md) §Out of Scope e [`../ROADMAP.md`](../ROADMAP.md) prevalece: **sem face, sem catraca, sem MTMCT/Re-ID, sem `session_traces`/`sessoes`, sem rastreio por silhueta** — apenas detecção de corpo, ByteTrack intra-câmera em RAM e saída agregada. Ver aviso no `README.md` desta pasta.
 >
 > Documento normativo vivo. Última atualização: **2026-10-21**.
 
@@ -74,8 +74,8 @@ python3 -m venv .venv
 
 | Necesidade | Arquivo |
 |---|---|
-| Escopo e plano vigente | `docs/PLANO_V1_COMPLETO.md` |
-| Fases detalhadas e status | `docs/DOCUMENTACAO_PROJETO_E_LGPD/09_PLANO_DE_FASES_V1.md` |
+| Escopo e plano vigente | `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md` |
+| Fases detalhadas e status | `.planning/ROADMAP.md` |
 | Roadmap e rastreabilidade | `.planning/ROADMAP.md`, `.planning/REQUIREMENTS.md` |
 | Mapa do código | `.planning/codebase/` |
 | Verificação legal (11 condições vinculantes) | `.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md` |

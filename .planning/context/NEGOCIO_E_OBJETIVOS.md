@@ -1,6 +1,6 @@
 # 01. VISÃO GERAL E REQUISITOS DE NEGÓCIO DO HOTEL
 
-> **⚠ Escopo vigente:** sem face, sem catraca/controle de acesso, sem MTMCT — apenas analytics de fluxo (contagem, ocupação, dwell, heatmap agregado). Ver `../PLANO_V1_COMPLETO.md` e o aviso no `README.md` desta pasta.
+> **⚠ Escopo vigente:** sem face, sem catraca/controle de acesso, sem MTMCT — apenas analytics de fluxo (contagem, ocupação, dwell, heatmap agregado). Ver `../REQUIREMENTS.md` §Out of Scope, `../ROADMAP.md` e o aviso no `README.md` desta pasta.
 
 ## 1. Contexto e Problema de Negócio
 Hotéis e resorts enfrentam dificuldades para dimensionar equipes operacionais, evitar filas em restaurantes/recepção, garantir segurança e entender como os hóspedes usufruem das instalações (piscinas, academias, lounges).
@@ -20,7 +20,7 @@ O sistema de visão computacional foi concebido para transformar câmeras de seg
 ### B. Controle de Acesso & Segurança — 🚫 FORA DO ESCOPO (superado em 2026-10-08)
 > **NÃO implementar nenhuma linha desta seção.** Face/catraca = proibido para sempre (LGPD art. 11; decisão do usuário). Esta seção permanece apenas como histórico do que foi imaginado no início do projeto. Escopo vigente = apenas a seção A (analytics de fluxo).
 - ~~**Identificação de Hóspedes:** Liberação ágil de catracas ou portas com chave facial inteligente (para hóspedes cadastrados no check-in).~~ *(SUPERADO — face/catraca proibidos)*
-- ~~**Monitoramento de Áreas Restritas:** Notificar a segurança caso pessoas acessem locais proibidos fora de horário.~~ *(fora do escopo v1 — ver `PLANO_V1_COMPLETO.md`)*
+- ~~**Monitoramento de Áreas Restritas:** Notificar a segurança caso pessoas acessem locais proibidos fora de horário.~~ *(fora do escopo v1 — ver `../REQUIREMENTS.md` §Out of Scope)*
 
 ---
 

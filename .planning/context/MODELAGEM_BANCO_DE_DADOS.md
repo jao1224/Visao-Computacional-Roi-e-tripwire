@@ -1,7 +1,7 @@
 # 06. MODELAGEM DO BANCO DE DADOS (POSTGRESQL & SCHEMAS)
 
 > **⚠ ADAPTAÇÃO OBRIGATÓRIA (revisado em 2026-10-21) — SCHEMA PARCIALMENTE SUPERADO.**
-> **NÃO implementar** as tabelas `sessoes` e `session_traces` (e nenhuma tabela/coluna por-pessoa: sem track_id, rota, embedding) — persistem trilha individual = perfil comportamental (LGPD art. 12 §2º). Implementar apenas: tabelas de configuração (`cameras`, `zonas`) + métricas agregadas (`metricas_fluxo_zona`, agregados de dwell com histograma, buckets de heatmap). Eventos de ocupação: somente zona, contagem, % de área e timestamp de janela — **sem chave de pessoa**. Fonte do escopo vigente: `../PLANO_V1_COMPLETO.md` e `09_PLANO_DE_FASES_V1.md`.
+> **NÃO implementar** as tabelas `sessoes` e `session_traces` (e nenhuma tabela/coluna por-pessoa: sem track_id, rota, embedding) — persistem trilha individual = perfil comportamental (LGPD art. 12 §2º). Implementar apenas: tabelas de configuração (`cameras`, `zonas`) + métricas agregadas (`metricas_fluxo_zona`, agregados de dwell com histograma, buckets de heatmap). Eventos de ocupação: somente zona, contagem, % de área e timestamp de janela — **sem chave de pessoa**. Fonte do escopo vigente: `../REQUIREMENTS.md` (requisitos canônicos) e `../ROADMAP.md` (fases canônicas).
 >
 > As entidades `SESSOES`, `SESSION_TRACES` e `EVENTOS_ALERTAS` estão neste documento **apenas como registro histórico do desenho original** — estão marcadas com 🚫 e **não devem ser criadas**. O schema que de fato vai para o banco está na seção 2.1.
 
