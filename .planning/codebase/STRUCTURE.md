@@ -33,7 +33,7 @@ Visao-Computacional-Roi-e-tripwire/
 ├── scripts/                         # Ferramentas de DESENVOLVIMENTO (fora do pipeline)
 │   ├── demarcar_zona.py             # Demarcador interativo de ROI (263 linhas)
 │   ├── download_and_convert_crowdhuman.py
-│   ├── gerar_relatorio_lgpd.py      # Gerador do relatório PDF de conformidade (1294 linhas)
+│   ├── gerar_relatorio_lgpd.py      # Gerador do relatório PDF de conformidade
 │   ├── run_pipeline.py
 │   ├── setup_colab_ssh.py
 │   ├── train_body.py
@@ -42,27 +42,19 @@ Visao-Computacional-Roi-e-tripwire/
 │   └── validate_body.py
 │
 ├── docs/
-│   ├── PLANO_V1_COMPLETO.md         # Plano mestre: 27 requisitos + 9 fases + status
-│   ├── DOCUMENTACAO_PROJETO_E_LGPD/
-│   │   ├── README.md                # Índice do pacote + aviso de escopo
-│   │   ├── 01_VISAO_GERAL_E_NEGOCIO_HOTEL.md
-│   │   ├── 02_ARQUITETURA_TECNICA_E_ENGENHARIA.md
-│   │   ├── 03_MAPEAMENTO_CAMERAS_E_PLANTAS.md
-│   │   ├── 04_MODELO_COMERCIAL_E_ROI.md          # registro histórico
-│   │   ├── 05_SEGURANCA_E_ROTAS_E_REIDENTIFICACAO.md  # registro histórico
-│   │   ├── 06_MODELAGEM_BANCO_DE_DADOS.md
-│   │   ├── 07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md
-│   │   ├── 08_PROMPT_E_DIRETRIZES_PARA_AGENTE_IA.md
-│   │   └── 09_PLANO_DE_FASES_V1.md
-│   └── relatorios/
+│   └── relatorios/                  # Entregáveis para a gestão (PDF)
 │       ├── README.md                # Índice dos relatórios publicados
-│       └── RELATORIO-CONFORMIDADE-LGPD-v1.0-2026-10-21.pdf
+│       ├── RELATORIO-CONFORMIDADE-LGPD-v1.0-2026-10-21.pdf
+│       └── RELATORIO-CONFORMIDADE-LGPD-v1.1-2026-10-21.pdf
 │
-├── .planning/                       # Estado de planejamento (GSD)
+├── .planning/                       # Planejamento canônico (GSD) — fonte única da verdade
 │   ├── PROJECT.md  REQUIREMENTS.md  ROADMAP.md  STATE.md
 │   ├── config.json  milestone.lock  state.json
 │   ├── codebase/                    # 7 documentos: ARCHITECTURE, CONCERNS,
 │   │                               # CONVENTIONS, INTEGRATIONS, STACK, STRUCTURE, TESTING
+│   ├── context/                     # Contexto: negócio, arquitetura, plantas/câmeras,
+│   │                               # banco, parecer LGPD, diretrizes, design por fase
+│   ├── historico/                   # Docs superados (face-vs-body, MTMCT) — não implementar
 │   ├── phases/                      # Snapshots históricos de fase (PLAN/SUMMARY/RESEARCH)
 │   ├── research/                    # Pesquisas (compliance legal, stack, stack-alvo…)
 │   ├── debug/                       # Diagnósticos de debug (filtro visual por ROI)

@@ -6,7 +6,7 @@ Detecção de **corpo/silhueta** com YOLO (CrowdHuman) para analytics de fluxo �
 Sistema que transforma câmeras do hotel em sensores de negócio: contagem, ocupação e (nas próximas fases) permanência por zona. Frames não são gravados; IDs do ByteTrack existem só em RAM.
 
 > **Estado atual (2026-10-21):** Fases **1 e 2 concluídas** (2/9) · **33 testes** verdes · foco em **ocupação por área (ROI)**.
-> Plano mestre: [`docs/PLANO_V1_COMPLETO.md`](docs/PLANO_V1_COMPLETO.md) · Roadmap: [`.planning/ROADMAP.md`](.planning/ROADMAP.md)
+> Roadmap (canônico): [`.planning/ROADMAP.md`](.planning/ROADMAP.md) · Requisitos: [`.planning/REQUIREMENTS.md`](.planning/REQUIREMENTS.md) · Contexto: [`.planning/context/`](.planning/context/)
 
 ---
 
@@ -20,8 +20,8 @@ Sistema que transforma câmeras do hotel em sensores de negócio: contagem, ocup
 
 Verificado automaticamente por `tests/test_privacidade.py` a cada build.
 
-Documentação legal e de produto: `docs/DOCUMENTACAO_PROJETO_E_LGPD/`.
-Parecer regulatório: [`07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md`](docs/DOCUMENTACAO_PROJETO_E_LGPD/07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md).
+Contexto e documentação legal: [`.planning/context/`](.planning/context/).
+Parecer regulatório: [`PARECER_LGPD_E_MARCO_CIVIL.md`](.planning/context/PARECER_LGPD_E_MARCO_CIVIL.md).
 Relatório para a gestão: [`docs/relatorios/`](docs/relatorios/).
 
 ---
@@ -44,10 +44,9 @@ Visao-Computacional-Roi-e-tripwire/
 ├── scripts/                --> Ferramentas de DEV: demarcador de ROI, treino, relatório PDF
 ├── tests/                  --> 33 testes: privacidade, integração, zonas, overlay, contratos
 ├── docs/
-│   ├── PLANO_V1_COMPLETO.md      --> Plano mestre: 27 requisitos + 9 fases + status
-│   ├── DOCUMENTACAO_PROJETO_E_LGPD/  --> Pacote documental (docs 01–09) + parecer LGPD
-│   └── relatorios/                --> Relatórios para a gestão (PDF)
-└── .planning/              --> Roadmap, requisitos, mapa do codebase, pesquisa
+│   └── relatorios/          --> Relatórios para a gestão (PDF)
+└── .planning/              --> Planejamento canônico: roadmap, requisitos, estado,
+                                contexto, histórico, mapa do codebase, pesquisa
 ```
 
 ---
@@ -157,10 +156,12 @@ Para demarcar o polígono de uma zona clicando diretamente na tela da webcam ou 
 
 | Documento | Para quê |
 |---|---|
-| [`docs/PLANO_V1_COMPLETO.md`](docs/PLANO_V1_COMPLETO.md) | Plano mestre: 27 requisitos, 9 fases, status de execução |
-| [`docs/DOCUMENTACAO_PROJETO_E_LGPD/`](docs/DOCUMENTACAO_PROJETO_E_LGPD/README.md) | Pacote documental (docs 01–09) + parecer LGPD/Marco Civil |
-| [`docs/relatorios/`](docs/relatorios/) | Relatórios para a gestão do projeto (PDF) |
-| [`.planning/ROADMAP.md`](.planning/ROADMAP.md) · [`.planning/REQUIREMENTS.md`](.planning/REQUIREMENTS.md) | Roadmap e rastreabilidade requisito → fase |
+| [`.planning/ROADMAP.md`](.planning/ROADMAP.md) | **Roadmap canônico**: as 9 fases, com metas, dependências e critérios de sucesso |
+| [`.planning/REQUIREMENTS.md`](.planning/REQUIREMENTS.md) | **Requisitos canônicos** (27) e rastreabilidade requisito → fase |
+| [`.planning/STATE.md`](.planning/STATE.md) | Estado de execução do planejamento |
+| [`.planning/context/`](.planning/context/) | Contexto: negócio, arquitetura, plantas/câmeras, modelagem do banco, parecer LGPD/Marco Civil, diretrizes e design por fase |
+| [`.planning/historico/`](.planning/historico/) | Documentos superados (face-vs-body, MTMCT) — registro histórico, não implementar |
 | [`.planning/codebase/`](.planning/codebase/) | Mapa do código: arquitetura, stack, estrutura, testes, riscos, convenções |
+| [`docs/relatorios/`](docs/relatorios/) | Relatórios para a gestão do projeto (PDF) |
 
 O relatório de conformidade em PDF é gerado por `scripts/gerar_relatorio_lgpd.py` — que usa `reportlab`, uma **dependência opcional** mantida fora do `requirements.txt` do produto.

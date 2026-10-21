@@ -62,7 +62,7 @@ O risco **real** do projeto não é técnico: é alguém reintroduzir uma grava�
 
 - `tests/test_privacidade.py` — falha se houver módulo/dependência de face, biometria ou demografia; falha se o pipeline escrever imagem/frame/crop em disco.
 - `requirements.txt` fixa `opencv-python` (não `opencv-contrib-python`, que puxaria `cv2.face`).
-- Invariantes declaradas em `docs/PLANO_V1_COMPLETO.md` §1 e no doc 08 (diretrizes para agentes de IA).
+- Invariantes declaradas em `.planning/ROADMAP.md` §Overview e em `.planning/context/DIRETRIZES_PARA_AGENTE_IA.md`.
 
 **Pendências da Fase 9 (PRV-01..05):** auditoria repo-wide (hoje a auditoria de teste cobre os módulos do produto, não o resíduo de treino), RIPD, LIA, ROPA, aviso de monitoramento, encarregado e plano de incidente.
 

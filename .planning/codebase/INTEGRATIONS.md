@@ -61,4 +61,4 @@
 
 - Dependências pinadas: `requirements.txt`, `requirements-dev.txt`
 - Stack completa: `.planning/codebase/STACK.md`
-- Arquitetura-alvo: `docs/DOCUMENTACAO_PROJETO_E_LGPD/02_ARQUITETURA_TECNICA_E_ENGENHARIA.md`
+- Arquitetura-alvo: `.planning/context/ARQUITETURA_TECNICA_E_ENGENHARIA.md`

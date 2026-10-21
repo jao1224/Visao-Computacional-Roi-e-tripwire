@@ -2,7 +2,7 @@
 
 ## What This Is
 
-Sistema de inteligência artificial com visão computacional que transforma câmeras de segurança convencionais do hotel em sensores de inteligência de negócios: contagem de pessoas por zona, tempo de permanência (dwell time), mapas de calor e ocupação em tempo real. Usuário final: gestão do hotel (equipes operacionais, recepção, segurança). Desenvolvimento parte do detector de corpo atual (`main.py`, YOLO CrowdHuman) e evolui conforme a documentação em `DOCUMENTACAO_PROJETO_E_LGPD/`.
+Sistema de inteligência artificial com visão computacional que transforma câmeras de segurança convencionais do hotel em sensores de inteligência de negócios: contagem de pessoas por zona, tempo de permanência (dwell time), mapas de calor e ocupação em tempo real. Usuário final: gestão do hotel (equipes operacionais, recepção, segurança). Desenvolvimento parte do detector de corpo atual (`main.py`, YOLO CrowdHuman) e evolui conforme o contexto documentado em `.planning/context/`.
 
 ## Core Value
 
@@ -36,7 +36,7 @@ Contagem, fluxo e permanência por zona — confiáveis e em tempo real — com 
 - Detecção/reconhecimento facial — decisão do usuário: projeto abandonou face detection; todo o fluxo é por corpo
 - Controle de acesso (catracas/portas com chave facial) — não teremos controle de acesso facial
 - **Rastreamento de indivíduos entre câmeras (MTMCT) e Re-ID — inclusive por silhueta/aparência** — perfil comportamental (LGPD Art. 12 §2º); câmera 2 nunca pode "reconhecer" alguém da câmera 1; proibido para sempre
-- **Tabelas `session_traces` e `sessoes` do doc 06** — não implementar: persistem trilha individual = perfil de trajetória (Art. 12 §2º)
+- **Tabelas `session_traces` e `sessoes` do schema de banco** (`.planning/context/MODELAGEM_BANCO_DE_DADOS.md`) — não implementar: persistem trilha individual = perfil de trajetória (Art. 12 §2º)
 - **Persistência de track_id/session_id, embeddings de aparência, rotas ou jornadas** — qualquer dado por-pessoa, inclusive "para testes"
 - Embeddings biométricos ou snapshots de rostos — sem base legal para analytics (LGPD Art. 11)
 - Identificação nominal de pessoas — apenas contagem anônima agregada
@@ -46,19 +46,20 @@ Contagem, fluxo e permanência por zona — confiáveis e em tempo real — com 
 ## Context
 
 - Código existente: `main.py` (aplicativo principal, inferência webcam/arquivo), `captura.py`, `rastreio.py`, `zona.py`, `overlay.py` (pipeline de produção) e `entender_zonas.py` (utilitário). `scripts/` contém ferramentas de desenvolvimento e documentação (download/treino/validação do detector, demarcador interativo de ROI, gerador do relatório LGPD) — **fora do pipeline de produção**.
-- Documentação obrigatória: `docs/DOCUMENTACAO_PROJETO_E_LGPD/` (docs 01–09) — fonte primária de verdade para arquitetura, requisitos e restrições legais. Os documentos foram **revisados em 2026-10-21** para refletirem o escopo vigente (sem face, sem catraca, sem MTMCT, sem `session_traces`); os docs 04 e 05 permanecem como **registro histórico** de escopos superados.
-- Plano mestre: `docs/PLANO_V1_COMPLETO.md` (requisitos + roadmap + 9 fases + status de execução).
+- Contexto do projeto: `.planning/context/` (negócio, arquitetura técnica, plantas/câmeras, modelagem do banco, parecer LGPD/Marco Civil e diretrizes para agentes) — material de apoio, revisado em 2026-10-21 para refletir o escopo vigente (sem face, sem catraca, sem MTMCT, sem `session_traces`).
+- Documentos de escopo superado (registro histórico, não implementar): `.planning/historico/` (face-vs-body, MTMCT/Re-ID).
+- Plano mestre: `.planning/ROADMAP.md` (9 fases) + `.planning/REQUIREMENTS.md` (27 requisitos com rastreabilidade) — **fonte canônica**; estado de execução em `.planning/STATE.md`.
 - Mapa do codebase: `.planning/codebase/` (7 documentos, atualizados em 2026-10-21)
 - Verificação legal completa (LGPD art. por artigo + Marco Civil): `.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md` — 11 condições vinculantes (ROPA, RIPD/LIA, encarregado, logs 6 meses, veto total a rastreio)
 - Relatório de conformidade para a gestão do projeto: `docs/relatorios/` (PDF gerado por `scripts/gerar_relatorio_lgpd.py`)
-- Arquitetura-alvo (doc 02): 5 camadas — ingestão RTSP → motor YOLO+ByteTrack → estado voláriel em RAM (sem sessões persistentes) → PostgreSQL → FastAPI/dashboard
+- Arquitetura-alvo (5 camadas — ver `.planning/context/ARQUITETURA_TECNICA_E_ENGENHARIA.md`): ingestão RTSP → motor YOLO+ByteTrack → estado volátil em RAM (sem sessões persistentes) → PostgreSQL → FastAPI/dashboard
 - Desenvolvimento começa com webcam/vídeos-amostra; RTSP real vem depois (usuário não tem DVRs disponíveis agora)
-- Banco: derivar do doc 06 **apenas** tabelas de configuração (cameras, zonas) e métricas agregadas (`metricas_fluxo_zona`, `dwell_agregado_zona`, `heatmap_densidade_camada`); **não implementar** `sessoes`/`session_traces`
+- Banco: derivar de `.planning/context/MODELAGEM_BANCO_DE_DADOS.md` **apenas** tabelas de configuração (cameras, zonas) e métricas agregadas (`metricas_fluxo_zona`, `dwell_agregado_zona`, `heatmap_densidade_camada`); **não implementar** `sessoes`/`session_traces`
 
 ## Constraints
 
 - **LGPD**: somente detecção de corpo (sem biometria); frames nunca persistidos; métricas anonimizadas (Art. 6º III, Art. 12)
-- **Performance**: latência ≤ 5 ms por frame em GPU; I/O de banco nunca dentro do loop de vídeo (doc 08)
+- **Performance**: latência ≤ 5 ms por frame em GPU; I/O de banco nunca dentro do loop de vídeo (`.planning/context/DIRETRIZES_PARA_AGENTE_IA.md`)
 - **Marco Civil**: logs de acesso à API por 6 meses sob sigilo (Art. 15)
 - **Idioma**: código e mensagens em português (pt-BR), convenções atuais do repo
 - **Hardware**: GPU NVIDIA para inferência (~320 FPS); desenvolvimento local pode usar CPU/webcam
@@ -68,11 +69,11 @@ Contagem, fluxo e permanência por zona — confiáveis e em tempo real — com 
 | Decisão | Racional | Desfecho |
 |----------|-----------|---------|
 | Eliminar detecção facial e controle de acesso do escopo | Decisão do usuário: só detecção de corpo; simplifica LGPD e escopo | ✓ Definitivo (2026-10-08) |
-| Eliminar MTMCT/Re-ID, session_traces e todo rastreamento persistente | LGPD Art. 12 §2º: reconstruir rotas = perfil comportamental; auditado em 2026-10-08 com base na lei + FAQ ANPD + doc 07 | ✓ Definitivo (2026-10-08) |
+| Eliminar MTMCT/Re-ID, session_traces e todo rastreamento persistente | LGPD Art. 12 §2º: reconstruir rotas = perfil comportamental; auditado em 2026-10-08 com base na lei + FAQ ANPD + parecer em `.planning/context/PARECER_LGPD_E_MARCO_CIVIL.md` | ✓ Definitivo (2026-10-08) |
 | Associação efêmera em RAM é permitida ( ByteTrack) | Minimização/necessidade (Art. 6º III): evita dupla contagem; nada é persistido, saída só agregada | ✓ Definitivo |
 | Analytics apenas com detecção de corpo (CrowdHuman) | Conformidade total com LGPD sem risco de multa (doc 07) | ✓ Definitivo |
 | Desenvolver primeiro com webcam/vídeos-amostra | Sem DVRs/RTSP disponíveis no momento | — Pendente |
-| Construir o sistema conforme os docs 01–09 | Documentação consolidada é fonte primária de verdade | — Pendente |
+| Construir o sistema conforme **um único planejamento canônico** (`.planning/ROADMAP.md` + `.planning/REQUIREMENTS.md` + `.planning/STATE.md`) | A duplicação entre `docs/` e `.planning/` já gerava divergência (roadmap de 6 fases na pesquisa × 9 fases no plano); o material único foi para `.planning/context/` | ✓ Definitivo (2026-10-21) |
 | Desativar o tripwire bidirecional; foco exclusivo em ROI/ocupação por área | O tripwire depende de travessia de linha, frágil sob oclusão e perspectiva; a recontagem por frame + interseção de área é mais estável e auditável. Código **comentado**, não removido, para reativação | ✓ Definitivo (2026-10-21) |
 | Adotar `Interseção = Área(Objeto) ∩ Área(ROI)` como métrica de ocupação | Mede ocupação efetiva da área, não apenas presença de ponto — é o insumo do heatmap agregado da Fase 7 | ✓ Definitivo (2026-10-21) |
 
@@ -94,4 +95,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-21 — reconciliação documental com o planejamento vigente (Fases 1–2 concluídas, escopo ROI-only, interseção de área).*
+*Last updated: 2026-10-21 — reconciliação documental com o planejamento vigente (Fases 1–2 concluídas, escopo ROI-only, interseção de área) e consolidação da documentação em `.planning/` (fonte única da verdade).*

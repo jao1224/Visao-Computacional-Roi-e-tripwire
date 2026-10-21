@@ -24,8 +24,8 @@ declarativa sem evidência:
 | `.planning/STATE.md` | Estado do projeto e progresso |
 | `.planning/debug/` | Diagnóstico e plano de correção do filtro visual por ROI |
 | `.planning/codebase/` | Mapa do código: arquitetura, stack, estrutura, testes, riscos, convenções |
-| `docs/DOCUMENTACAO_PROJETO_E_LGPD/` | Documentação legal e técnica de origem (docs 01 a 09) |
-| `docs/PLANO_V1_COMPLETO.md` | Plano mestre aprovado com as invariantes legais |
+| `.planning/context/` | Contexto do projeto: negócio, arquitetura, plantas/câmeras, modelagem do banco, parecer LGPD e diretrizes |
+| `.planning/ROADMAP.md` · `.planning/REQUIREMENTS.md` | Roadmap e requisitos canônicos com as invariantes legais |
 | Suíte de testes (`tests/`) | Evidência automatizada das garantias de privacidade (33 testes) |
 | `git log` | Evidência de processo: commits atômicos (contagem apurada na geração) |
 

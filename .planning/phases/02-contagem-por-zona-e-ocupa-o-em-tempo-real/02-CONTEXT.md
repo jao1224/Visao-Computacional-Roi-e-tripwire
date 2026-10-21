@@ -94,7 +94,7 @@ camera_0:  # webcam / vídeo-amostra
 ### Escopo e requisitos da fase
 - `.planning/ROADMAP.md` §Phase 2 — goal, success criteria (4 itens) e requisitos CNT-02, CNT-04
 - `.planning/REQUIREMENTS.md` — CNT-02 (tripwire bidirecional), CNT-04 (ocupação instantânea com reset/clamp)
-- `DOCUMENTACAO_PROJETO_E_LGPD/09_PLANO_DE_FASES_V1.md` §Fase 2 — detalhamento
+- `.planning/context/DESENHO_POR_FASE.md` §Fase 2 — detalhamento (antes em `docs/DOCUMENTACAO_PROJETO_E_LGPD/09_PLANO_DE_FASES_V1.md`)
 
 ### Conformidade (obrigatório em toda decisão de código)
 - `.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md` — 11 condições vinculantes

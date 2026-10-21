@@ -41,7 +41,7 @@ Requisitos da fase: ING-01, ING-03, CNT-01, CNT-03.
 ### Escopo e requisitos da fase
 - `.planning/ROADMAP.md` §Phase 1 — goal, success criteria (4 itens) e requisitos da fase
 - `.planning/REQUIREMENTS.md` — ING-01 (webcam + vídeo-amostra), ING-03 (frames voláteis), CNT-01 (só corpo), CNT-03 (associação intra-câmera efêmera)
-- `DOCUMENTACAO_PROJETO_E_LGPD/09_PLANO_DE_FASES_V1.md` §Fase 1 — detalhamento, critérios e base legal
+- `.planning/context/DESENHO_POR_FASE.md` §Fase 1 — detalhamento, critérios e base legal (antes em `docs/DOCUMENTACAO_PROJETO_E_LGPD/09_PLANO_DE_FASES_V1.md`)
 
 ### Conformidade (obrigatório em toda decisão de código)
 - `.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md` — 11 condições vinculantes (verificar invariantes: nada em disco, sem face, IDs efêmeros)

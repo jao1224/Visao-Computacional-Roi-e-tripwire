@@ -84,13 +84,13 @@ Câmeras RTSP (PyAV, watchdog+backoff)
                      → Dashboard React + Vite + ECharts
 ```
 
-Invariantes da arquitetura-alvo: **sem sessão persistida, sem Re-ID/MTMCT, sem frame em disco**. O detalhe está em `docs/DOCUMENTACAO_PROJETO_E_LGPD/02_ARQUITETURA_TECNICA_E_ENGENHARIA.md`.
+Invariantes da arquitetura-alvo: **sem sessão persistida, sem Re-ID/MTMCT, sem frame em disco**. O detalhe está em `.planning/context/ARQUITETURA_TECNICA_E_ENGENHARIA.md`.
 
 ---
 
 ## 6. Referências
 
-- Escopo e fases: `docs/PLANO_V1_COMPLETO.md`
-- Detalhamento das fases: `docs/DOCUMENTACAO_PROJETO_E_LGPD/09_PLANO_DE_FASES_V1.md`
+- Escopo e fases: `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`
+- Detalhamento do design por fase (rascunho): `.planning/context/DESENHO_POR_FASE.md`
 - Roadmap e rastreabilidade: `.planning/ROADMAP.md`, `.planning/REQUIREMENTS.md`
-- Conformidade LGPD: `docs/DOCUMENTACAO_PROJETO_E_LGPD/07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md`
+- Conformidade LGPD: `.planning/context/PARECER_LGPD_E_MARCO_CIVIL.md`
