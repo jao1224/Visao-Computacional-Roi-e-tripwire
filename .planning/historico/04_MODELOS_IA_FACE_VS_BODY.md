@@ -1,7 +1,7 @@
 # 04. MODELOS DE INTELIGÊNCIA ARTIFICIAL: FACE VS. CORPO (BODY)
 
 > **⚠ DOCUMENTO SUPERADO (2026-10-08) — NÃO SEGUIR A PARTE DE FACE.**
-> Escopo vigente (aprovado pelo usuário): **apenas detecção de corpo (CrowdHuman)**. Face/reconhecimento/biometria estão **FORA DO ESCOPO PARA SEMPRE** (LGPD art. 11 — dado sensível sem base legal para analytics; decisão do usuário). Este documento permanece apenas como histórico técnico da comparação de modelos. Fonte do escopo vigente: `PLANO_V1_COMPLETO.md` e `09_PLANO_DE_FASES_V1.md`.
+> Escopo vigente (aprovado pelo usuário): **apenas detecção de corpo (CrowdHuman)**. Face/reconhecimento/biometria estão **FORA DO ESCOPO PARA SEMPRE** (LGPD art. 11 — dado sensível sem base legal para analytics; decisão do usuário). Este documento permanece apenas como histórico técnico da comparação de modelos. Fonte do escopo vigente: `../REQUIREMENTS.md` (requisitos canônicos) e `../ROADMAP.md` (fases canônicas).
 
 ## 1. Visão Geral dos Modelos Treinados no Projeto
 

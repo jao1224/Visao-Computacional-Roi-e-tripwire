@@ -1,7 +1,7 @@
 # 05. RASTREAMENTO MULTI-CÂMERAS (MTMCT) E RE-IDENTIFICAÇÃO
 
 > **⚠ DOCUMENTO SUPERADO (2026-10-08) — NÃO IMPLEMENTAR.**
-> MTMCT, Re-ID, fusão de trilhas e qualquer associação entre câmeras estão **FORA DO ESCOPO PARA SEMPRE** (LGPD art. 12 §2º — reconstruir rotas = perfil comportamental; ordem explícita do usuário: "câmera 2 nunca pode reconhecer alguém da câmera 1, nem por silhueta"). Este documento permanece apenas como referência histórica/research. O rastreamento permitido é **intra-câmera, em RAM, segundos** (ByteTrack), nunca persistido. Fonte do escopo vigente: `PLANO_V1_COMPLETO.md` e `09_PLANO_DE_FASES_V1.md`.
+> MTMCT, Re-ID, fusão de trilhas e qualquer associação entre câmeras estão **FORA DO ESCOPO PARA SEMPRE** (LGPD art. 12 §2º — reconstruir rotas = perfil comportamental; ordem explícita do usuário: "câmera 2 nunca pode reconhecer alguém da câmera 1, nem por silhueta"). Este documento permanece apenas como referência histórica/research. O rastreamento permitido é **intra-câmera, em RAM, segundos** (ByteTrack), nunca persistido. Fonte do escopo vigente: `../REQUIREMENTS.md` (requisitos canônicos) e `../ROADMAP.md` (fases canônicas).
 
 ## 1. O Desafio do Rastreamento Multi-Câmeras (MTMCT)
 Em um hotel com dezenas de câmeras, um hóspede entra pela porta principal (Cam 1), faz check-in no balcão (Cam 2), pega o elevador no 1º andar (Cam 4) e vai ao seu quarto (Cam 5).

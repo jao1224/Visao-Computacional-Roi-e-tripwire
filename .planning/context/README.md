@@ -30,6 +30,9 @@
 | **[`PARECER_LGPD_E_MARCO_CIVIL.md`](PARECER_LGPD_E_MARCO_CIVIL.md)** | Parecer regulatório completo: artigo por artigo, multas, TTLs e pendências da Fase 9. | ✅ **Vigente** (revisado em 2026-10-21 — ver também [`../research/COMPLIANCE-LGPD-MARCO-CIVIL.md`](../research/COMPLIANCE-LGPD-MARCO-CIVIL.md)) |
 | **[`DIRETRIZES_PARA_AGENTE_IA.md`](DIRETRIZES_PARA_AGENTE_IA.md)** | Instruções e restrições de escopo para agentes de IA. | ✅ **Vigente** (revisado em 2026-10-21 — comandos obsoletos removidos) |
 
+Documentos **superados** — mantidos apenas como registro histórico, com os banners `SUPERADO` —
+estão em [`../historico/`](../historico/).
+
 ---
 
 ## ⚡ Resumo Executivo em 1 Minuto
@@ -60,6 +63,8 @@ removido, o que era único foi movido para cá.
 | `06_MODELAGEM_BANCO_DE_DADOS.md` | [`MODELAGEM_BANCO_DE_DADOS.md`](MODELAGEM_BANCO_DE_DADOS.md) |
 | `07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md` | [`PARECER_LGPD_E_MARCO_CIVIL.md`](PARECER_LGPD_E_MARCO_CIVIL.md) |
 | `08_PROMPT_E_DIRETRIZES_PARA_AGENTE_IA.md` | [`DIRETRIZES_PARA_AGENTE_IA.md`](DIRETRIZES_PARA_AGENTE_IA.md) |
+| `04_MODELOS_IA_FACE_VS_BODY.md` | [`../historico/`](../historico/) — **SUPERADO** |
+| `05_RASTREAMENTO_MULTICAMERAS_MTMCT.md` | [`../historico/`](../historico/) — **SUPERADO** |
 
 ---
 
