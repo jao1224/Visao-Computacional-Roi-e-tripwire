@@ -3,15 +3,50 @@ import numpy as np
 
 
 
-def desenhar_caixas(frame, caixas):
-    """Desenha caixas com ID e confiança in-place no frame (sem gravar)."""
+def desenhar_caixas(frame, caixas, zonas=None):
+    """Desenha caixas com ID e confiança in-place no frame. Se zonas for fornecido, desenha quem intercepta o ROI."""
+    rois_poligonos = []
+    if zonas:
+        for z in zonas:
+            pts = z.get('roi_pontos') or z.get('pontos')
+            if pts and len(pts) >= 3 and (z.get('tipo') == 'roi' or z.get('roi_pontos')):
+                rois_poligonos.append(np.array(pts, dtype=np.int32))
+
     for tid, (x1, y1, x2, y2), conf in caixas:
-        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 165, 0), 2)
+        x1_i, y1_i, x2_i, y2_i = int(x1), int(y1), int(x2), int(y2)
+
+        # Se houver zonas ROI configuradas, desenha apenas se a pessoa tocar ou estiver no ROI
+        if rois_poligonos:
+            pe_x, pe_y = (x1 + x2) / 2.0, float(y2)
+            centro_x, centro_y = (x1 + x2) / 2.0, (y1 + y2) / 2.0
+            
+            # Verifica pé, centro ou qualquer vértice da caixa
+            toca_roi = False
+            for roi in rois_poligonos:
+                if (cv2.pointPolygonTest(roi, (pe_x, pe_y), False) >= 0 or
+                    cv2.pointPolygonTest(roi, (centro_x, centro_y), False) >= 0 or
+                    cv2.pointPolygonTest(roi, (float(x1), float(y1)), False) >= 0 or
+                    cv2.pointPolygonTest(roi, (float(x2), float(y1)), False) >= 0):
+                    toca_roi = True
+                    break
+
+            # Se ainda não detectou (ex: ROI é menor que a pessoa e está no meio dela)
+            if not toca_roi:
+                for roi in rois_poligonos:
+                    rx, ry, rw, rh = cv2.boundingRect(roi)
+                    # Interseção de bounding boxes rápida
+                    if not (x2_i < rx or x1_i > rx + rw or y2_i < ry or y1_i > ry + rh):
+                        toca_roi = True
+                        break
+
+            if not toca_roi:
+                continue
+
+        cv2.rectangle(frame, (x1_i, y1_i), (x2_i, y2_i), (255, 165, 0), 2)
         label = f'ID {tid} | {conf*100:.1f}%'
         (w_text, _), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-        cv2.rectangle(frame, (x1, y1 - 22), (x1 + w_text, y1), (255, 165, 0), -1)
-        cv2.putText(frame, label, (x1, y1 - 5),
+        cv2.rectangle(frame, (x1_i, y1_i - 22), (x1_i + w_text, y1_i), (255, 165, 0), -1)
+        cv2.putText(frame, label, (x1_i, y1_i - 5),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 2)
 
 
