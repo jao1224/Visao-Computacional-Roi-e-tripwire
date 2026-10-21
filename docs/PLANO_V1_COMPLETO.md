@@ -1,8 +1,10 @@
 # Plano Completo v1 — Visão Computacional para Hotelaria (Analytics de Fluxo)
 
-> **Documento único para aprovação da equipe** — une requisitos, roadmap e detalhamento das 9 fases do v1.
-> Data: 2026-10-08 · Status: **aguardando aprovação da equipe**
+> **Documento único de referência do v1** — une requisitos, roadmap e detalhamento das 9 fases do v1.
+> Data: 2026-10-08 · **Última atualização: 2026-10-21** · Status: **aprovado · Fases 1 e 2 concluídas (2/9)**
 > Base legal verificada: LGPD (Lei 13.709/2018) e Marco Civil (Lei 12.965/2014) — ver `DOCUMENTACAO_PROJETO_E_LGPD/07` e verificação completa em `.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md`
+>
+> 📌 **Estado do projeto:** ver a [seção 9 — Status de execução](#9-status-de-execução-atual-2026-10-21). A Fase 2 foi reorientada para **exclusivamente ROI/ocupação por área** (tripwire comentado no código, não removido).
 
 ---
 
@@ -29,20 +31,23 @@ Câmeras de segurança do hotel viram sensores de negócio: **contagem de pessoa
 
 ## 2. Requisitos v1 (27 — aprovados em 2026-10-08)
 
+> **Legenda:** `[x]` concluído e verificado por testes · `[ ]` planejado (fase futura).
+> **Fonte de verdade do status:** `.planning/REQUIREMENTS.md` (mesmos 27 requisitos, com rastreabilidade por fase).
+
 ### Ingestão (ING)
-- [ ] **ING-01**: Sistema processa webcam e arquivos de vídeo-amostra como fonte de vídeo (v1 = desenvolvimento)
+- [x] **ING-01**: Sistema processa webcam e arquivos de vídeo-amostra como fonte de vídeo (v1 = desenvolvimento)
 - [ ] **ING-02**: Processa múltiplas câmeras RTSP simultaneamente, com reconexão automática (backoff exponencial) e watchdog de latência/staleness
-- [ ] **ING-03**: Frames são voláteis (RAM) e descartados após inferência — nenhuma imagem/frame/crop toca disco, log ou backup
+- [x] **ING-03**: Frames são voláteis (RAM) e descartados após inferência — nenhuma imagem/frame/crop toca disco, log ou backup
 
 ### Contagem (CNT)
-- [ ] **CNT-01**: Detecção de pessoas apenas por corpo (YOLO CrowdHuman) — nenhum módulo de face/biometria no código
-- [ ] **CNT-02**: Contagem por zona com tripwire bidirecional (entra/sai), sem dupla contagem da mesma pessoa
-- [ ] **CNT-03**: Associação intra-câmera efêmera (ByteTrack, segundos, RAM) — IDs morrem ao sair do quadro, nunca persistidos, **nunca comparados entre câmeras (nem por silhueta/aparência)**
-- [ ] **CNT-04**: Ocupação instantânea por zona recalculada em tempo real, com reset/clamp diário e reconciliação após reconexão
+- [x] **CNT-01**: Detecção de pessoas apenas por corpo (YOLO CrowdHuman) — nenhum módulo de face/biometria no código
+- [x] **CNT-02**: Contagem e ocupação por zona com ROI poligonal em tempo real, sem dupla contagem (ocupação por área via interseção Área(Objeto) ∩ Área(ROI) e presença)
+- [x] **CNT-03**: Associação intra-câmera efêmera (ByteTrack, segundos, RAM) — IDs morrem ao sair do quadro, nunca persistidos, **nunca comparados entre câmeras (nem por silhueta/aparência)**
+- [x] **CNT-04**: Ocupação instantânea por zona recalculada em tempo real (número de pessoas e % de área ocupada), com reset/clamp diário e reconciliação após reconexão
 
 ### Permanência e Fluxo (DWL)
 - [ ] **DWL-01**: Dwell time por zona (ROI poligonal) com timeout de saída — cálculo em RAM; **somente histograma/soma/n por zona×janela persistido** (nunca linha por pessoa)
-- [ ] **DWL-02**: Heatmap de **densidade agregado** (célula × janela de tempo) por câmera/zona — apenas contadores de posições efêmeras; nenhum histórico por pessoa
+- [ ] **DWL-02**: Heatmap de **densidade agregado** (célula × janela de tempo) por câmera/zona — apenas contadores somados de posições efêmeras; nenhum histórico por pessoa
 
 ### Dados/API (API)
 - [ ] **API-01**: PostgreSQL armazena **apenas** configuração (câmeras, zonas) e métricas agregadas — sem `session_traces`/`sessoes`/traces por pessoa
@@ -57,14 +62,14 @@ Câmeras de segurança do hotel viram sensores de negócio: **contagem de pessoa
 
 ### Privacidade (PRV)
 - [ ] **PRV-01**: Auditoria de código automatizada prova que **nada por-pessoa** é gravado (busca proibida: track_id/session_id persistido, trilha, rota, embedding, silhueta)
-- [ ] **PRV-02**: Nenhum frame/vídeo/crop em disco (inclui logs, backups, dumps de erro)
-- [ ] **PRV-03**: Nenhum módulo de face, biometria, demografia ou emoção
+- [x] **PRV-02**: Nenhum frame/vídeo/crop em disco (inclui logs, backups, dumps de erro) — coberto por `tests/test_privacidade.py`
+- [x] **PRV-03**: Nenhum módulo de face, biometria, demografia ou emoção — coberto por `tests/test_privacidade.py`
 - [ ] **PRV-04**: RIPD + LIA (interesse legítimo, art. 10 §3) + registro de operações (art. 37) antes de produção
 - [ ] **PRV-05**: Aviso de monitoramento nas áreas (art. 6º IV) + encarregado indicado com contato publicado (art. 41, Res. ANPD 18/2024)
 
 ### Qualidade (QUA)
 - [ ] **QUA-01**: Latência ≤ 5 ms/frame em GPU; I/O de banco fora do loop de vídeo (fila em lote)
-- [ ] **QUA-02**: Testes automatizados das regras críticas (tripwire, dwell+timeout, fila, ocupação, reconexão)
+- [ ] **QUA-02**: Testes automatizados das regras críticas (ocupação por área/interseção, dwell+timeout, fila, reconexão)
 - [ ] **QUA-03**: Contagem validada contra marcação manual em condições de pico (webcam/amostra)
 
 ### Operação (OPS)
@@ -85,7 +90,7 @@ Face/biometria/demografia/emoção (art. 11) · controle de acesso/catraca · **
 | # | Fase | Objetivo | Requisitos |
 |---|------|----------|-----------|
 | 1 | Fatia vertical single-câmera | Webcam/vídeo → YOLO corpo → ByteTrack em RAM; base de privacidade desde o início | ING-01, ING-03, CNT-01, CNT-03 |
-| 2 | Contagem por zona e ocupação | Tripwire bidirecional sem dupla contagem + ocupação em tempo real | CNT-02, CNT-04 |
+| 2 | Contagem por zona e ocupação | Ocupação em tempo real por zona ROI (interseção de área) + clamp/reset/reconciliação | CNT-02, CNT-04 |
 | 3 | Persistência PostgreSQL | Fila + escrita em lote; schema só config + agregados | API-01, QUA-01 |
 | 4 | API FastAPI + Marco Civil | Somente-leitura, TTL, logs de acesso 6 meses | API-02, API-03, API-04 |
 | 5 | Dashboard web | Ocupação ao vivo (WebSocket), séries, docker-compose | DSH-01, DSH-02, OPS-02 |
@@ -112,13 +117,14 @@ Face/biometria/demografia/emoção (art. 11) · controle de acesso/catraca · **
 4. Busca por módulos/dependências de face/biometria vem vazia
 
 ### Fase 2 — Contagem por zona e ocupação em tempo real
-**Constrói:** zonas (ROIs poligonais nomeadas), tripwire bidirecional (linha virtual: cruza para dentro +1, para fora −1), ocupação instantânea por zona no overlay, histerese anti-flicker, reset/clamp diário, reconciliação ao reiniciar.
-**Por quê antes da infra:** um bug de tripwire é 100× mais barato de descobrir na tela do que depois reprocessando no banco. É a lógica de maior risco do sistema.
+**Constrói:** zonas (ROIs poligonais nomeadas) configuradas em `config/zonas.yaml`, ocupação instantânea por zona no overlay (presença + interseção de área), clamp `[0, capacidade]`, reset diário e por inatividade, reconciliação ao reiniciar a fonte.
+**Por quê antes da infra:** um bug de contagem/ocupação é 100× mais barato de descobrir na tela do que depois reprocessando no banco. É a lógica de maior risco do sistema.
+**Escopo vigente (2026-10-21):** o **tripwire bidirecional foi desativado** — o código existe, porém **comentado** em `zona.py`, `overlay.py` e `main.py`. O foco exclusivo da fase é **ocupação por área (ROI)**; o suporte a tripwire permanece no código para reativação futura.
 **Critérios de sucesso:**
-1. Contador incrementa/descrementa certo, sem dupla contagem (mesmo sob jitter/occlusão leve)
-2. Ocupação exibida ao vivo no overlay durante a execução
-3. Reiniciar a fonte não corrompe a ocupação (reset/clamp/reconciliação)
-4. Sob rajada de detecções, sem explosão de eventos ENTROU/SAIU
+1. Ocupação exibida ao vivo no overlay durante a execução, coerente com a presença real dentro do ROI
+2. Interseção de área calculada a cada frame (percentual de área ocupada), estável sob flicker de caixa
+3. Reiniciar a fonte não corrompe a ocupação (reset/clamp/reconciliação aplicados)
+4. Sob rajada de detecções, a métrica mantém-se estável e sem dupla contagem espúria
 
 ### Fase 3 — Persistência PostgreSQL (fila + escrita em lote)
 **Constrói:** fila em memória (loop publica eventos e segue), batch writer idempotente (N eventos ou T segundos, UUID por lote), schema mínimo (câmeras, zonas, `metricas_fluxo_zona` — derivado do doc 06 **sem** `sessoes`/`session_traces`), métrica de latência.
@@ -171,7 +177,7 @@ Permitido: "média de permanência na recepção por horário". Impossível (por
 4. Auditoria do schema confirma zero identificadores individuais
 
 ### Fase 8 — Validação de qualidade e testes automatizados
-**Constrói:** suíte de testes (tripwire, dwell+timeout, fila, ocupação, reconexão) com um comando; protocolo de marcação manual (ground truth) em vídeo de pico; relatório de acurácia (erro médio + faixa); definição escrita de "quem conta" (ex.: equipe conta ou não).
+**Constrói:** suíte de testes (ocupação por área/interseção, dwell+timeout, fila, reconexão) com um comando; protocolo de marcação manual (ground truth) em vídeo de pico; relatório de acurácia (erro médio + faixa); definição escrita de "quem conta" (ex.: equipe conta ou não).
 **Nota honesta:** acurácia em cenário de hotel real **não pode ser julgada sem os DVRs** — validação de campo fica pendente dos streams reais; a fase documenta a limitação.
 **Critérios de sucesso:**
 1. Suíte cobre as 5 regras críticas e passa com um comando
@@ -240,4 +246,40 @@ Permitido: "média de permanência na recepção por horário". Impossível (por
 2. **Validação em hotel real fica para depois** dos streams reais (Fase 8 documenta a limitação).
 3. **A Fase 9 é gate:** nada vai a produção sem auditoria de código + RIPD/LIA/ROPA + aviso + encarregado + plano de incidente.
 4. **Proibido para sempre** (não é "para depois"): face, MTMCT/Re-ID (inclusive por silhueta), `session_traces`/`sessoes`, embeddings, trilha individual, gravação de vídeo.
-5. Stack principal (verificado na pesquisa de 2026-10-08): Python 3.12 · PyAV (RTSP) · ByteTrack (supervisores `trackers`) · PostgreSQL 18 + asyncpg · FastAPI + WebSocket · React + Vite + ECharts · MediaMTX · docker-compose.
+5. **Stack real (implementada hoje, 2026-10-21):** Python 3.14.4 (venv `.venv/`) · `ultralytics==8.4.121` (YOLO + ByteTrack) · `opencv-python==5.0.0.93` · `numpy==2.5.2` · `lap==0.5.13` · `pyyaml==6.0.3` · `pytest>=8.0` (dev). Ver `requirements.txt` / `requirements-dev.txt`.
+6. **Stack-alvo (Fases 3–7, planejada — não implementada):** PyAV (ingestão RTSP — OpenCV corrompe frames RTSP após 15–35 s) · MediaMTX (servidor RTSP local de teste) · PostgreSQL 18 + `asyncpg` · FastAPI + WebSocket · React + Vite + ECharts · docker-compose.
+7. **Relatório de conformidade para a gestão:** `docs/relatorios/RELATORIO-CONFORMIDADE-LGPD-v1.0-2026-10-21.pdf` (gerado por `scripts/gerar_relatorio_lgpd.py`, dependência opcional `reportlab` fora do `requirements.txt` do produto).
+
+---
+
+## 9. Status de execução (2026-10-21)
+
+| Fase | Status | Data | Evidência |
+|---|---|---|---|
+| 1 — Fatia vertical single-câmera | ✅ Concluída | 2026-10-08 | 4/4 planos · `tests/test_captura.py`, `test_rastreio.py`, `test_main.py`, `test_integracao.py` |
+| 2 — Contagem por zona e ocupação | ✅ Concluída | 2026-10-12 | 4/4 planos · `tests/test_zona.py` (10), `test_overlay.py` (4) |
+| 3 — Persistência PostgreSQL | ⏳ Não iniciada | — | `API-01`, `QUA-01` |
+| 4 — API FastAPI + Marco Civil | ⏳ Não iniciada | — | `API-02..04` |
+| 5 — Dashboard web | ⏳ Não iniciada | — | `DSH-01..02`, `OPS-02` |
+| 6 — Multi-câmera e RTSP | ⏳ Não iniciada | — | `ING-02`, `OPS-01` |
+| 7 — Dwell e heatmap agregado | ⏳ Não iniciada | — | `DWL-01..02`, `DSH-03` |
+| 8 — Validação de qualidade | ⏳ Não iniciada | — | `QUA-02..03` |
+| 9 — Conformidade LGPD (gate) | ⏳ Não iniciada | — | `PRV-01..05`, `OPS-03` |
+
+**Progresso: 2/9 fases (22%) · 6/27 requisitos concluídos.**
+
+### Entregue até aqui
+- Pipeline single-câmera com captura (webcam/arquivo), YOLO corpo + ByteTrack efêmero em RAM.
+- Zonas ROI por câmera (`config/zonas.yaml`), ocupação instantânea por zona e **interseção de área** `Área(Objeto) ∩ Área(ROI)` — clamp `[0, capacidade]`, reset diário e por inatividade, reconciliação ao reabrir a fonte.
+- Filtro de renderização por ROI no overlay (só desenha quem intersecta a zona) + destaque da interseção.
+- Auditoria automatizada de privacidade (`tests/test_privacidade.py`) — prova ausência de face e de escrita em disco.
+- **33 testes** verdes (`./.venv/bin/python -m pytest`).
+- Demarcador interativo de ROI (`scripts/demarcar_zona.py`) — utilitário de desenvolvimento, fora do pipeline de produção.
+- Relatório de conformidade LGPD/Marco Civil em PDF para a gestão do projeto (`docs/relatorios/`).
+
+### Divergência conhecida e registrada
+O tripwire bidirecional (previsto na versão original desta Fase 2) foi **desativado por decisão do usuário**: o código está comentado, não removido, em `zona.py`, `overlay.py` e `main.py`. O roadmap (`.planning/ROADMAP.md`) e os requisitos (`.planning/REQUIREMENTS.md`) já refletem o escopo **ROI-only**; este documento foi alinhado em 2026-10-21.
+
+---
+
+_Documento normativo vivo. Última atualização: 2026-10-21 — status de execução, escopo ROI-only e stack real._
