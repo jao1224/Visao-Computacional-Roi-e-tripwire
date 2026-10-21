@@ -1,6 +1,13 @@
 # Project Research Summary
 
-> **[AVISO] OVERRIDE LGPD (2026-10-08, decisao do usuario):** MTMCT, Re-ID, session_traces, sessoes, embeddings de aparencia e qualquer persistencia de track_id/session_id estao **FORA DO ESCOPO para sempre** (LGPD Art. 12, par. 2 - perfil comportamental). Ignore secoes/patterns/roadmap que mencionem rastreamento entre cameras ou trilhas individuais. Permitido apenas: associacao efemera em RAM + metricas agregadas.
+> **⚠️ DOCUMENTO DE PESQUISA — DATADO (2026-10-08) E PARCIALMENTE SUPERADO.**
+> Preservado como **registro de referência técnica**, não como plano. Índice, mapa de validade e
+> equivalências da numeração antiga: [`README.md`](README.md) (nesta pasta).
+> - **Roadmap canônico:** [`../ROADMAP.md`](../ROADMAP.md) — **9 fases**. O roadmap de fases sugerido neste documento é de **6** e **não** é o plano.
+> - **Vetos definitivos (mantidos):** MTMCT, Re-ID, `session_traces`/`sessoes`, embeddings de aparência e qualquer persistência de `track_id`/`session_id` estão **fora do escopo para sempre** (LGPD art. 12 §2º). Ignore as seções/patterns/fases que os mencionem. Permitido: associação efêmera em RAM + métricas agregadas.
+> - **Escopo e requisitos:** [`../REQUIREMENTS.md`](../REQUIREMENTS.md) · **estado:** [`../STATE.md`](../STATE.md).
+> - **Stack real:** Python **3.14.4** (venv `.venv/`) — a pesquisa fixou 3.12 por causa do `av` 19.x. Estado real: [`../codebase/STACK.md`](../codebase/STACK.md).
+> - **Tripwire desativado:** o escopo vigente é **ROI/ocupação por área** (`Interseção = Área(Objeto) ∩ Área(ROI)`); o tripwire bidirecional ficou comentado no código, não removido.
 
 **Project:** Visão Computacional para Hotelaria (Analytics de Fluxo)
 **Domain:** Real-time people-counting / zone-flow analytics (RTSP → YOLO+ByteTrack → PostgreSQL → FastAPI → dashboard), body-only, LGPD-compliant

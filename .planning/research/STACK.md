@@ -4,6 +4,14 @@
 **Researched:** 2026-10-08
 **Confidence:** HIGH (versions verified directly against PyPI / npm / GitHub registries on 2026-10-08; architecture patterns verified against current official docs and 2025–2026 ecosystem projects)
 
+> **⚠️ DOCUMENTO DE PESQUISA — DATADO (2026-10-08) E PARCIALMENTE SUPERADO.**
+> Preservado como **registro de referência técnica**, não como plano. Índice, mapa de validade e
+> equivalências da numeração antiga: [`README.md`](README.md) (nesta pasta).
+> - **Roadmap canônico:** [`../ROADMAP.md`](../ROADMAP.md) — **9 fases**. O roadmap de fases sugerido neste documento é de **6** e **não** é o plano.
+> - **Vetos definitivos (mantidos):** MTMCT, Re-ID, `session_traces`/`sessoes`, embeddings de aparência e qualquer persistência de `track_id`/`session_id` estão **fora do escopo para sempre** (LGPD art. 12 §2º). Ignore as seções/patterns/fases que os mencionem. Permitido: associação efêmera em RAM + métricas agregadas.
+> - **Escopo e requisitos:** [`../REQUIREMENTS.md`](../REQUIREMENTS.md) · **estado:** [`../STATE.md`](../STATE.md).
+> - **Stack real:** Python **3.14.4** (venv `.venv/`) — a pesquisa fixou 3.12 por causa do `av` 19.x. Estado real: [`../codebase/STACK.md`](../codebase/STACK.md).
+
 > Scope: NEW layers only (ingestion, tracking, queues, DB, API, dashboard). Existing detector (`main.py`, YOLO CrowdHuman) is out of scope per milestone context.
 
 ---
