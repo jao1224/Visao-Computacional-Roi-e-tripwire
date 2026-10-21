@@ -19,13 +19,13 @@
 | Arquivo | Conteúdo e Finalidade | Status |
 | :--- | :--- | :--- |
 | **[`01_VISAO_GERAL_E_NEGOCIO_HOTEL.md`](01_VISAO_GERAL_E_NEGOCIO_HOTEL.md)** | Visão de produto, dor do cliente, objetivos de negócio e requisitos funcionais. | ⚠ Partes de face/catraca superadas |
-| **[`02_ARQUITETURA_TECNICA_E_ENGENHARIA.md`](02_ARQUITETURA_TECNICA_E_ENGENHARIA.md)** | Arquitetura em camadas, pipelines de vídeo RTSP, filas assíncronas e hardware. | ✅ Válido (com invariantes do aviso) |
+| **[`02_ARQUITETURA_TECNICA_E_ENGENHARIA.md`](02_ARQUITETURA_TECNICA_E_ENGENHARIA.md)** | Arquitetura em camadas, pipelines de vídeo RTSP, filas assíncronas e hardware. | ✅ **Vigente** (revisado em 2026-10-21 — arquitetura-alvo + implementação real) |
 | **[`03_MAPEAMENTO_CAMERAS_E_PLANTAS.md`](03_MAPEAMENTO_CAMERAS_E_PLANTAS.md)** | Planta física do hotel, divisão por andares (Recepção, Lazer, Corredores) e ROIs. | ✅ **Vigente** (revisado em 2026-10-21 — tripwire desativado; ver `config/zonas.yaml`) |
 | **[`04_MODELOS_IA_FACE_VS_BODY.md`](04_MODELOS_IA_FACE_VS_BODY.md)** | Comparativo dos modelos: YOLO Face vs. YOLO Body/CrowdHuman. | 🚫 **SUPERADO** — só body (histórico) |
 | **[`05_RASTREAMENTO_MULTICAMERAS_MTMCT.md`](05_RASTREAMENTO_MULTICAMERAS_MTMCT.md)** | Arquitetura de rastreamento entre câmeras (Re-ID, fusão de trilhas). | 🚫 **SUPERADO — não implementar** |
-| **[`06_MODELAGEM_BANCO_DE_DADOS.md`](06_MODELAGEM_BANCO_DE_DADOS.md)** | DDL PostgreSQL, MER, tabelas de zonas, câmeras, sessões e traces. | ⚠ **Adaptar**: sem `sessoes`/`session_traces` |
+| **[`06_MODELAGEM_BANCO_DE_DADOS.md`](06_MODELAGEM_BANCO_DE_DADOS.md)** | DDL PostgreSQL, MER, tabelas de zonas, câmeras, sessões e traces. | ✅ **Vigente** (revisado em 2026-10-21 — schema conforme na §2.2; `sessoes`/`session_traces` marcados como vetados) |
 | **[`07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md`](07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md)** | Parecer regulatório completo: artigo por artigo, multas, TTLs e pendências da Fase 9. | ✅ **Vigente** (revisado em 2026-10-21 — ver também `.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md`) |
-| **[`08_PROMPT_E_DIRETRIZES_PARA_AGENTE_IA.md`](08_PROMPT_E_DIRETRIZES_PARA_AGENTE_IA.md)** | Instruções e restrições de escopo para agentes de IA. | ⚠ Válido nas partes de engenharia/privacidade; menções a face/rastreio superadas |
+| **[`08_PROMPT_E_DIRETRIZES_PARA_AGENTE_IA.md`](08_PROMPT_E_DIRETRIZES_PARA_AGENTE_IA.md)** | Instruções e restrições de escopo para agentes de IA. | ✅ **Vigente** (revisado em 2026-10-21 — comandos obsoletos removidos) |
 | **[`09_PLANO_DE_FASES_V1.md`](09_PLANO_DE_FASES_V1.md)** | Detalhamento das 9 fases do v1 (requisitos, critérios, LGPD). | ✅ **Vigente** |
 
 ---
