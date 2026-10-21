@@ -1,169 +1,80 @@
-# Padrões de Testes
+# Estratégia e Cobertura de Testes
 
-**Data da Análise:** 2026-10-08
-
-## Framework de Testes
-
-**Runner:**
-- **Nenhum configurado.** Não existem testes pytest, unittest ou nose; não há `pytest.ini`, `conftest.py`, `tox.ini`, `setup.cfg`, `pyproject.toml` ou `requirements.txt`
-- `pytest` não está instalado no ambiente (Python 3.11.9)
-- Sem configuração de CI (sem `.github/`, sem arquivos de workflow) — nada executa testes automaticamente
-
-**Biblioteca de Asserções:**
-- Não se aplica (sem testes). Se adicionar testes, use o `assert` embutido do `pytest`
-
-**Comandos de Execução:**
-```bash
-python -m pytest                        # seria a entrada padrão (uma vez adicionado)
-python scripts/validate_body.py         # [teste] métricas de validação do YOLO
-python main.py                          # execução do APLICATIVO PRINCIPAL (verificação manual: webcam, pressione q para sair)
-python run_pipeline.py                  # [teste] verificação ponta a ponta do pipeline (download + treino, check=True aborta em caso de falha)
-```
-
-> **Papéis (definido pelo usuário):** `main.py` é o arquivo principal; `run_pipeline.py`, `treinar_crowdhuman.py`, `treinar_crowdhuman_colab.ipynb` e `scripts/` são apenas para teste.
-
-## Organização dos Arquivos de Teste
-
-**Localização:**
-- Sem arquivos de teste. `test/` na raiz do repositório contém **apenas um asset de amostra** — `test/gemini_generated_video_8d21d35f.mp4` (6,3 MB). São dados, não uma suíte de testes, apesar do nome do diretório
-- **Não** coloque testes em `test/` sem antes renomeá-lo/limpá-lo — o diretório é ambíguo
-
-**Nomenclatura (recomendado para seguir as normas do Python):**
-- Testes unitários: `tests/test_<módulo>.py` (novo diretório `tests/` na raiz do repositório)
-
-**Estrutura:**
-```
-scriptvisaocomput/            # (atual)
-├── main.py
-├── run_pipeline.py
-├── treinar_crowdhuman.py
-├── scripts/
-│   ├── download_and_convert_crowdhuman.py
-│   ├── train_body.py
-│   ├── validate_body.py
-│   └── setup_colab_ssh.py
-├── test/                     # NÃO é testes - contém gemini_generated_video_8d21d35f.mp4
-└── (sem tests/, sem conftest.py)
-```
-
-## Estrutura de Testes
-
-**Organização da Suíte:**
-- Não há padrão de suíte existente para copiar. Padrão recomendado para testes novos (estilo pytest):
-```python
-# tests/test_convert_odgt.py
-def test_convert_odgt_writes_yolo_labels(tmp_path):
-    # preparar
-    ...
-    # executar
-    count = convert_odgt_to_yolo(odgt_path, images_dir, labels_dir)
-    # asserir
-    assert count == 1
-    assert "0 0.500000 0.500000 0.250000 0.500000" in (labels_dir / "img1.txt").read_text()
-```
-
-**Padrões:**
-- Configuração: fixtures do pytest (`tmp_path` para diretórios de dataset) — sem precedente de `beforeEach`/`setUp`
-- Limpeza: confiar na limpeza automática de `tmp_path`/`monkeypatch`; nada global a restaurar
-- Estrutura: preparar/executar/asserir com comentários explícitos (coincide com o hábito de comentários numerados da base de código)
-
-## Mocking
-
-**Framework:**
-- Nenhum em uso. Escolha padrão: `pytest` + `unittest.mock` (`monkeypatch`, `patch`)
-
-**Padrões:**
-```python
-# Recomendado para esta base de código: mockar as fronteiras de rede + sistema de arquivos
-from unittest.mock import patch, MagicMock
-
-@patch("scripts.download_and_convert_crowdhuman.requests.get")
-def test_download_file_writes_chunks(mock_get, tmp_path):
-    mock_get.return_value.iter_content.return_value = [b"a" * 1024, b"b" * 1024]
-    mock_get.return_value.headers = {"content-length": "2048"}
-    assert download_file("f.zip", str(tmp_path / "f.zip")) is True
-```
-
-**O que Mockar:**
-- Rede: `requests.get` / `requests.head` (`scripts/download_and_convert_crowdhuman.py:36,51`), `huggingface_hub.snapshot_download` (`treinar_crowdhuman.py:63`)
-- Modelo Ultralytics: `ultralytics.YOLO` (construtor, `.train()`, `.val()`) — o treino dura horas de GPU
-- Webcam/OpenCV: `cv2.VideoCapture` (`main.py:28`) para qualquer teste de `main.py`
-- `torch.cuda.is_available()` para ramos dependentes de hardware (`treinar_crowdhuman.py:28`, seleção de dispositivo em `train_body.py`)
-- `subprocess.run` ao testar `run_pipeline.py`
-
-**O que NÃO Mockar:**
-- Funções puras: `convert_odgt_to_yolo`, `flatten_directory`, `extract_zip` — teste contra arquivos reais em `tmp_path`
-- Lógica de parsing de JSON/zip (use arquivos de fixture pequenos)
-
-## Fixtures e Fábricas
-
-**Dados de Teste:**
-```python
-# Recomendado: fixture ODGT mínima (uma linha de JSON do CrowdHuman)
-ODGT_LINE = '{"ID": "img1", "gtboxes": [{"tag": "person", "fbox": [100, 50, 200, 400]}]}'
-
-# Saída esperada do rótulo YOLO para uma imagem de 640x400:
-# "0 0.250000 0.562500 0.312500 1.000000"  (limitado pelas guarda de max/min)
-```
-- Um `.jpg` pequeno pode ser gerado com `PIL.Image.new("RGB", (640, 400))` na fixture em vez de distribuir binários
-
-**Localização:**
-- Não existem fixtures. Recomendado: `tests/fixtures/` para amostras estáticas `.odgt`/`.jpg`; fábricas inline no arquivo de teste para dados gerados
-
-## Cobertura
-
-**Requisitos:**
-- Nenhum imposto (sem ferramenta de cobertura, sem gate de CI, sem meta)
-
-**Configuração:**
-- Não configurada. Se adicionada: `pytest-cov` com `--cov=scripts --cov=main` e exclusões para `treinar_crowdhuman_colab.ipynb`
-
-**Ver Cobertura:**
-```bash
-python -m pytest --cov=scripts --cov-report=term-missing
-```
-
-## Tipos de Teste
-
-**Testes Unitários:**
-- Escopo (recomendado): matemática de conversão de anotações (`convert_odgt_to_yolo`, limites em `download_and_convert_crowdhuman.py:136-139`), lógica de retomada de download/verificação de tamanho (`download_file`, `:33-44`), resolução de fallback de caminhos (`main.py:11-19`, `scripts/train_body.py:9-12`)
-- Mocking: apenas rede + sistema de arquivos; alimente arquivos pequenos reais via `tmp_path`
-- Velocidade: deve executar sem GPU/pesos de modelo
-
-**Testes de Integração:**
-- Não presentes. Equivalentes mais próximos são execuções de script com dados reais:
-  - `python run_pipeline.py` — orquestração completa download→treino, aborta na primeira falha (`check=True`)
-  - O Ultralytics emite seus próprios artefatos de treino para `runs/detect/train_crowdhuman_body/` (`args.yaml`, imagens de batch) — inspecione-os para verificações de sanidade
-
-**Testes E2E:**
-- Não usados. Apenas verificação manual:
-  - `python main.py` — verificação da webcam com humano no loop (o HUD mostra FPS + contagem de pessoas, `q` para sair; `main.py:73-82`)
-  - `python scripts/validate_body.py` — imprime mAP@0.5, mAP@0.5:0.95, P, R, F1 a partir de `model.val()` (`validate_body.py:33-39`)
-  - A célula 1 do notebook `treinar_crowdhuman_colab.ipynb` está rotulada "Teste de Conexao e Deteccao de GPU" — apenas teste de fumaça de conectividade/GPU
-
-## Padrões Comuns
-
-**Testes Assíncronos:**
-- Não se aplica — a base de código é totalmente síncrona
-
-**Testes de Erro:**
-```python
-# Sem precedente no repositório. Alvos recomendados para testes de caminho de falha:
-def test_missing_model_returns_early(capsys, monkeypatch):
-    monkeypatch.setattr(os.path, "exists", lambda p: False)   # todos os candidatos ausentes
-    main()
-    assert "Erro: Nenhum modelo encontrado" in capsys.readouterr().out   # main.py:21
-```
-
-**Testes de Snapshot:**
-- Não usados
-
-**Verificações de Regressão de Métricas (a versão do domínio das asserções):**
-- Validadas através do objeto de métricas de `model.val()`: `metrics.box.map50`, `metrics.box.map`, `metrics.box.mp`, `metrics.box.mr` (`scripts/validate_body.py:34-38`)
-- F1 calculado inline com guarda de epsilon `1e-16` (`validate_body.py:38`)
-- Se automatizar: asserir limiares (ex.: `metrics.box.map50 >= 0.50`) após o treino; os resultados ficam em `runs/detect/train_crowdhuman_body/results.csv`
+**Atualizado em:** 2026-10-21 · **Estado real do repositório** (94 commits)
+**Resultado:** ✅ **33/33 testes verdes** em ~6–10 s
 
 ---
 
-*Análise de testes: 2026-10-08*
-*Atualize quando os padrões de teste mudarem*
+## 1. Comando canônico
+
+```bash
+./.venv/bin/python -m pytest
+```
+
+> ⚠️ **Use sempre o interpretador do venv do repositório.** O `pytest` do sistema falha por falta das dependências do projeto (`ultralytics`, `opencv-python`, `numpy`, `pyyaml`).
+>
+> Instalação: `./.venv/bin/python -m pip install -r requirements-dev.txt`
+
+---
+
+## 2. Cobertura por arquivo
+
+| Arquivo | Linhas | Testes | Foco |
+|---|---:|---:|---|
+| `tests/conftest.py` | 32 | — (fixtures) | Fixtures compartilhadas: frames sintéticos, zonas de teste, estados de ocupação |
+| `tests/test_captura.py` | 34 | **3** | Abertura de webcam/arquivo, carimbo `capture_ts`, retorno `None` em fonte inválida |
+| `tests/test_rastreio.py` | 59 | **3** | Extração de caixas `(id, xyxy, conf)`, guard de `boxes.id is None`, tuplas vazias |
+| `tests/test_zona.py` | 261 | **10** | Carga/validação de YAML, **ocupação por ROI**, **interseção de área**, clamp `[0, capacidade]`, resets (diário/inatividade), reconciliação, poda de track states |
+| `tests/test_overlay.py` | 41 | **4** | Desenho das ROIs, destaque da interseção, **filtro de caixas fora do ROI**, HUD/card de ocupação |
+| `tests/test_main.py` | 39 | **6** | Resolução de fonte (`resolver_fonte`) e de pesos (`resolver_modelo`), montagem do pipeline, wiring do overlay |
+| `tests/test_integracao.py` | 247 | **4** | Pipeline ponta a ponta com fonte sintética: captura → rastreio → zona → overlay, sem escrita em disco |
+| `tests/test_privacidade.py` | 133 | **3** | **Auditoria LGPD automatizada** (ver abaixo) |
+| **Total** | **846** | **33** | |
+
+---
+
+## 3. `tests/test_privacidade.py` — a auditoria LGPD que roda em todo build
+
+Este é o arquivo mais importante da suíte: **transforma os vetos de privacidade em testes que quebram o build**.
+
+| Teste | O que garante |
+|---|---|
+| Ausência de face/biometria | Nenhum módulo do produto importa `face`, `biometria`, `demografia`, `emocao`; `requirements.txt` não traz `opencv-contrib-python`; nenhum uso de `cv2.face`/`FaceDetectorYN` |
+| Nada gravado em disco | O pipeline não chama `cv2.imwrite`, `VideoWriter` ou equivalente; rodar não cria arquivo de imagem |
+| Nenhum identificador individual persistido | Não há escrita de `track_id`, `session_id`, `sessoes`, `session_traces`, `embedding`, `rota` ou `jornada` |
+
+**Regra para agentes de IA:** esses testes **não podem ser desabilitados, afrouxados ou pulados**. Se um teste de privacidade falha, a correção é remover o código que viola a política — nunca o teste.
+
+---
+
+## 4. Estratégia de teste por fase
+
+| Fase | O que os testes cobrem | Requisito |
+|---|---|---|
+| 1 — Fatia vertical | Captura, rastreio efêmero, integração do pipeline, privacidade | ING-01, ING-03, CNT-01, CNT-03 |
+| 2 — Contagem por zona | Ocupação por ROI, interseção de área, clamp/reset/reconciliação, overlay | CNT-02, CNT-04 |
+| 3 — Persistência | *(planejado)* fila em RAM, batch idempotente, schema sem coluna por-pessoa | API-01, QUA-01 |
+| 4 — API | *(planejado)* endpoints somente-leitura, TTL de retenção, logs de 6 meses | API-02..04 |
+| 5 — Dashboard | *(planejado)* | DSH-01..02, OPS-02 |
+| 6 — Multi-câmera | *(planejado)* reconexão, watchdog, tracker isolado por câmera | ING-02, OPS-01 |
+| 7 — Dwell + heatmap | *(planejado)* histograma agregado sem linha por pessoa | DWL-01..02, DSH-03 |
+| 8 — Qualidade | *(planejado)* acurácia vs. marcação manual em vídeo de pico | QUA-02, QUA-03 |
+| 9 — Conformidade | *(planejado)* auditoria repo-wide (PRV-01) | PRV-01..05, OPS-03 |
+
+---
+
+## 5. Convenções
+
+- Arquivos `tests/test_<módulo>.py` espelham os módulos do raiz.
+- Fixtures compartilhadas em `tests/conftest.py`; casos específicos ficam no próprio arquivo.
+- Testes que dependem de **modelo** ou **vídeo** ausentes devem `pytest.skip(...)` explicitamente — nunca falhar.
+- Testes de privacidade não usam mocks para os módulos auditados: leem o **código-fonte real** do repositório.
+- Nenhum teste pode gravar imagem ou vídeo de pessoa em disco — nem como "fixture de debug".
+
+---
+
+## 6. Referências
+
+- Módulos testados: `.planning/codebase/ARCHITECTURE.md`
+- Mapeamento requisito → fase: `.planning/REQUIREMENTS.md`
+- Execução e resultado: `.planning/STATE.md`

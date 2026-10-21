@@ -1,102 +1,64 @@
 # Integrações Externas
 
-**Data da Análise:** 2026-10-08
-
-## APIs e Serviços Externos
-
-**Registros de ML/Dataset:**
-- Hugging Face Hub - dataset de pedestres CrowdHuman (`sshao0516/CrowdHuman`), a única fonte de dados que o código realmente busca.
-  - SDK/Cliente (principal): `huggingface_hub.snapshot_download(repo_id='sshao0516/CrowdHuman', repo_type='dataset', allow_patterns=['*.zip','*.odgt'])` em `treinar_crowdhuman.py:63-67`
-  - SDK/Cliente (alternativo): streaming HTTP bruto via `requests.get(..., stream=True)` em `scripts/download_and_convert_crowdhuman.py:51`; URL base `https://huggingface.co/datasets/sshao0516/CrowdHuman/resolve/main` (`scripts/download_and_convert_crowdhuman.py:16`)
-  - Autenticação: nenhuma - dataset público, nenhum token HF usado em lugar algum (sem referências a token/variável de ambiente no repositório)
-  - Arquivos obtidos: `annotation_train.odgt`, `annotation_val.odgt`, `CrowdHuman_val.zip`, `CrowdHuman_train01-03.zip` (`scripts/download_and_convert_crowdhuman.py:18-25`)
-  - Cache: `dataset/downloads_cache/` (`scripts/download_and_convert_crowdhuman.py:14`); o cache próprio do HF é reutilizado por `snapshot_download`
-  - Observação: a verificação TLS está desativada para esta integração - `verify=False` em `requests.head`/`requests.get` (`scripts/download_and_convert_crowdhuman.py:36,51`) com `urllib3.disable_warnings()` (`scripts/download_and_convert_crowdhuman.py:10`, `treinar_crowdhuman.py:14`) como contorno para proxy/certificado local.
-
-**Downloads:**
-- GitHub Releases (Cloudflare) - obtém `cloudflared-windows-amd64.exe` de `https://github.com/cloudflare/cloudflared/releases/latest/download/...`
-  - Cliente: `urllib.request.urlretrieve` da stdlib (`scripts/setup_colab_ssh.py:11`)
-  - Autenticação: nenhuma
-  - Destino: `~/.ssh/cloudflared.exe` (`scripts/setup_colab_ssh.py:6`)
-
-**Manual/Documentado (não automatizado):**
-- crowdhuman.org e Roboflow Universe - fontes alternativas manuais de dataset mencionadas em `README.md:43`, sem integração de código.
-
-## Armazenamento de Dados
-
-**Bancos de Dados:**
-- Nenhum - nenhum cliente SQL/NoSQL, ORM ou string de conexão em todo o codebase.
-
-**Armazenamento em Arquivos:**
-- Apenas sistema de arquivos local - tudo é lido/escrito relativamente ao diretório do projeto:
-  - `dataset/` (criado em tempo de execução): `images/{train,val}`, `labels/{train,val}` - produzidos por `scripts/download_and_convert_crowdhuman.py:158-166`
-  - `dataset/downloads_cache/` - zips/odgt brutos (`scripts/download_and_convert_crowdhuman.py:14`)
-  - `runs/detect/train_crowdhuman_body/` - checkpoints do Ultralytics, `results.csv`, gráficos (`scripts/train_body.py:40-42`)
-  - `runs/detect/val_results/val_body/` - saída da validação (`scripts/validate_body.py:18`)
-  - `resultados/`, `models/` - pesos finais (`best.pt`, `base_face_weights.pt`, `yolo26n.pt`)
-- Google Drive (apenas Colab) - artefatos das execuções salvos em `/content/drive/MyDrive/yolo_crowdhuman_treinamento/runs` quando montado, caso contrário `/content/runs` (`treinar_crowdhuman_colab.ipynb`)
-
-**Cache:**
-- Nenhum (sem Redis/Memcached). Apenas cache de downloads no nível do sistema de arquivos, conforme acima.
-
-## Autenticação e Identidade
-
-**Provedor de Autenticação:**
-- Nenhum - sem usuários, sem login, sem sessões, sem tokens. Toda chamada externa é anônima/pública.
-
-**Integrações OAuth:**
-- Nenhuma
-
-**Acesso SSH (máquina remota de treinamento):**
-- `scripts/setup_colab_ssh.py` configura SSH de saída do Windows para o Colab através de um Cloudflare Tunnel: anexa um bloco `Host *.trycloudflare.com` com `ProxyCommand cloudflared access ssh --hostname %h` a `~/.ssh/config` (`scripts/setup_colab_ssh.py:18-24`), `User root`, `Port 22`.
-  - Credenciais: qualquer chave SSH já existente em `~/.ssh/` (nenhuma gerenciada/gerada por este repositório).
-
-## Monitoramento e Observabilidade
-
-**Rastreamento de Erros:**
-- Nenhum (sem Sentry/Datadog/etc.)
-
-**Análíticas:**
-- Nenhuma
-
-**Logs:**
-- Apenas stdout - `print(...)` com prefixos `[OK]`/`[Aviso]`/`[STATUS]`, `flush=True` em `treinar_crowdhuman.py`
-- O Ultralytics grava suas próprias métricas de treinamento em `runs/detect/train_crowdhuman_body/results.csv` e gráficos JPG (`runs/detect/train_crowdhuman_body/*.jpg`)
-
-## CI/CD e Implantação
-
-**Hospedagem:**
-- Nenhuma - sem Dockerfile, sem configuração de implantação em nuvem.
-- Google Colab - treinamento interativo em GPU via `treinar_crowdhuman_colab.ipynb`; detecção de runtime via `'google.colab' in sys.modules or os.path.exists('/content')`
-
-**Pipeline de CI:**
-- Não detectado - sem `.github/workflows/`, sem pre-commit, sem executor de testes. (O repositório tem um diretório `.git/`, mas todos os arquivos estão atualmente não rastreados.)
-
-## Configuração de Ambiente
-
-**Variáveis de ambiente obrigatórias:**
-- Nenhuma. O projeto não lê variáveis de ambiente.
-
-**Local dos segredos:**
-- Nenhum presente - sem `.env*`, sem arquivos de credenciais, sem chaves de API referenciadas no código (a busca por `api_key|token|secret` só corresponde à detecção de runtime do Colab).
-
-**Diferenças por ambiente:**
-- Windows local: pipeline completo (`run_pipeline.py`), inferência por webcam (`main.py`)
-- Colab: mesma lógica de treinamento em `treinar_crowdhuman_colab.ipynb` com persistência no Drive e `!pip install -q ultralytics huggingface_hub pillow`
-- Staging/Produção: não aplicável
-
-**Ressalva de portabilidade:**
-- `data.yaml:1` e `runs/detect/train_crowdhuman_body/args.yaml:3-4,15,116` incorporam caminhos absolutos de outra máquina (`C:\Users\ferna\Desktop\visao computacional\yolo_crowdhuman_body\...`). Apenas `treinar_crowdhuman.py:118-122` reescreve `data.yaml` antes do treinamento; `scripts/train_body.py`/`scripts/validate_body.py` o consomem inalterado.
-
-## Webhooks e Callbacks
-
-**Recebidos:**
-- Nenhum
-
-**Enviados:**
-- Nenhum
+**Atualizado em:** 2026-10-21 · **Estado real do repositório** (94 commits)
 
 ---
 
-*Auditoria de integrações: 2026-10-08*
-*Atualizar ao adicionar/remover serviços externos*
+## 1. Integrações Existentes (em produção)
+
+| Integração | Versão | Uso no código | Onde |
+|---|---|---|---|
+| **Ultralytics** (`ultralytics`) | `8.4.121` | YOLO de corpo + **ByteTrack** (`tracker='bytetrack.yaml'`, `conf=0.25`, `iou=0.60`, `classes=[0]`) | `rastreio.py`, `main.py` |
+| **OpenCV** (`opencv-python`) | `5.0.0.93` | `VideoCapture` (webcam/arquivo), `imshow`/`waitKey`, `fillPoly`, `pointPolygonTest`, `boundingRect`, `rectangle`, `putText`, `addWeighted` | `captura.py`, `zona.py`, `overlay.py`, `main.py` |
+| **NumPy** (`numpy`) | `2.5.2` | Máscaras `(H, W)`, `logical_and`, `clip`, `isfinite`, `asarray` | `zona.py`, `overlay.py` |
+| **lap** (`lap`) | `0.5.13` | Associação do tracker (dependência do ByteTrack) | via `ultralytics` |
+| **PyYAML** (`pyyaml`) | `6.0.3` | `yaml.safe_load` da configuração de zonas | `zona.py` |
+| **pytest** (`pytest`) | `>=8.0` (instalado 9.1.1) | Suíte de 33 testes | `tests/` |
+
+### Fontes de vídeo suportadas hoje
+- **Webcam** por índice (`main.py 0`, `main.py 1`) — `cv2.VideoCapture(int)` com `CAP_PROP_BUFFERSIZE = 1`.
+- **Arquivo de vídeo local** (`main.py caminho/video.mp4`).
+- ⚠️ **RTSP não é suportado de forma confiável**: `cv2.VideoCapture` corrompe frames RTSP após 15–35 s. A ingestão RTSP é a **Fase 6**, com **PyAV**.
+
+### Pesos do modelo (resolvidos por `main.py`, em ordem)
+1. `resultados/best.pt` — detector de corpo treinado em CrowdHuman ✅ (versionado)
+2. `runs/detect/train_crowdhuman_body/weights/best.pt`
+3. `models/best.pt`
+4. `models/yolo26n.pt`
+5. `yolo26n.pt`
+
+---
+
+## 2. Integrações Planejadas (Fases 3–7 — ainda NÃO implementadas)
+
+| Integração | Fase | Papel | Observações |
+|---|---|---|---|
+| **PostgreSQL 18** + `asyncpg` | 3 | Config (câmeras, zonas) + métricas agregadas (`metricas_fluxo_zona`, `dwell_agregado_zona`, `heatmap_densidade_camada`) | **Sem** `sessoes`/`session_traces`; sem I/O dentro do loop de vídeo |
+| **Fila em RAM + batch writer idempotente** | 3 | Desacopla o loop de vídeo do banco (UUID por lote) | Critério: latência ≤ 5 ms/frame |
+| **FastAPI** (+ WebSocket) | 4 | API **somente-leitura** de contagem, ocupação, séries, histogramas e heatmap agregado; guard que impede expor dado por-pessoa | TTL documentado (art. 16) |
+| **Logs de acesso** | 4 | IP/data/hora/ação retidos **exatamente 6 meses** sob sigilo (Marco Civil art. 15) | Mínimo funcional |
+| **React + Vite + ECharts** | 5 | Dashboard de ocupação ao vivo, séries e heatmap | WebSocket para tempo real; indicador de frescor do dado |
+| **docker-compose** | 5 | PostgreSQL + API + dashboard sobem com um comando | `OPS-02` |
+| **PyAV** | 6 | Ingestão RTSP multi-stream (substitui `cv2.VideoCapture` para RTSP) | Backoff exponencial + watchdog de staleness |
+| **MediaMTX** | 6 | Servidor RTSP **local** de teste — exercita produção sem os DVRs reais | Tracker estritamente por câmera |
+| **Jupyter/Colab** | treino | `scripts/treinar_crowdhuman_colab.ipynb` + `scripts/setup_colab_ssh.py` | Fora do pipeline |
+
+---
+
+## 3. Integrações Proibidas (veto permanente)
+
+| Integração | Motivo |
+|---|---|
+| Detecção/reconhecimento **facial**, biometria, demografia, emoção | LGPD art. 11 (dado sensível) — sem base legal para analytics |
+| **MTMCT / Re-ID / associação entre câmeras** (inclusive por silhueta ou aparência) | LGPD art. 12 §2º (perfil comportamental) |
+| `opencv-contrib-python` (traz `cv2.face`) | Introduziria módulo de face na dependência |
+| Qualquer armazenamento de **frame, imagem, crop ou vídeo** | LGPD art. 6º III (minimização) |
+| **PMS/BI** com dados por pessoa | V2 só permite integração via **API de agregados** (V2-03) |
+
+---
+
+## 4. Referências
+
+- Dependências pinadas: `requirements.txt`, `requirements-dev.txt`
+- Stack completa: `.planning/codebase/STACK.md`
+- Arquitetura-alvo: `docs/DOCUMENTACAO_PROJETO_E_LGPD/02_ARQUITETURA_TECNICA_E_ENGENHARIA.md`
