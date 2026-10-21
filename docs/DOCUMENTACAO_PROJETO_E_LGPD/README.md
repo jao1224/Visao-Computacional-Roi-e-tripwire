@@ -24,7 +24,7 @@
 | **[`04_MODELOS_IA_FACE_VS_BODY.md`](04_MODELOS_IA_FACE_VS_BODY.md)** | Comparativo dos modelos: YOLO Face vs. YOLO Body/CrowdHuman. | 🚫 **SUPERADO** — só body (histórico) |
 | **[`05_RASTREAMENTO_MULTICAMERAS_MTMCT.md`](05_RASTREAMENTO_MULTICAMERAS_MTMCT.md)** | Arquitetura de rastreamento entre câmeras (Re-ID, fusão de trilhas). | 🚫 **SUPERADO — não implementar** |
 | **[`06_MODELAGEM_BANCO_DE_DADOS.md`](06_MODELAGEM_BANCO_DE_DADOS.md)** | DDL PostgreSQL, MER, tabelas de zonas, câmeras, sessões e traces. | ⚠ **Adaptar**: sem `sessoes`/`session_traces` |
-| **[`07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md`](07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md)** | Parecer regulatório completo: artigo por artigo, multas, TTLs. | ✅ Válido (ver também verificação em `.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md`) |
+| **[`07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md`](07_PARECER_COMPLETO_LGPD_E_MARCO_CIVIL.md)** | Parecer regulatório completo: artigo por artigo, multas, TTLs e pendências da Fase 9. | ✅ **Vigente** (revisado em 2026-10-21 — ver também `.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md`) |
 | **[`08_PROMPT_E_DIRETRIZES_PARA_AGENTE_IA.md`](08_PROMPT_E_DIRETRIZES_PARA_AGENTE_IA.md)** | Instruções e restrições de escopo para agentes de IA. | ⚠ Válido nas partes de engenharia/privacidade; menções a face/rastreio superadas |
 | **[`09_PLANO_DE_FASES_V1.md`](09_PLANO_DE_FASES_V1.md)** | Detalhamento das 9 fases do v1 (requisitos, critérios, LGPD). | ✅ **Vigente** |
 
