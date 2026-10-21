@@ -2,7 +2,7 @@
 
 ## Overview
 
-O sistema nasce do detector existente (`main.py`, YOLO CrowdHuman) e evolui em 9 fases verticais: primeiro uma fatia single-câmera que prova que a **contagem está correta** (captura → detecção → ByteTrack efêmero → tripwire/ocupação), depois a camada de produto (PostgreSQL com fila em lote → FastAPI → dashboard), em seguida a escala (multi-câmera RTSP com reconexão), a profundidade de analytics (dwell + heatmap de densidade agregado) e, por fim, validação de qualidade e a auditoria formal de LGPD (RIPD/LIA/ROPA, encarregado, plano de incidente) como gate antes de produção. Invariante em todas as fases: **saída exclusivamente agregada — zero tracking entre câmeras, zero frames em disco, zero dado por-pessoa** (LGPD art. 12 §2º). Invariante adicional: **nenhum stream real com hóspedes é ligado antes do gate da Fase 9** — fases 1–8 rodam exclusivamente com webcam, vídeos-amostra e MediaMTX local (sem titulares reais de hotel em tratamento).
+O sistema nasce do detector existente (`main.py`, YOLO CrowdHuman) e evolui em 9 fases verticais: primeiro uma fatia single-câmera que prova que a **ocupação por área está correta** (captura → detecção → ByteTrack efêmero → ocupação por ROI), depois a camada de produto (PostgreSQL com fila em lote → FastAPI → dashboard), em seguida a escala (multi-câmera RTSP com reconexão), a profundidade de analytics (dwell + heatmap de densidade agregado) e, por fim, validação de qualidade e a auditoria formal de LGPD (RIPD/LIA/ROPA, encarregado, plano de incidente) como gate antes de produção. Invariante em todas as fases: **saída exclusivamente agregada — zero tracking entre câmeras, zero frames em disco, zero dado por-pessoa** (LGPD art. 12 §2º). Invariante adicional: **nenhum stream real com hóspedes é ligado antes do gate da Fase 9** — fases 1–8 rodam exclusivamente com webcam, vídeos-amostra e MediaMTX local (sem titulares reais de hotel em tratamento).
 
 ## Phases
 
@@ -11,7 +11,7 @@ O sistema nasce do detector existente (`main.py`, YOLO CrowdHuman) e evolui em 9
 - Decimal phases (2.1, 2.2): urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Fatia vertical single-câmera (captura, detecção, rastreio efêmero)** - Webcam/vídeo-amostra → YOLO corpo → ByteTrack em RAM com overlay, sem nada em disco (completed 2026-10-08)
-- [x] **Phase 2: Contagem por zona e ocupação em tempo real** - Tripwire bidirecional sem dupla contagem e ocupação instantânea por zona (overlay) (completed 2026-10-12)
+- [x] **Phase 2: Contagem por zona e ocupação em tempo real** - Ocupação instantânea por zona ROI via interseção de área, com clamp/reset/reconciliação (overlay) (completed 2026-10-12)
 - [ ] **Phase 3: Persistência PostgreSQL (fila + escrita em lote)** - Schema só com configuração e métricas agregadas; I/O de banco fora do loop de vídeo
 - [ ] **Phase 4: API FastAPI de métricas e conformidade Marco Civil** - Endpoints somente-leitura, TTL de retenção e logs de acesso de 6 meses
 - [ ] **Phase 5: Dashboard web de ocupação e séries** - Ocupação ao vivo (WebSocket), séries com filtro de período e ambiente reproduzível (docker-compose)
@@ -62,13 +62,15 @@ Plans:
 - [x] 02-01-PLAN.md — Fundação: scaffold de testes (13 RED) + config/zonas.yaml + zona.py (constantes, helpers, carregar_zonas)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [x] 02-02-PLAN.md — Travessia: verificar_tripwires bidirecional (transição de lado + debounce + histerese) + podar_track_states
+- [x] 02-02-PLAN.md — Travessia: verificar_tripwires bidirecional (transição de lado + debounce + histerese) + podar_track_states — **funcionalidade desativada depois; o código permanece comentado**
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [x] 02-03-PLAN.md — Ocupação e reconciliação: atualizar_ocupacao (recontagem + clamp [0, capacidade] + resets) + reconciliar_fonte
 
 **Wave 4** *(blocked on Wave 3 completion)*
-- [x] 02-04-PLAN.md — Integração visual: overlay (tripwires/ROIs/cards) + main.py wiring + auditoria de privacidade + checkpoint humano
+- [x] 02-04-PLAN.md — Integração visual: overlay (ROIs/cards + interseção) + main.py wiring + auditoria de privacidade + checkpoint humano
+
+> 📌 **Nota de escopo (2026-10-21):** a Fase 2 entregou **ocupação por área (ROI)** com interseção `Área(Objeto) ∩ Área(ROI)`. O tripwire bidirecional previsto no Wave 2 foi **desativado por decisão do usuário** — o código está comentado (não removido) em `zona.py`, `overlay.py` e `main.py`. A recontagem por frame é o mecanismo vigente de contagem/ocupação.
 
 ### Phase 3: Persistência PostgreSQL (fila + escrita em lote)
 
@@ -143,7 +145,7 @@ Plans:
 **Depends on**: Phase 7
 **Requirements**: QUA-02, QUA-03
 **Success Criteria** (what must be TRUE):
-  1. Suíte de testes automatizados cobre tripwire, dwell+timeout, fila, ocupação e reconexão — e passa de ponta a ponta com um comando
+  1. Suíte de testes automatizados cobre ocupação por área/interseção, dwell+timeout, fila e reconexão — e passa de ponta a ponta com um comando
   2. Contagem validada contra marcação manual em vídeo de pico (webcam/amostra), com relatório de acurácia (erro médio + faixa) documentado
   3. Definição escrita de "quem conta" (ex.: exclui equipe?) é aplicada na validação e registrada no relatório
 
@@ -173,6 +175,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 02 | ✅ Complete | 2026-10-12 |
 | 03 | ⏳ Pending | — |
 | ... | ... | ... |
+
+**Posição atual (2026-10-21):** 2/9 fases concluídas (22%) · 6/27 requisitos concluídos · 33 testes verdes (`./.venv/bin/python -m pytest`) · próxima fase: **Phase 3 — Persistência PostgreSQL** (API-01, QUA-01), ainda não iniciada.
 
 ---
 
