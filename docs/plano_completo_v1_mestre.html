@@ -1,0 +1,1044 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Plano Completo v1 (Mestre) — Visão Computacional para Hotelaria (Analytics de Fluxo)</title>
+  <style>
+@page { size: A4; margin: 20mm; }
+body { font-family: Arial, Helvetica, sans-serif; line-height: 1.6; font-size: 10.5pt; color: #1a1a1a; }
+h1 { font-size: 22pt; margin-top: 0; }
+h2 { font-size: 16pt; margin-top: 28pt; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+h3 { font-size: 13pt; margin-top: 22pt; }
+h4 { font-size: 11.5pt; margin-top: 18pt; }
+p { margin: 8pt 0; }
+table { border-collapse: collapse; width: 100%; margin: 14pt 0; font-size: 9.5pt; }
+th, td { border: 1px solid #c9c9c9; padding: 6px 8px; text-align: left; vertical-align: top; }
+th { background: #f6f6f6; font-weight: bold; }
+blockquote { border-left: 4px solid #d8d8d8; padding-left: 12px; color: #4f4f4f; margin: 12pt 0; }
+code { background: #f6f8fa; padding: 1px 4px; border-radius: 4px; font-family: Consolas, monospace; font-size: 9.5pt; }
+pre { background: #f6f8fa; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 9pt; line-height: 1.4; }
+pre code { background: none; padding: 0; }
+ul, ol { margin: 8pt 0 8pt 18pt; }
+li { margin: 4pt 0; }
+hr { border: none; border-top: 1px solid #e5e5e5; margin: 24pt 0; }
+</style>
+</head>
+<body>
+<h1 id="plano-completo-v1-mestre-visao-computacional-para-hotelaria-analytics-de-fluxo">Plano Completo v1 (Mestre) — Visão Computacional para Hotelaria (Analytics de Fluxo)</h1>
+<blockquote>
+<p><strong>Documento mestre de referência e alinhamento</strong> — une requisitos, roadmap e detalhamento técnico de cada uma das 9 fases do v1, adaptado ao cenário operacional vigente.
+<strong>Data de atualização:</strong> 2026-10-26 · <strong>Status:</strong> Fases 1 e 2 concluídas (33 testes verdes) · Pronto para a Fase 3.
+<strong>Base legal verificada:</strong> LGPD (Lei 13.709/2018) e Marco Civil da Internet (Lei 12.965/2014) — ver <code>.planning/context/PARECER_LGPD_E_MARCO_CIVIL.md</code>, <code>.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md</code> e <code>.planning/context/PERGUNTAS_FREQUENTES_TECNICAS.md</code>.</p>
+</blockquote>
+<hr />
+<h2 id="1-o-que-e-o-sistema">1. O que é o sistema</h2>
+<p>Câmeras de segurança do hotel viram sensores de negócio: <strong>contagem de pessoas por zona, ocupação em tempo real, tempo de permanência (dwell) e mapa de calor de fluxo</strong> — para o hotel saber <em>quantas pessoas estão em cada lugar, quando e por quanto tempo ficam</em>, sem nunca identificar ninguém.</p>
+<p><strong>Base do projeto:</strong> o detector já existente (<code>main.py</code>, YOLO CrowdHuman, ~320 FPS em GPU) — evoluindo de forma vertical e incremental pelas fases planejadas, sempre com <strong>privacidade por construção</strong>.</p>
+<h3 id="invariantes-obrigatorios-em-todas-as-fases">Invariantes obrigatórios em todas as fases</h3>
+<table>
+<thead>
+<tr>
+<th>Invariante</th>
+<th>Base legal / Operacional</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Saída <strong>exclusivamente agregada</strong> — nenhum dado por-pessoa é gravado</td>
+<td>LGPD art. 12 §2º</td>
+</tr>
+<tr>
+<td><strong>Zero associação entre câmeras</strong> — nem por ID, nem por silhueta, nem por aparência (sem MTMCT/Re-ID)</td>
+<td>LGPD art. 12 §2º + decisão do projeto</td>
+</tr>
+<tr>
+<td><strong>Frames de vídeo nunca tocam disco</strong> — imagem vive só na RAM durante a inferência</td>
+<td>LGPD art. 6º III (minimização)</td>
+</tr>
+<tr>
+<td>Face, biometria, demografia ou emoção <strong>nunca</strong> existem no código</td>
+<td>LGPD art. 11 (dado sensível)</td>
+</tr>
+<tr>
+<td>IDs de rastreamento (ByteTrack) morrem ao sair do quadro, <strong>intra-câmera</strong> e nunca persistidos</td>
+<td>LGPD art. 6º III (necessidade)</td>
+</tr>
+<tr>
+<td><strong>Auditoria automatizada como guarda técnica</strong> — <code>tests/test_privacidade.py</code> varre o repositório e <strong>falha o build</strong> caso haja violação (IDs individuais, trilhas, frames em disco ou dados sensíveis).</td>
+<td>LGPD arts. 6º III e 12 §2º + <em>Privacy by Design</em></td>
+</tr>
+<tr>
+<td><strong>Nenhum stream real com hóspedes antes do gate da Fase 9</strong> — fases 1–8 usam só webcam, vídeos-amostra e MediaMTX local</td>
+<td>LGPD art. 7º IX + art. 10 §3 (LIA formal ao fim da Fase 9)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Risco se violado:</strong> sanções administrativas previstas na <strong>LGPD art. 52</strong> (multa de até <strong>2% do faturamento, limitado a R$ 50.000.000,00 por infração</strong>), além de advertência, publicação da infração, bloqueio ou eliminação dos dados, conforme o caso.</p>
+<h3 id="11-fundamentos-legais-e-adequacao-a-lgpd">1.1 Fundamentos legais e adequação à LGPD</h3>
+<p>O desenho deste projeto busca adequação à <strong>LGPD (Lei nº 13.709/2018)</strong> e ao <strong>Marco Civil da Internet (Lei nº 12.965/2014)</strong> com base nos seguintes fundamentos:</p>
+<table>
+<thead>
+<tr>
+<th>Dispositivo</th>
+<th>Fundamento</th>
+<th>Aplicação prática no projeto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LGPD art. 5º, I</strong></td>
+<td>Conceito de dado pessoal</td>
+<td>Reconhece-se que, <strong>durante a inferência</strong>, há tratamento de dado pessoal (imagem/caixas). Esse tratamento é <strong>efêmero</strong>: ocorre apenas em RAM, <strong>não</strong> é gravado em disco e é descartado assim que a inferência é finalizada.</td>
+</tr>
+<tr>
+<td><strong>LGPD art. 6º, I–III</strong></td>
+<td>Princípios da boa-fé, adequação, necessidade e minimização</td>
+<td><strong>Apenas o estritamente necessário.</strong> Usa-se detecção por <strong>corpo</strong>, rastreamento <strong>intra-câmera efêmero</strong> (ByteTrack), <strong>ROI-only</strong> com interseção de área e <strong>saída exclusivamente agregada</strong>. Frames <strong>nunca</strong> vão para disco.</td>
+</tr>
+<tr>
+<td><strong>LGPD art. 7º, IX</strong></td>
+<td>Interesse legítimo</td>
+<td>Base legal prevista para o v1. Será formalizada por meio da <strong>LIA</strong> (<em>Legitimate Interest Assessment</em>) na <strong>Fase 9</strong>, demonstrando necessidade, proporcionalidade e equilíbrio com os direitos e liberdades dos titulares.</td>
+</tr>
+<tr>
+<td><strong>LGPD art. 11</strong></td>
+<td>Tratamento de dados sensíveis</td>
+<td><strong>Vedado.</strong> Não há tratamento de dados biométricos, faciais, de origem étnica/racial, religiosa, política, genética ou de saúde. O código é auditado para garantir essa vedação.</td>
+</tr>
+<tr>
+<td><strong>LGPD art. 12, caput e §2º</strong></td>
+<td>Dado anonimizado / agregação</td>
+<td>O objetivo é que os dados <strong>persistidos</strong> sejam <strong>anônimos irreversíveis</strong>. Apenas estatísticas por <strong>zona × janela</strong> (médias, contagens, histogramas, heatmap agregado) são gravadas. <strong>Após a agregação, toda informação individual é descartada.</strong> O próprio sistema <strong>não mantém chaves, mapeamentos ou índices</strong> capazes de reverter esses agregados para um indivíduo. Se não houver <strong>meios razoáveis</strong> de reidentificação a partir do banco, incide o art. 12 da LGPD.</td>
+</tr>
+<tr>
+<td><strong>LGPD art. 37</strong></td>
+<td><strong>ROPA</strong> (<em>Registro das Operações de Tratamento</em>)</td>
+<td>Será elaborado e mantido atualizado na <strong>Fase 9</strong>, registrando finalidades, categorias de dados tratados (efêmeros x agregados), medidas de segurança e minimização.</td>
+</tr>
+<tr>
+<td><strong>LGPD art. 38</strong></td>
+<td><strong>RIPD</strong> (<em>Relatório de Impacto à Proteção de Dados</em>)</td>
+<td>Obrigatório antes de qualquer <strong>stream real com hóspedes</strong>. Deve avaliar riscos, impactos e as medidas mitigadoras adotadas por <em>Privacy by Design</em>.</td>
+</tr>
+<tr>
+<td><strong>LGPD art. 41</strong></td>
+<td>Encarregado (<strong>DPO</strong>)</td>
+<td>Designação formal com <strong>nome e canal de contato</strong> divulgado, apto a receber solicitações de titulares e atuar perante a <strong>ANPD</strong>.</td>
+</tr>
+<tr>
+<td><strong>LGPD art. 46</strong></td>
+<td>Segurança do tratamento</td>
+<td>Medidas técnicas e administrativas para proteção dos dados: acesso restrito ao PostgreSQL/API, credenciais em <code>.env</code> (fora do repositório), princípio do menor privilégio, escrita fora do <em>hot-loop</em>, logs segregados e com acesso restrito, <strong>frames e trilhas apenas em RAM</strong>, <strong>nunca</strong> gravados em disco.</td>
+</tr>
+<tr>
+<td><strong>LGPD art. 48</strong></td>
+<td>Comunicação de incidente de segurança</td>
+<td>Previsto no <strong>Plano de Resposta a Incidentes</strong> da <strong>Fase 9</strong>, com critérios para contenção, avaliação, eventual comunicação à ANPD e, quando cabível, aos titulares.</td>
+</tr>
+<tr>
+<td><strong>Marco Civil da Internet (Lei nº 12.965/2014) art. 15</strong></td>
+<td>Registros de acesso a aplicações de internet</td>
+<td>Justifica a geração de <strong>logs de acesso</strong> na <strong>API</strong> (Fase 4), com <strong>retenção por 6 meses</strong>, sob sigilo, finalidade exclusiva de auditoria e segurança.</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Regra de ouro (critérios de conformidade):</strong> <em>"Se for possível reconstituir o trajeto ou o tempo individual de alguém consultando o banco, está errado. Se só for possível obter médias, contagens, histogramas e dados agregados por zona/tempo, está correto."</em><br />
+<strong>Teste decisivo da Fase 9:</strong> inspecionar código + consultar o banco e comprovar que <strong>não existem meios razoáveis</strong> de reidentificação a partir dos dados persistidos.</p>
+</blockquote>
+<hr />
+<h2 id="2-resumo-de-requisitos-e-status-atual-v1">2. Resumo de Requisitos e Status Atual (v1)</h2>
+<ul>
+<li><strong>Status atual:</strong> <strong>6/27</strong> requisitos concluídos (<strong>ING-01, ING-03, CNT-01, CNT-02, CNT-03, CNT-04</strong>).</li>
+<li><strong>Escopo vigente:</strong> Contagem <strong>ROI-only</strong> (ocupação por área via interseção $\text{Área}(\text{Objeto}) \cap \text{Área}(\text{ROI})$). O <strong>tripwire bidirecional</strong> foi desativado por decisão do projeto e permanece <strong>comentado</strong> no código (<code>zona.py</code>, <code>overlay.py</code>, <code>main.py</code>), não removido.</li>
+<li><strong>Testes:</strong> <strong>33/33</strong> verdes (<code>./.venv/bin/python -m pytest</code>).</li>
+<li><strong>Verificação GSD:</strong> Fase 1 (<code>01-VERIFICATION.md</code>) e Fase 2 (<code>02-VERIFICATION.md</code>) aprovadas com status <strong>PASSED</strong>.</li>
+</ul>
+<h3 id="categorias-de-requisitos">Categorias de Requisitos</h3>
+<table>
+<thead>
+<tr>
+<th>Categoria</th>
+<th>Abrangência</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ING (Ingestão)</strong></td>
+<td>Webcam, vídeos-amostra e futuras câmeras RTSP. Frames voláteis em RAM.</td>
+<td>2/3 concluídos</td>
+</tr>
+<tr>
+<td><strong>CNT (Contagem &amp; Ocupação)</strong></td>
+<td>Detecção apenas por corpo, ByteTrack efêmero intra-câmera, ocupação por ROI e interseção de área.</td>
+<td>4/4 concluídos</td>
+</tr>
+<tr>
+<td><strong>DWL (Permanência &amp; Fluxo)</strong></td>
+<td>Dwell time e heatmap de densidade <strong>apenas agregados</strong>.</td>
+<td>0/2 pendentes</td>
+</tr>
+<tr>
+<td><strong>API (Dados/API)</strong></td>
+<td>PostgreSQL restrito a configuração + agregados, FastAPI somente-leitura, TTL e logs de acesso 6 meses (Marco Civil).</td>
+<td>0/4 pendentes</td>
+</tr>
+<tr>
+<td><strong>DSH (Dashboard)</strong></td>
+<td>Ocupação ao vivo, séries temporais, dwell e heatmap agregados.</td>
+<td>0/3 pendentes</td>
+</tr>
+<tr>
+<td><strong>PRV (Privacidade)</strong></td>
+<td>Auditoria automatizada, RIPD/LIA/ROPA, aviso de monitoramento, encarregado (DPO), sem dado por-pessoa.</td>
+<td>0/5 pendentes</td>
+</tr>
+<tr>
+<td><strong>QUA (Qualidade)</strong></td>
+<td>Latência ≤ 5ms/frame, escrita fora do loop, testes críticos, acurácia vs marcação manual.</td>
+<td>0/3 pendentes</td>
+</tr>
+<tr>
+<td><strong>OPS (Operação)</strong></td>
+<td>Multi-câmera/RTSP, reconexão/watchdog, ambiente reproduzível, plano de resposta a incidente.</td>
+<td>0/3 pendentes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cobertura v1:</strong> 27/27 requisitos mapeados no roadmap, sem órfãos.</p>
+<h3 id="21-mapeamento-dos-requisitos-citados-ing-e-cnt">2.1 Mapeamento dos requisitos citados (ING e CNT)</h3>
+<p>Os IDs abaixo são os que já foram validados e constam como concluídos nas Fases 1 e 2. A fonte oficial deles é <a href=".planning/REQUIREMENTS.md"><code>.planning/REQUIREMENTS.md</code></a>.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Categoria</th>
+<th>Descrição</th>
+<th>Status</th>
+<th>Evidência</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ING-01</strong></td>
+<td>Ingestão (ING)</td>
+<td>Suportar ingestão via <strong>webcam</strong> para desenvolvimento e testes locais.</td>
+<td><strong>Concluído</strong></td>
+<td><code>main.py</code>, <code>captura.py</code></td>
+</tr>
+<tr>
+<td><strong>ING-03</strong></td>
+<td>Ingestão (ING)</td>
+<td>Suportar ingestão de <strong>vídeos-amostra locais</strong> para validação, sem gravação de frames em disco.</td>
+<td><strong>Concluído</strong></td>
+<td><code>main.py</code>, <code>captura.py</code>, <code>tests/test_privacidade.py</code></td>
+</tr>
+<tr>
+<td><strong>CNT-01</strong></td>
+<td>Contagem &amp; Ocupação (CNT)</td>
+<td>Realizar <strong>detecção apenas por corpo</strong> utilizando o modelo <strong>YOLO CrowdHuman</strong>. Sem detecção facial, biometria ou classificação demográfica.</td>
+<td><strong>Concluído</strong></td>
+<td><code>main.py</code>, <code>.planning/phases/01-fatia-vertical-single-c-mera-captura-detec-o-rastreio-ef-mero/</code></td>
+</tr>
+<tr>
+<td><strong>CNT-02</strong></td>
+<td>Contagem &amp; Ocupação (CNT)</td>
+<td>Contagem por <strong>zona poligonal</strong> definida em <code>config/zonas.yaml</code>, com suporte a múltiplas ROIs por câmera.</td>
+<td><strong>Concluído</strong></td>
+<td><code>zona.py</code>, <code>config/zonas.yaml</code>, <code>tests/test_zona.py</code></td>
+</tr>
+<tr>
+<td><strong>CNT-03</strong></td>
+<td>Contagem &amp; Ocupação (CNT)</td>
+<td>Rastreamento <strong>efêmero e intra-câmera</strong> com <strong>ByteTrack</strong> para evitar dupla contagem da mesma pessoa entre frames consecutivos. Os IDs morrem ao sair do quadro e <strong>nunca</strong> são persistidos.</td>
+<td><strong>Concluído</strong></td>
+<td><code>rastreio.py</code>, <code>main.py</code>, <code>tests/test_rastreio.py</code></td>
+</tr>
+<tr>
+<td><strong>CNT-04</strong></td>
+<td>Contagem &amp; Ocupação (CNT)</td>
+<td>Calcular ocupação por <strong>interseção de área</strong> <code>Área(Objeto) ∩ Área(ROI)</code>, priorizando o <strong>centro-inferior da bounding box</strong> (pé no chão) para o teste de presença, em linha com o escopo <strong>ROI-only</strong>.</td>
+<td><strong>Concluído</strong></td>
+<td><code>zona.py</code>, <code>overlay.py</code>, <code>tests/test_zona.py</code>, <code>tests/test_overlay.py</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Observação:</strong> Os demais requisitos listados na tabela abaixo permanecem <strong>pendentes</strong> conforme <code>.planning/REQUIREMENTS.md</code> e <code>.planning/ROADMAP.md</code>. Estes 6 são exatamente os que foram auditados e aprovados na verificação GSD das Fases 1 e 2.</p>
+</blockquote>
+<h3 id="22-mapeamento-completo-dos-requisitos-citados-neste-plano">2.2 Mapeamento completo dos requisitos citados neste plano</h3>
+<p>Todos os IDs abaixo aparecem nos cabeçalhos <code>*Requisitos:*</code> das Fases 3–9. Fonte oficial: <a href=".planning/REQUIREMENTS.md"><code>.planning/REQUIREMENTS.md</code></a>.</p>
+<h4 id="ingestao-ing">Ingestão (ING)</h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Descrição</th>
+<th>Status</th>
+<th>Fase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ING-02</strong></td>
+<td>Suportar ingestão via <strong>RTSP</strong> com reconexão automática e tolerância a falhas de stream.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 6</td>
+</tr>
+</tbody>
+</table>
+<h4 id="contagem-ocupacao-cnt">Contagem &amp; Ocupação (CNT)</h4>
+<p><em>Todos os requisitos CNT do v1 já foram concluídos (ver 2.1).</em></p>
+<h4 id="persistencia-dados-api-api">Persistência &amp; Dados / API (API)</h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Descrição</th>
+<th>Status</th>
+<th>Fase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>API-01</strong></td>
+<td>Persistir <strong>apenas métricas agregadas</strong> no PostgreSQL, com escrita assíncrona em lote fora do loop de vídeo.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 3</td>
+</tr>
+<tr>
+<td><strong>API-02</strong></td>
+<td>Disponibilizar <strong>API FastAPI somente-leitura</strong> para consulta de métricas agregadas.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 4</td>
+</tr>
+<tr>
+<td><strong>API-03</strong></td>
+<td>Implementar <strong>logs de acesso</strong> auditáveis com retenção por <strong>6 meses</strong> conforme Marco Civil da Internet (Lei 12.965/2014).</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 4</td>
+</tr>
+<tr>
+<td><strong>API-04</strong></td>
+<td>Aplicar <strong>política de TTL/expurgo</strong> para métricas, respeitando os princípios de minimização e limitação de retenção.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 4</td>
+</tr>
+</tbody>
+</table>
+<h4 id="analytics-permanencia-dwl">Analytics &amp; Permanência (DWL)</h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Descrição</th>
+<th>Status</th>
+<th>Fase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DWL-01</strong></td>
+<td>Calcular <strong>tempo de permanência (dwell time)</strong> por zona, em <strong>RAM efêmero</strong>, com agregação imediata e <strong>descartar</strong> o dado individual.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 7</td>
+</tr>
+<tr>
+<td><strong>DWL-02</strong></td>
+<td>Gerar <strong>heatmap de densidade agregado</strong> por célula×janela, <strong>sem</strong> traços, rotas ou histórico por-pessoa.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 7</td>
+</tr>
+</tbody>
+</table>
+<h4 id="dashboard-dsh">Dashboard (DSH)</h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Descrição</th>
+<th>Status</th>
+<th>Fase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DSH-01</strong></td>
+<td>Exibir <strong>ocupação em tempo real</strong> por zona no dashboard operacional.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 5</td>
+</tr>
+<tr>
+<td><strong>DSH-02</strong></td>
+<td>Exibir <strong>séries temporais históricas</strong> das métricas agregadas com filtros por período.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 5</td>
+</tr>
+<tr>
+<td><strong>DSH-03</strong></td>
+<td>Exibir <strong>histograma de permanência</strong> e <strong>heatmap agregado</strong> de densidade.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 7</td>
+</tr>
+</tbody>
+</table>
+<h4 id="qualidade-qua">Qualidade (QUA)</h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Descrição</th>
+<th>Status</th>
+<th>Fase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>QUA-01</strong></td>
+<td>Garantir <strong>isolamento do hot-loop</strong>: nenhuma chamada SQL dentro do <code>while True</code>. Latência <strong>≤ 5 ms/frame</strong>.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 3</td>
+</tr>
+<tr>
+<td><strong>QUA-02</strong></td>
+<td>Cobrir regras críticas com <strong>testes automatizados</strong> (zona, dwell/timeout, fila/batch writer, reconexão, watchdog).</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 8</td>
+</tr>
+<tr>
+<td><strong>QUA-03</strong></td>
+<td>Realizar <strong>validação de campo</strong> com marcação manual (definir e aplicar <strong>"quem conta"</strong>) e documentar relatório de acurácia.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 8</td>
+</tr>
+</tbody>
+</table>
+<h4 id="operacao-ops">Operação (OPS)</h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Descrição</th>
+<th>Status</th>
+<th>Fase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OPS-01</strong></td>
+<td>Suportar <strong>múltiplas câmeras RTSP</strong> com workers isolados, <strong>reconexão exponencial</strong> e <strong>watchdog</strong> de staleness.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 6</td>
+</tr>
+<tr>
+<td><strong>OPS-02</strong></td>
+<td>Disponibilizar <strong>ambiente reproduzível</strong> via <code>docker-compose.yml</code> (PostgreSQL + API + Dashboard).</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 5</td>
+</tr>
+<tr>
+<td><strong>OPS-03</strong></td>
+<td>Elaborar e aprovar <strong>plano de resposta a incidentes</strong> como parte do gate da Fase 9.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 9</td>
+</tr>
+</tbody>
+</table>
+<h4 id="privacidade-governanca-prv">Privacidade &amp; Governança (PRV)</h4>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Descrição</th>
+<th>Status</th>
+<th>Fase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PRV-01</strong></td>
+<td>Executar <strong>auditoria automatizada</strong> repo-wide em busca de <code>track_id</code>, <code>session_id</code>, <code>sessoes</code>, <code>session_traces</code>, <code>embedding</code>, rota/jornada. Garantir <strong>zero frames em disco</strong> e <strong>sem face/biometria</strong>.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 9</td>
+</tr>
+<tr>
+<td><strong>PRV-02</strong></td>
+<td>Elaborar <strong>RIPD</strong> (Relatório de Impacto à Proteção de Dados).</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 9</td>
+</tr>
+<tr>
+<td><strong>PRV-03</strong></td>
+<td>Elaborar <strong>LIA</strong> (Legitimate Interest Assessment) com análise de necessidade, proporcionalidade e equilíbrio.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 9</td>
+</tr>
+<tr>
+<td><strong>PRV-04</strong></td>
+<td>Elaborar <strong>ROPA</strong> (Registro das Operações de Tratamento) e definir formalmente o <strong>Encarregado (DPO)</strong> com canal de contato.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 9</td>
+</tr>
+<tr>
+<td><strong>PRV-05</strong></td>
+<td>Garantir <strong>aviso de monitoramento</strong> nas áreas, revisar logs/API com retenção por 6 meses e obter <strong>parecer jurídico-técnico favorável</strong> para liberação de streams reais com hóspedes.</td>
+<td><strong>Pendente</strong></td>
+<td>Fase 9</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-detalhamento-foco-a-foco-das-9-fases">3. Detalhamento Foco a Foco das 9 Fases</h2>
+<h3 id="fase-1-fatia-vertical-single-camera-captura-deteccao-rastreio-efemero">Fase 1 — Fatia vertical single-câmera (captura, detecção, rastreio efêmero)</h3>
+<ul>
+<li><strong>Status:</strong> Concluída (2026-10-08)</li>
+<li><strong>Dependências:</strong> Nenhuma</li>
+<li><strong>Requisitos:</strong> ING-01, ING-03, CNT-01, CNT-03</li>
+</ul>
+<p><strong>O que constrói:</strong>
+Pipeline mínimo funcional em <code>main.py</code>: captura (<code>captura.py</code>), detecção de corpo com <strong>YOLO CrowdHuman</strong>, rastreamento efêmero com <strong>ByteTrack</strong> intra-câmera (<code>rastreio.py</code>) e renderização em tempo real (<code>overlay.py</code>), sem qualquer persistência.</p>
+<p><strong>Como funciona:</strong>
+1. Fonte definida por argumento (webcam/arquivo). <code>capture_ts</code> carimbado imediatamente após <code>cap.read()</code>.
+2. Inferência restrita a <code>classes=[0]</code> (apenas corpo). Sem detecção facial ou módulos de biometria.
+3. <code>model.track</code> com <code>tracker='bytetrack.yaml'</code>, <code>persist=True</code>. IDs existem <strong>apenas enquanto a pessoa permanece no quadro</strong>.
+4. Extração com guarda: caso <code>boxes.id</code> seja <code>None</code>, retorna lista vazia.
+5. Overlay desenha in-place no <code>ndarray</code>. <strong>Nenhum</strong> <code>cv2.imwrite</code>, <code>cv2.VideoWriter</code> ou gravação de arquivo.</p>
+<p><strong>Garantias:</strong>
+- Frames voláteis em RAM, descartados após inferência.
+- IDs efêmeros, nunca gravados em arquivo ou banco.
+- Sem face, biometria, demografia ou emoção.
+- Auditoria automatizada via <code>tests/test_privacidade.py</code>.</p>
+<p><strong>Critérios atendidos:</strong> 21 testes da fase integrados à suíte atual (33/33 verdes). Verificação GSD aprovada.</p>
+<hr />
+<h3 id="fase-2-contagem-por-zona-e-ocupacao-em-tempo-real-roi-only">Fase 2 — Contagem por zona e ocupação em tempo real (ROI-only)</h3>
+<ul>
+<li><strong>Status:</strong> Concluída (2026-10-12)</li>
+<li><strong>Dependências:</strong> Fase 1</li>
+<li><strong>Requisitos:</strong> CNT-02, CNT-04</li>
+</ul>
+<p><strong>O que constrói:</strong>
+Módulo <code>zona.py</code> para definição e validação de polígonos ROI em <code>config/zonas.yaml</code>. Cálculo de ocupação instantânea por <strong>presença</strong> e por <strong>interseção de área</strong> (<code>Área(Objeto) ∩ Área(ROI)</code>). Integração com <code>overlay.py</code> e <code>main.py</code>, com clamp por capacidade, reset diário, reconciliação ao reiniciar a fonte e poda de <code>track_states</code>.</p>
+<p><strong>Como funciona:</strong>
+1. <strong>Carregamento:</strong> <code>carregar_zonas()</code> lê e normaliza ROIs com validação de schema. Uso exclusivo de <code>yaml.safe_load</code>.
+2. <strong>Âncora para presença:</strong> Prioritariamente o <strong>centro-inferior da bounding box</strong> (<code>_bottom_center</code>) para aproximar o pé no chão. Teste com <code>cv2.pointPolygonTest</code>. Há <em>fallback</em> com centro geométrico e tratamento para pessoas cortadas pela borda inferior.
+3. <strong>Interseção de área:</strong> Máscara do ROI gerada com <code>cv2.fillPoly</code>. Máscara das pessoas gerada com o <strong>terço inferior</strong> da bounding box por padrão (<code>modo='base'</code>), reduzindo superestimação por perspectiva. <code>intersecao = np.logical_and(pessoas_mask, roi_mask)</code>. <code>pct_area = (área_interseção / área_ROI) * 100</code>.
+4. <strong>Estabilização:</strong> <code>clamp([0, capacidade])</code>, reset diário, <code>reconciliar_fonte()</code> ao trocar/reabrir fonte, <code>podar_track_states()</code> para limpar tracks inativos.
+5. <strong>Visualização:</strong> Polígonos ROI, interseção destacada e contadores por zona exibidos no overlay, <strong>sem gravação</strong>.</p>
+<p><strong>Garantias:</strong>
+- Foco estritamente <strong>ROI-only</strong>. O tripwire bidirecional permanece <strong>comentado</strong> em <code>zona.py</code>, <code>overlay.py</code> e <code>main.py</code>.
+- Sem dupla contagem espúria e estável sob <em>flicker</em>.
+- Mantém todos os invariantes de privacidade da Fase 1.
+- Geometria avaliada <em>on-the-fly</em>: alteração dos pontos passa a valer no próximo frame (sem cache congelado).</p>
+<p><strong>Critérios atendidos:</strong> 10 testes em <code>tests/test_zona.py</code> + integração com overlay. Verificação GSD aprovada.</p>
+<hr />
+<h3 id="fase-3-persistencia-postgresql-fila-escrita-em-lote">Fase 3 — Persistência PostgreSQL (fila + escrita em lote)</h3>
+<ul>
+<li><strong>Status:</strong> Pendente</li>
+<li><strong>Dependências:</strong> Fase 2</li>
+<li><strong>Requisitos:</strong> API-01, QUA-01</li>
+</ul>
+<p><strong>Objetivo:</strong> Tornar as métricas <strong>apenas agregadas</strong> duradouras, sem jamais impactar o <em>hot-loop</em> de processamento de vídeo e sem persistir qualquer dado por-pessoa.</p>
+<p><strong>O que constrói:</strong>
+Schema relacional PostgreSQL restrito a <strong>configuração e métricas agregadas</strong>. Fila assíncrona em memória com <em>batch writer</em> isolado do processamento de frames. Infraestrutura pronta para alimentar API e Dashboard nas fases seguintes.</p>
+<p><strong>Como será feito (detalhado):</strong></p>
+<ol>
+<li><strong>Schema estritamente restrito</strong></li>
+<li><strong>Permitidas:</strong> <code>cameras</code>, <code>zonas</code>, <code>metricas_fluxo_zona</code>. Nas fases corretas também <code>dwell_agregado_zona</code> e <code>heatmap_densidade_camada</code>.</li>
+<li>
+<p><strong>Vedadas:</strong> <code>sessoes</code>, <code>session_traces</code> e qualquer tabela com trilha/jornada. <strong>Nunca</strong> conter colunas <code>track_id</code>, <code>session_id</code>, <code>id_rastreio_local</code>, <code>embedding</code>, <code>rota</code>, <code>jornada</code>.</p>
+</li>
+<li>
+<p><strong>Gravação por janela temporal (não por frame)</strong></p>
+</li>
+<li>Ao fechar cada janela de tempo (sugerido <strong>1 minuto</strong>), o sistema calcula valores agregados por zona com base no <code>estado</code> corrente.</li>
+<li><strong>Nunca</strong> são gravados frames, caixas, coordenadas ou históricos individuais.</li>
+<li>
+<p>É gerada <strong>1 linha agregada por (zona_id, janela_inicio, janela_fim)</strong>.</p>
+</li>
+<li>
+<p><strong>Fila em memória + Batch Writer fora do loop</strong></p>
+</li>
+<li>O worker de vídeo monta apenas <strong>eventos agregados</strong> e os coloca numa fila em memória.</li>
+<li>Um <em>Batch Writer</em> em thread separada consome essa fila em lote (<em>size-or-time</em>: ex. N registros ou X segundos) e executa o <code>INSERT</code> no PostgreSQL.</li>
+<li>
+<p><strong>Nenhum</strong> <code>cursor.execute()</code>, <code>commit()</code> ou chamada SQL pode ocorrer dentro do <code>while True</code> de captura/detecção/rastreamento. A latência do loop deve permanecer <strong>≤ 5 ms/frame</strong>.</p>
+</li>
+<li>
+<p><strong>Idempotência e segurança</strong></p>
+</li>
+<li>Cada lote terá um identificador único (<code>batch_id</code>, UUID) para evitar duplicação em caso de reinício/reenvio.</li>
+<li>Testes <strong>negativos</strong> obrigatórios: devem falhar caso se tente inserir <code>track_id</code>, criar <code>sessoes</code> ou <code>session_traces</code>.</li>
+<li>Auditoria de schema para garantir ausência total de identificadores individuais.</li>
+</ol>
+<p><strong>Estrutura alvo inicial (<code>metricas_fluxo_zona</code>):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Tipo</th>
+<th>Finalidade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>BIGSERIAL</code></td>
+<td>Chave técnica</td>
+</tr>
+<tr>
+<td><code>zona_id</code></td>
+<td><code>INT</code> FK → <code>zonas(id)</code></td>
+<td>Zona monitorada</td>
+</tr>
+<tr>
+<td><code>janela_inicio</code></td>
+<td><code>TIMESTAMP WITH TIME ZONE</code></td>
+<td>Início da janela agregada</td>
+</tr>
+<tr>
+<td><code>janela_fim</code></td>
+<td><code>TIMESTAMP WITH TIME ZONE</code></td>
+<td>Fim da janela agregada</td>
+</tr>
+<tr>
+<td><code>ocupacao_media</code></td>
+<td><code>REAL</code></td>
+<td>Média da ocupação no intervalo</td>
+</tr>
+<tr>
+<td><code>pct_area_media</code></td>
+<td><code>REAL</code></td>
+<td>Média do % de área ocupada no intervalo</td>
+</tr>
+<tr>
+<td><code>criado_em</code></td>
+<td><code>TIMESTAMP WITH TIME ZONE</code></td>
+<td>Timestamp da gravação do agregado</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Exemplo prático:</strong> Para "Recepção" entre <code>14:00:00</code> e <code>14:01:00</code>, grava-se <strong>exatamente 1 linha</strong> com médias daquele intervalo. É <strong>impossível</strong> recuperar "quanto tempo ficou a pessoa X" a partir dessa linha.</p>
+<p><strong>Critérios de sucesso:</strong>
+1. Banco criado <strong>apenas</strong> com tabelas de configuração e métricas agregadas (sem tabelas de rastreio/sessões).
+2. Escrita em lote assíncrona, <strong>completamente fora do loop de vídeo</strong>.
+3. Latência do loop ≤ 5 ms/frame mesmo com <em>batch writer</em> ativo.
+4. Idempotência validada.
+5. Testes automatizados de conexão e escrita agregada, além de <strong>testes negativos</strong> contra persistência por-pessoa.</p>
+<hr />
+<h3 id="fase-4-api-fastapi-de-metricas-e-conformidade-marco-civil">Fase 4 — API FastAPI de métricas e conformidade Marco Civil</h3>
+<ul>
+<li><strong>Status:</strong> Pendente</li>
+<li><strong>Dependências:</strong> Fase 3</li>
+<li><strong>Requisitos:</strong> API-02, API-03, API-04</li>
+</ul>
+<p><strong>O que constrói:</strong>
+API <strong>somente-leitura</strong> com FastAPI para consulta das métricas já agregadas. Governança com política de <strong>TTL</strong>, logs de acesso auditáveis por <strong>6 meses</strong> sob sigilo (Marco Civil da Internet — Lei 12.965/2014).</p>
+<p><strong>Como será feito:</strong>
+1. <strong>Rotas restritas:</strong> Apenas <code>GET</code>. Sem criação/edição/exclusão de dados.
+2. <strong>Resposta 100% agregada:</strong> JSON com médias, contagens, ocupação, séries temporais, histogramas e heatmap agregado. <strong>Nunca</strong> retornar IDs individuais, trilhas ou identificadores.
+3. <strong>Logs de acesso:</strong> Registrar IP, data/hora e ação consultada, com rotina de retenção/expurgo por <strong>6 meses</strong>.
+4. <strong>TTL por tipo de métrica:</strong> Documentado e aplicado conforme necessidade operacional e minimização.
+5. <strong>Documentação interativa:</strong> Swagger/OpenAPI para facilitar consumo pelo dashboard.</p>
+<p><strong>Critérios de sucesso:</strong>
+1. Endpoints respondem <strong>exclusivamente</strong> com dados agregados.
+2. Logs de acesso gerados e retidos exatamente por 6 meses sob sigilo.
+3. TTL documentado e aplicado.
+4. Auditoria confirma ausência de qualquer dado por-pessoa nas respostas.</p>
+<hr />
+<h3 id="fase-5-dashboard-operacional-de-ocupacao-em-tempo-real">Fase 5 — Dashboard operacional de ocupação em tempo real</h3>
+<ul>
+<li><strong>Status:</strong> Pendente</li>
+<li><strong>Dependências:</strong> Fase 4</li>
+<li><strong>Requisitos:</strong> DSH-01, DSH-02, OPS-02</li>
+</ul>
+<p><strong>O que constrói:</strong>
+Interface web leve conectada à API para visualização em tempo real da ocupação por zona, indicadores claros de lotação e séries temporais para apoio à gestão.</p>
+<p><strong>Como será feito:</strong>
+1. <strong>Tempo real:</strong> Atualização via WebSocket para ocupação instantânea por zona.
+2. <strong>Séries históricas:</strong> Filtros por período com gráficos objetivos.
+3. <strong>Indicador de frescor:</strong> Exibir "atualizado há X segundos" para evitar confusão entre dado ao vivo e histórico.
+4. <strong>Ambiente reproduzível:</strong> <code>docker-compose.yml</code> subindo PostgreSQL + API + Dashboard com um único comando.
+5. <strong>Foco operacional:</strong> Interface simples, voltada a recepção/operação do hotel.</p>
+<p><strong>Critérios de sucesso:</strong>
+1. Ocupação ao vivo por zona atualizando em tempo real.
+2. Séries temporais filtráveis por período.
+3. Ambiente ponta-a-ponta reproduzível via <code>docker-compose</code>.
+4. Indicador de saúde/frescor da métrica.</p>
+<hr />
+<h3 id="fase-6-multi-camera-rtsp-com-reconexao-e-watchdog">Fase 6 — Multi-câmera RTSP com reconexão e watchdog</h3>
+<ul>
+<li><strong>Status:</strong> Pendente</li>
+<li><strong>Dependências:</strong> Fase 5</li>
+<li><strong>Requisitos:</strong> ING-02, OPS-01</li>
+</ul>
+<p><strong>O que constrói:</strong>
+Processamento paralelo de múltiplos fluxos RTSP com robustez para produção. Cada câmera com seu próprio worker e tracker <strong>estritamente intra-câmera</strong>.</p>
+<p><strong>Como será feito:</strong>
+1. <strong>Ingestão robusta:</strong> Migração para abordagem mais estável com <strong>PyAV</strong> para fluxos RTSP.
+2. <strong>Workers por câmera:</strong> Um worker dedicado por stream. Tracker, estado e zonas <strong>totalmente isolados</strong> entre câmeras.
+3. <strong>Reconexão automática:</strong> Backoff exponencial em caso de perda de conexão.
+4. <strong>Watchdog de staleness:</strong> Detecção de stream travado/congelado e disparo de reconexão sem derrubar o processo principal.
+5. <strong>Reconciliação segura:</strong> Ao reconectar, estado reconciliado sem corromper contagens.
+6. <strong>Sem cruzamento:</strong> <strong>Proibido terminantemente</strong> qualquer forma de associação entre câmeras (IDs, aparência, trajetória).</p>
+<p><strong>Critérios de sucesso:</strong>
+1. Múltiplas câmeras RTSP processando simultaneamente.
+2. Recuperação automática após queda de rede.
+3. Watchdog funcional.
+4. Contagens íntegros após reconexão.
+5. <strong>Isolamento absoluto</strong> entre câmeras comprovado.</p>
+<hr />
+<h3 id="fase-7-analytics-de-permanencia-e-heatmap-agregado">Fase 7 — Analytics de permanência e heatmap agregado</h3>
+<ul>
+<li><strong>Status:</strong> Pendente</li>
+<li><strong>Dependências:</strong> Fase 6</li>
+<li><strong>Requisitos:</strong> DWL-01, DWL-02, DSH-03</li>
+</ul>
+<p><strong>O que constrói:</strong>
+Módulo de <em>dwell time</em> e mapa de calor de densidade <strong>exclusivamente agregados</strong>. Exibidos no dashboard com total conformidade à LGPD.</p>
+<p><strong>Como funciona (Privacy by Design):</strong></p>
+<pre><code class="language-text">RAM (efêmero):                         Banco (agregado):
+trilha entra na zona 14:02:11          zona | janela  | n | soma_seg | min | max | histograma
+sai ou some às 14:10:43 (duração 8m32s) ──▶ recepção | 14:02-14:03 | 9 | 4320 | 47 | 842 | 0-2:4 | 2-5:3 | 5-15:2 | 15+:0
+(dados individuais morrem aqui — nunca gravados)
+</code></pre>
+<p><strong>Detalhamento:</strong></p>
+<ol>
+<li><strong>Dwell em RAM:</strong> Ao entrar na ROI, registra-se o timestamp efêmero. Ao sair ou ao desaparecer do quadro, calcula-se a duração <strong>naquele instante</strong>.</li>
+<li><strong>Agregação imediata:</strong> Soma-se à janela <code>zona × tempo</code>. São persistidos <strong>apenas</strong> <code>n_permanencias</code>, <code>soma_segundos</code>, <code>min_segundos</code>, <code>max_segundos</code> e <code>histograma</code> nas faixas <strong>0–2, 2–5, 5–15, 15+ minutos</strong>.</li>
+<li><strong>Descartar individual:</strong> Após agregar, <strong>toda</strong> informação que permita vincular àquela passagem específica é descartada da memória.</li>
+<li><strong>Heatmap agregado:</strong> Posições efêmeras são somadas por <strong>célula × janela</strong>. Gera-se um contador agregado por quadrícula. <strong>Nunca</strong> um traço, rota ou trajeto por pessoa.</li>
+<li><strong>Fechamento de zumbis:</strong> Mecanismo de <em>timeout</em> para fechar permanências não finalizadas corretamente.</li>
+<li><strong>Dashboard:</strong> Exibição de histograma de permanências e heatmap de densidade agregado.</li>
+</ol>
+<p><strong>Garantias inegociáveis:</strong>
+- <strong>Nenhuma linha por pessoa</strong> em <code>dwell_agregado_zona</code>.
+- <strong>Nenhum identificador individual</strong> em <code>heatmap_densidade_camada</code>.
+- <strong>Impossível</strong> consultar "quanto tempo ficou X pessoa" via SQL.
+- <strong>Permitido</strong> apenas perguntas agregadas: "Média de permanência por zona/horário".</p>
+<p><strong>Critérios de sucesso:</strong>
+1. Apenas histograma/soma/n por <code>zona × janela</code> persistidos.
+2. Heatmap gerado exclusivamente a partir de posições efêmeras, sem histórico individual.
+3. Visualização funcional no dashboard.
+4. Auditoria de schema confirma <strong>zero</strong> identificadores individuais.</p>
+<hr />
+<h3 id="fase-8-suite-de-testes-de-carga-resiliencia-e-validacao-de-campo">Fase 8 — Suíte de testes de carga, resiliência e validação de campo</h3>
+<ul>
+<li><strong>Status:</strong> Pendente</li>
+<li><strong>Dependências:</strong> Fase 7</li>
+<li><strong>Requisitos:</strong> QUA-02, QUA-03</li>
+</ul>
+<p><strong>O que constrói:</strong>
+Bateria robusta de testes para validar regras críticas, resiliência e acurácia real do sistema.</p>
+<p><strong>Como será feito:</strong>
+1. <strong>Cobertura crítica:</strong> Testes para ocupação por área/interseção, dwell+timeout, fila/batch writer, reconexão e watchdog.
+2. <strong>Resiliência:</strong> Simulações de queda de banco, estouro de fila, perda/reconexão de câmeras.
+3. <strong>Carga leve:</strong> Validação com múltiplos streams e comportamento sob carga.
+4. <strong>Validação manual:</strong> Comparação com contagem feita manualmente em vídeo de pico (webcam/amostra). Definição escrita de <strong>"quem conta"</strong> aplicada e registrada.
+5. <strong>Relatório de acurácia:</strong> Documentação com erro médio, faixa observada, limitações e justificativas.</p>
+<p><strong>Critérios de sucesso:</strong>
+1. Suíte automatizada cobre regras críticas e passa integralmente.
+2. Validação contra marcação manual documentada com relatório de acurácia.
+3. "Quem conta" definido, aplicado e registrado.</p>
+<hr />
+<h3 id="fase-9-auditoria-formal-lgpd-ripdliaropa-e-liberacao-de-producao">Fase 9 — Auditoria formal LGPD (RIPD/LIA/ROPA) e liberação de produção</h3>
+<ul>
+<li><strong>Status:</strong> Pendente</li>
+<li><strong>Dependências:</strong> Fase 8</li>
+<li><strong>Requisitos:</strong> PRV-01, PRV-02, PRV-03, PRV-04, PRV-05, OPS-03</li>
+</ul>
+<p><strong>O que constrói:</strong>
+Auditoria jurídica-técnica completa e <strong>gate obrigatório</strong> antes de qualquer ligação de stream real com hóspedes.</p>
+<p><strong>Atividades obrigatórias:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Base Legal</th>
+<th>Finalidade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Auditoria de código automatizada</strong></td>
+<td>PRV-01</td>
+<td>Varredura repo-wide por <code>track_id</code>, <code>session_id</code>, <code>session_traces</code>, <code>sessoes</code>, <code>embedding</code>, rota/jornada. Verificar ausência de frames em disco e ausência de face/biometria.</td>
+</tr>
+<tr>
+<td><strong>RIPD (Relatório de Impacto à Proteção de Dados)</strong></td>
+<td>LGPD art. 5º XVII, art. 38</td>
+<td>Identificação de riscos, medidas mitigadoras e avaliação geral.</td>
+</tr>
+<tr>
+<td><strong>LIA (Legitimate Interest Assessment)</strong></td>
+<td>LGPD art. 10 §3º</td>
+<td>Justificativa do interesse legítimo, necessidade, proporcionalidade e equilíbrio com direitos dos titulares.</td>
+</tr>
+<tr>
+<td><strong>ROPA (Registro das Operações de Tratamento)</strong></td>
+<td>LGPD art. 37</td>
+<td>Registro completo das operações realizadas.</td>
+</tr>
+<tr>
+<td><strong>Aviso de monitoramento</strong></td>
+<td>LGPD art. 6º IV</td>
+<td>Placas visíveis nas áreas monitoradas, em linguagem clara.</td>
+</tr>
+<tr>
+<td><strong>Encarregado (DPO)</strong></td>
+<td>LGPD art. 41, Res. ANPD 18/2024</td>
+<td>Indicação formal com nome e canal de contato publicado.</td>
+</tr>
+<tr>
+<td><strong>Plano de resposta a incidente</strong></td>
+<td>LGPD art. 48</td>
+<td>Procedimento para identificação, contenção, avaliação e comunicação à ANPD e, quando cabível, aos titulares.</td>
+</tr>
+<tr>
+<td><strong>Revisão de logs/API</strong></td>
+<td>Marco Civil art. 15</td>
+<td>Conferir logs de acesso com retenção por 6 meses sob sigilo.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Teste prático decisivo:</strong> Tentar, por inspeção de código e por consulta ao banco, <strong>reconstituir o trajeto ou o tempo individual de uma pessoa</strong>. Se for possível → <strong>não liberar</strong>. Se for <strong>impossível</strong> → segue para gate.</p>
+<p><strong>Critérios de sucesso:</strong>
+1. Auditoria automatizada passa sem achados críticos.
+2. RIPD, LIA e ROPA revisados e aprovados.
+3. Aviso de monitoramento afixado e Encarregado (DPO) definido/publicado.
+4. Plano de resposta a incidente aprovado.
+5. <strong>Parecer jurídico-técnico favorável</strong> e <strong>gate de liberação assinado</strong> para streams reais com hóspedes.</p>
+<hr />
+<h2 id="4-organizacao-do-repositorio-e-documentacao">4. Organização do Repositório e Documentação</h2>
+<table>
+<thead>
+<tr>
+<th>Local</th>
+<th>Finalidade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>.planning/</code></strong></td>
+<td>Fonte única da verdade (GSD): <code>ROADMAP.md</code>, <code>REQUIREMENTS.md</code>, <code>PROJECT.md</code>, <code>STATE.md</code>, fases, pesquisas e histórico.</td>
+</tr>
+<tr>
+<td><strong><code>.planning/context/</code></strong></td>
+<td>Manuais de engenharia, arquitetura, modelagem de banco, parecer LGPD/Marco Civil, diretrizes e <code>PLANO_V1_COMPLETO.md</code>.</td>
+</tr>
+<tr>
+<td><strong><code>.planning/phases/</code></strong></td>
+<td>Snapshots por fase com <code>PLAN</code>, <code>SUMMARY</code>, <code>CONTEXT</code>, <code>RESEARCH</code>, <code>VALIDATION</code>, <code>VERIFICATION</code>.</td>
+</tr>
+<tr>
+<td><strong><code>main.py</code>, <code>captura.py</code>, <code>rastreio.py</code>, <code>zona.py</code>, <code>overlay.py</code></strong></td>
+<td>Pipeline de produção.</td>
+</tr>
+<tr>
+<td><strong><code>config/zonas.yaml</code></strong></td>
+<td>Configuração de ROIs por câmera.</td>
+</tr>
+<tr>
+<td><strong><code>tests/</code></strong></td>
+<td>Suíte automatizada (33 testes). Inclui <code>test_privacidade.py</code> como guarda de privacidade.</td>
+</tr>
+<tr>
+<td><strong><code>scripts/</code></strong></td>
+<td>Ferramentas de desenvolvimento (demarcação de ROI, treino/validação, gerador de relatório). <strong>Fora do pipeline de produção.</strong></td>
+</tr>
+<tr>
+<td><strong><code>docs/</code></strong></td>
+<td>Documentação adicional e relatórios para gestão/conformidade.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="5-referencias-cruzadas">5. Referências Cruzadas</h2>
+<table>
+<thead>
+<tr>
+<th>Documento</th>
+<th>Aplicação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href=".planning/ROADMAP.md"><code>.planning/ROADMAP.md</code></a></td>
+<td>Cronograma, fases, progresso e rastreabilidade.</td>
+</tr>
+<tr>
+<td><a href=".planning/REQUIREMENTS.md"><code>.planning/REQUIREMENTS.md</code></a></td>
+<td>Requisitos v1 (27), status e traceability.</td>
+</tr>
+<tr>
+<td><a href=".planning/PROJECT.md"><code>.planning/PROJECT.md</code></a></td>
+<td>Visão, escopo, decisões-chave e evolução.</td>
+</tr>
+<tr>
+<td><a href=".planning/STATE.md"><code>.planning/STATE.md</code></a></td>
+<td>Estado atual, foco e progresso.</td>
+</tr>
+<tr>
+<td><a href=".planning/context/MODELAGEM_BANCO_DE_DADOS.md"><code>.planning/context/MODELAGEM_BANCO_DE_DADOS.md</code></a></td>
+<td>Schema permitido x vetado (<code>sessoes</code>/<code>session_traces</code> proibidas).</td>
+</tr>
+<tr>
+<td><a href=".planning/context/PARECER_LGPD_E_MARCO_CIVIL.md"><code>.planning/context/PARECER_LGPD_E_MARCO_CIVIL.md</code></a></td>
+<td>Análise jurídico-técnica e pendências da Fase 9.</td>
+</tr>
+<tr>
+<td><a href=".planning/context/PERGUNTAS_FREQUENTES_TECNICAS.md"><code>.planning/context/PERGUNTAS_FREQUENTES_TECNICAS.md</code></a></td>
+<td>Dwell, ByteTrack, cálculo de ocupação e mudança de polígono.</td>
+</tr>
+<tr>
+<td><a href=".planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md"><code>.planning/research/COMPLIANCE-LGPD-MARCO-CIVIL.md</code></a></td>
+<td>Verificação normativa artigo por artigo.</td>
+</tr>
+<tr>
+<td><a href=".planning/context/DIRETRIZES_PARA_AGENTE_IA.md"><code>.planning/context/DIRETRIZES_PARA_AGENTE_IA.md</code></a></td>
+<td>Regras obrigatórias para desenvolvimento.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-glossario-de-siglas">6. Glossário de Siglas</h2>
+<table>
+<thead>
+<tr>
+<th>Sigla</th>
+<th>Significado</th>
+<th>Observação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ANPD</strong></td>
+<td>Autoridade Nacional de Proteção de Dados</td>
+<td>Órgão fiscalizador da LGPD.</td>
+</tr>
+<tr>
+<td><strong>API</strong></td>
+<td>Application Programming Interface</td>
+<td>Interface para consulta das métricas agregadas (FastAPI).</td>
+</tr>
+<tr>
+<td><strong>CNT</strong></td>
+<td>Contagem &amp; Ocupação</td>
+<td>Requisitos relacionados à detecção, rastreamento efêmero e ocupação por zona/ROI.</td>
+</tr>
+<tr>
+<td><strong>DPO</strong></td>
+<td>Data Protection Officer (Encarregado)</td>
+<td>Responsável pelo canal de atendimento de titulares e pela interface com a ANPD.</td>
+</tr>
+<tr>
+<td><strong>DSH</strong></td>
+<td>Dashboard</td>
+<td>Requisitos relacionados à interface web operacional.</td>
+</tr>
+<tr>
+<td><strong>DWL</strong></td>
+<td>Dwell</td>
+<td>Referente a tempo de permanência (<em>dwell time</em>).</td>
+</tr>
+<tr>
+<td><strong>FPS</strong></td>
+<td>Frames Per Second</td>
+<td>Quadros por segundo.</td>
+</tr>
+<tr>
+<td><strong>GSD</strong></td>
+<td>Get Shit Done</td>
+<td>Metodologia/fluxo utilizado para planejamento e execução das fases.</td>
+</tr>
+<tr>
+<td><strong>ING</strong></td>
+<td>Ingestão</td>
+<td>Captura de vídeo (webcam, arquivo, RTSP).</td>
+</tr>
+<tr>
+<td><strong>LIA</strong></td>
+<td>Legitimate Interest Assessment</td>
+<td>Avaliação de Interesse Legítimo exigida no art. 10 §3º da LGPD.</td>
+</tr>
+<tr>
+<td><strong>LGPD</strong></td>
+<td>Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018)</td>
+<td>Lei aplicável ao tratamento de dados pessoais no Brasil.</td>
+</tr>
+<tr>
+<td><strong>MTMCT</strong></td>
+<td>Multi-Target Multi-Camera Tracking</td>
+<td>Rastreamento entre câmeras. <strong>Proibido</strong> neste projeto.</td>
+</tr>
+<tr>
+<td><strong>OPS</strong></td>
+<td>Operação</td>
+<td>Requisitos relacionados à robustez, multi-câmera, reconexão, watchdog e ambiente.</td>
+</tr>
+<tr>
+<td><strong>PRV</strong></td>
+<td>Privacidade</td>
+<td>Itens relacionados a conformidade com LGPD/Marco Civil.</td>
+</tr>
+<tr>
+<td><strong>QUA</strong></td>
+<td>Qualidade</td>
+<td>Testes, acurácia, latência e resiliência.</td>
+</tr>
+<tr>
+<td><strong>RAM</strong></td>
+<td>Random Access Memory</td>
+<td>Memória volátil. Frames e trilhas efêmeras vivem apenas aqui.</td>
+</tr>
+<tr>
+<td><strong>Re-ID</strong></td>
+<td>Re-Identification / Re-identificação</td>
+<td>Tentativa de associar pessoas entre frames/câmeras por aparência. <strong>Proibido</strong> neste projeto.</td>
+</tr>
+<tr>
+<td><strong>RIPD</strong></td>
+<td>Relatório de Impacto à Proteção de Dados</td>
+<td>Exigido quando o tratamento pode gerar riscos elevados aos titulares.</td>
+</tr>
+<tr>
+<td><strong>ROI</strong></td>
+<td>Region of Interest (Região de Interesse)</td>
+<td>Polígono delimitado no frame para contagem/ocupação.</td>
+</tr>
+<tr>
+<td><strong>ROPA</strong></td>
+<td>Registro das Operações de Tratamento de Dados Pessoais</td>
+<td>Registro exigido pelo art. 37 da LGPD.</td>
+</tr>
+<tr>
+<td><strong>RTSP</strong></td>
+<td>Real Time Streaming Protocol</td>
+<td>Protocolo para ingestão de câmeras IP.</td>
+</tr>
+<tr>
+<td><strong>SQL</strong></td>
+<td>Structured Query Language</td>
+<td>Linguagem utilizada pelo PostgreSQL.</td>
+</tr>
+<tr>
+<td><strong>TTL</strong></td>
+<td>Time To Live</td>
+<td>Política de expiração/retenção de métricas e logs.</td>
+</tr>
+<tr>
+<td><strong>UUID</strong></td>
+<td>Universally Unique Identifier</td>
+<td>Identificador único utilizado para idempotência de lotes (<code>batch_id</code>).</td>
+</tr>
+<tr>
+<td><strong>YOLO</strong></td>
+<td>You Only Look Once</td>
+<td>Modelo de detecção utilizado (YOLO CrowdHuman).</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><strong>Documento gerado na branch <code>docs/refatoracao-organizacao-documentacao</code>.</strong> Fiel ao escopo vigente: <strong>ROI-only, saída exclusivamente agregada, zero associação entre câmeras, frames voláteis, sem face/biometria, sem dados por-pessoa.</strong></p>
+</body>
+</html>
