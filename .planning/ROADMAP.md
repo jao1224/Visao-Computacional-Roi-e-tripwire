@@ -12,7 +12,7 @@ O sistema nasce do detector existente (`main.py`, YOLO CrowdHuman) e evolui em 9
 
 - [x] **Phase 1: Fatia vertical single-câmera (captura, detecção, rastreio efêmero)** - Webcam/vídeo-amostra → YOLO corpo → ByteTrack em RAM com overlay, sem nada em disco (completed 2026-10-08)
 - [x] **Phase 2: Contagem por zona e ocupação em tempo real** - Ocupação instantânea por zona ROI via interseção de área, com clamp/reset/reconciliação (overlay) (completed 2026-10-12)
-- [ ] **Phase 3: Persistência PostgreSQL (fila + escrita em lote)** - Schema só com configuração e métricas agregadas; I/O de banco fora do loop de vídeo
+- [x] **Phase 3: Persistência PostgreSQL (fila + escrita em lote)** - Schema só com configuração e métricas agregadas; I/O de banco fora do loop de vídeo
 - [ ] **Phase 4: API FastAPI de métricas e conformidade Marco Civil** - Endpoints somente-leitura, TTL de retenção e logs de acesso de 6 meses
 - [ ] **Phase 5: Dashboard web de ocupação e séries** - Ocupação ao vivo (WebSocket), séries com filtro de período e ambiente reproduzível (docker-compose)
 - [ ] **Phase 6: Multi-câmera e ingestão RTSP** - Múltiplos streams simultâneos com reconexão, watchdog e reconexão sem corromper contagens
@@ -79,11 +79,16 @@ Plans:
 **Requirements**: API-01, QUA-01
 **Success Criteria** (what must be TRUE):
   1. Eventos de contagem chegam ao PostgreSQL via fila em lote (size-or-time), e nenhuma operação de banco acontece dentro do loop de vídeo (verificável por código/review e métrica de FPS)
-  2. O banco contém apenas tabelas de configuração (câmeras, zonas) e métricas agregadas — nenhuma tabela ou coluna por-pessoa (sessões, traces, rotas) existe no schema; eventos ENTROU/SAIU são gravados **sem qualquer chave de pessoa** (sem track_id — só zona, direção e timestamp de janela)
+  2. O banco contém apenas tabelas de configuração (câmeras, zonas) e métricas agregadas — nenhuma tabela ou coluna por-pessoa (sessões, traces, rotas) existe no schema; apenas métricas por janela (zona/câmera e célula da grade) são gravadas, sem `track_id`, `session_id` ou qualquer chave individual
   3. Latência do loop permanece ≤ 5 ms/frame em GPU mesmo com o escritor ativo
   4. Reentregar um lote após interrupção não duplica contagens (idempotência via evento UUID)
 
-**Plans**: TBD
+**Plans:** 2/2 plans complete
+Plans:
+**Wave 1**
+- [x] 03-01-PLAN.md — Schema restrito (cameras/zonas + métricas agregadas, heatmap por célula, dwell) + config de conexão + testes de privacidade
+**Wave 2**
+- [x] 03-02-PLAN.md — Fila em memória + agregador por janela + batch writer idempotente + integração no pipeline + testes de isolamento/privacidade
 
 ### Phase 4: API FastAPI de métricas e conformidade Marco Civil
 
@@ -185,6 +190,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 Ideias validadas, documentadas mas não em roadmap imediato — aguardando trigger de implementação:
 
 ### SEED-261014-szc: Mapa de ocupação por área (Heatmap de Densidade)
+
 - **Plantado em:** 2026-10-14
 - **Status:** Dormant
 - **Trigger:** Ao planejar Fase 7 (Analytics de permanência e heatmap agregado — requisito `DWL-02`)
@@ -193,21 +199,10 @@ Ideias validadas, documentadas mas não em roadmap imediato — aguardando trigg
 - **Motivo:** A Fase 2 usa apenas ponto do pé para ocupação instantânea; para heatmap agregado (Fase 7) precisamos rastrear área/silhueta inteira
 
 ### SEED-261015-demarcador-zonas-roi: Demarcador Interativo de Zonas ROI por Clique
+
 - **Plantado em:** 2026-10-15
 - **Status:** Dormant (mas com MVP implementado em `scripts/demarcar_zona.py`)
 - **Trigger:** Preparação para Fase 5 (Dashboard CRUD de zonas com interface gráfica)
 - **Escopo:** Utilitário local (não faz parte do pipeline de produção) com interface OpenCV para demarcar polígonos de ROI por clique, edição de pontos, alinhamento automático (`a`), retângulo perfeito (`r`), desfazer (`u`)
 - **Localização:** `.planning/seeds/SEED-261015-demarcador-zonas-roi.md` e `scripts/demarcar_zona.py`
 - **Motivo:** Eliminar edição manual de coordenadas em YAML; preparar base para futuro dashboard interativo
-
---- Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Fatia vertical single-câmera | 4/4 | Complete    | 2026-10-08 |
-| 2. Contagem por zona e ocupação | 4/4 | Complete    | 2026-10-12 |
-| 3. Persistência PostgreSQL | 0/TBD | Not started | - |
-| 4. API FastAPI + Marco Civil | 0/TBD | Not started | - |
-| 5. Dashboard web | 0/TBD | Not started | - |
-| 6. Multi-câmera e RTSP | 0/TBD | Not started | - |
-| 7. Dwell e heatmap agregado | 0/TBD | Not started | - |
-| 8. Validação de qualidade | 0/TBD | Not started | - |
-| 9. Conformidade LGPD | 0/TBD | Not started | - |

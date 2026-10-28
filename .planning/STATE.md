@@ -1,21 +1,23 @@
 ---
 gsd_state_version: "1.0"
 milestone: v1.0
-current_phase: 02
-current_phase_name: Contagem por zona e ocupação em tempo real
-status: Phase 02 finished, ready for Phase 03
-last_updated: "2026-10-21T19:34:00.000Z"
+current_phase: 03
+current_phase_name: Persistência PostgreSQL (fila + escrita em lote)
+status: Phase 03 complete, ready for Phase 04
+last_updated: "2026-10-27T21:47:14.542Z"
 last_activity: 2026-10-21
-state_head: cb8f1ec0b8df28345e20f9c7b5f20420ac5e0d1c
+state_head: 84ce1360c1f1811906b07b7245cfe2aa5e900267
 progress:
   total_phases: 9
-  completed_phases: 2
-  total_plans: 8
-  completed_plans: 8
-stopped_at: Phase 2 complete
-last_activity_desc: "Reconciliação documental completa com o planejamento vigente (16 commits): plano mestre, docs 01-09, parecer LGPD/MCI, roadmap, requisitos, mapa do codebase e README realinhados ao escopo ROI-only (ocupação por área, tripwire desativado). Relatório de conformidade v1.1 publicado (26 pág., nova seção 5.7 sobre não-identificação). Implementação: config/data.yaml sem caminho absoluto de máquina e scripts de treino/validação com resolução correta do descritor. Fase 3 (persistência PostgreSQL) ainda não iniciada"
+  completed_phases: 3
+  total_plans: 10
+  completed_plans: 10
 milestone_name: milestone
+stopped_at: Phase 3 complete
+last_activity_desc: "Reconciliação documental completa com o planejamento vigente (16 commits): plano mestre, docs 01-09, parecer LGPD/MCI, roadmap, requisitos, mapa do codebase e README realinhados ao escopo ROI-only (ocupação por área, tripwire desativado). Relatório de conformidade v1.1 publicado (26 pág., nova seção 5.7 sobre não-identificação). Implementação: config/data.yaml sem caminho absoluto de máquina e scripts de treino/validação com resolução correta do descritor. Fase 3 concluída: schema restrito a agregados, fila em memória, batch writer idempotente fora do hot-loop, integração no pipeline e validação contra PostgreSQL 16"
 ---
+
+Total Phases: 3
 
 # Project State
 
@@ -28,12 +30,12 @@ See: .planning/PROJECT.md (updated 2026-10-08)
 
 ## Current Position
 
-Phase: 02 (Contagem por zona e ocupação em tempo real) — COMPLETE
-Plan: 4 of 4 completed
-Status: Phase 02 finished, ready for Phase 03
-Last activity: 2026-10-21
+Phase: 03 (Persistência PostgreSQL – fila + escrita em lote) — COMPLETE
+Plan: 2 of 2 completed
+Status: Phase 03 complete, ready for Phase 04
+Last activity: 2026-10-28
 
-Progress: [██░░░░░░░░] 22%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -83,4 +85,4 @@ Recent decisions affecting current work:
 - Reconciliação documental com o planejamento vigente (16 commits, 2026-10-21): plano mestre, docs 01–09, parecer LGPD/MCI, ROADMAP, REQUIREMENTS, PROJECT, mapa do codebase e README
 - Relatório de conformidade LGPD/MCI v1.1 publicado em `docs/relatorios/` (26 pág.)
 - Correção de implementação: `config/data.yaml` sem caminho absoluto de máquina; scripts de treino/validação com resolução correta do descritor de dataset
-- Suite de testes: 33 passando (100% verdes)
+- Suite de testes: 49 passando + 1 integração opcional (DB_TESTE=1), 100% verdes

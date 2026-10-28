@@ -5,54 +5,54 @@
   "phases": [
     {
       "number": "1",
-      "name": "Fatia vertical single-câmera",
+      "name": "Fatia vertical single-câmera (captura, detecção, rastreio efêmero)",
       "status": "complete"
     },
     {
       "number": "2",
-      "name": "Contagem por zona e ocupação",
+      "name": "Contagem por zona e ocupação em tempo real",
       "status": "complete"
     },
     {
       "number": "3",
-      "name": "Persistência PostgreSQL",
-      "status": "pending"
+      "name": "Persistência PostgreSQL (fila + escrita em lote)",
+      "status": "complete"
     },
     {
       "number": "4",
-      "name": "API FastAPI + Marco Civil",
+      "name": "API FastAPI de métricas e conformidade Marco Civil",
       "status": "pending"
     },
     {
       "number": "5",
-      "name": "Dashboard web",
+      "name": "Dashboard web de ocupação e séries",
       "status": "pending"
     },
     {
       "number": "6",
-      "name": "Multi-câmera e RTSP",
+      "name": "Multi-câmera e ingestão RTSP",
       "status": "pending"
     },
     {
       "number": "7",
-      "name": "Dwell e heatmap agregado",
+      "name": "Analytics de permanência e heatmap agregado",
       "status": "pending"
     },
     {
       "number": "8",
-      "name": "Validação de qualidade",
+      "name": "Validação de qualidade e testes automatizados",
       "status": "pending"
     },
     {
       "number": "9",
-      "name": "Conformidade LGPD",
+      "name": "Conformidade LGPD e preparação para produção",
       "status": "pending"
     }
   ],
   "next": {
-    "command": "/gsd:progress --next",
-    "label": "Advance to Phase 3 planning",
-    "reason": "Phase 02 complete · 4/4 plans · 33 tests passing"
+    "command": "/gsd:progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
   },
-  "updated_at": "2026-10-21T19:34:00.000Z"
+  "updated_at": "2026-10-27T21:47:14.553Z"
 }
