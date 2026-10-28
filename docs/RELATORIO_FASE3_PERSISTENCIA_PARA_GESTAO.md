@@ -76,14 +76,17 @@ A grande preocupação da Fase 3 é **não degradar o desempenho** do processame
 | **3. Fechamento da janela** | Ao final do intervalo, são calculadas apenas as **médias agregadas**. Nenhum dado individual é mantido. |
 | **4. Enfileiramento** | O evento **100% agregado** é enviado para uma fila em memória (`persistencia/fila.py`). |
 | **5. Batch Writer (thread separada)** | Em segundo plano, `persistencia/batch_writer.py` consome essa fila em lote e grava no PostgreSQL. |
-| **6. Gravação em lote** | Utiliza transação única por lote, com `INSERT ... ON CONFLICT DO NOTHING` para garantir idempotência. |
+| **6. Gravação em lote** | Transação única por lote, com `INSERT ... ON CONFLICT DO NOTHING` para garantir idempotência. |
+| **7. Recuperação de falha** | Se o banco cair, os lotes ficam em uma fila de retry limitada (1000 eventos) com espera crescente (0,5 s a 30 s). Quando o banco volta, a gravação continua sem reiniciar o vídeo. |
 
 ### Requisitos atendidos
 
 - **Desempenho:** Nenhuma chamada SQL ocorre dentro do `while True` do processamento de vídeo — o loop só acumula números em RAM e enfileira. Medição do trecho adicionado ao loop: **~0,002 ms/frame** com 5 zonas, muito abaixo da meta de 5 ms/frame. Toda a latência de banco fica na thread escritora.
 - **Idempotência:** Cada lote recebe um `batch_id` único (UUID) e as tabelas agregadas têm `UNIQUE`; reentregar o mesmo lote não duplica linhas (validado: 2 linhas após gravar o mesmo lote duas vezes).
-- **Robustez:** O *Batch Writer* roda em thread *daemon*, abre conexão por lote e erros de banco não derrubam o processamento de vídeo.
+- **Robustez:** O *Batch Writer* roda em thread *daemon* com conexão própria e persistente. Queda de banco não derruba o processamento de vídeo: os eventos ficam em retry e são gravados quando a conexão volta (validado com o banco desligado e religado durante a execução). Se a fila de retry encher, os eventos mais antigos são descartados com aviso — o banco nunca cresce a RAM sem limite.
 - **Privacidade por construção:** A fila valida e **rejeita** qualquer evento que contenha chaves vetadas (`track_id`, `session_id`, etc.).
+- **Cadastro explícito:** as zonas são sincronizadas do `config/zonas.yaml` por `python -m db.seed` antes da execução. O escritor nunca cria zona por conta própria: zona não cadastrada é ignorada com aviso, evitando cadastro fantasma no banco.
+- **Janela ajustável:** `DB_JANELA_SEGUNDOS` (padrão 60) permite mudar o intervalo de agregação sem alterar código.
 
 ---
 
@@ -109,10 +112,17 @@ A grande preocupação da Fase 3 é **não degradar o desempenho** do processame
 - [x] Inclusão das tabelas `heatmap_densidade_camada` e `dwell_agregado_zona` para evitar migrações futuras
 - [x] Implementação da fila, agregador e *batch writer* fora do *hot-loop*
 - [x] Integração no pipeline (`main.py`): acumula por janela de 1 minuto e enfileira; nenhuma consulta SQL no loop
-- [x] Testes negativos de privacidade e de isolamento aprovados (49 testes verdes na suíte)
+- [x] Testes negativos de privacidade e de isolamento aprovados (52 testes verdes na suíte)
 - [x] Documentação atualizada no plano mestre do projeto
 - [x] Schema aplicado em PostgreSQL 16 e gravação real validada (inclusive reentrega do mesmo lote sem duplicar)
 - [x] Latência do trecho de persistência no loop medida em ~0,002 ms/frame com 5 zonas
+- [x] Teste de queda do banco: escritor segura os eventos, reconecta e grava quando o banco volta
+- [x] Seed de câmeras/zonas (`python -m db.seed`) validado contra o banco real
+- [x] Verificação goal-backward registrada em `.planning/phases/03-.../03-VERIFICATION.md` (4 de 4 critérios PASS)
+
+### Ponto de atenção
+
+- A meta de 5 ms/frame refere-se ao loop completo **em GPU**; nesta fase medimos o custo do trecho de persistência. A medição do pipeline completo é critério da Fase 8.
 
 ### Próximos passos (Fase 4)
 
