@@ -6,21 +6,33 @@
 **Requirements:** API-01, QUA-01
 
 ## Decisões-chave (vinculantes)
+
 - **ROI-only / saída agregada:** Nunca persistir dados por-pessoa. Sem `track_id`, `session_id`, `session_traces`, `sessoes`, rotas/jornadas/embeddings.
-- **Schema permitido:** `cameras`, `zonas`, `metricas_fluxo_zona`. Futuramente `dwell_agregado_zona`, `heatmap_densidade_camada` apenas quando usados.
+- **Schema permitido:** `cameras`, `zonas`, `metricas_fluxo_zona`. `dwell_agregado_zona` e `heatmap_densidade_camada` já criadas (vazias) para evitar migração na Fase 7.
 - **Gravação por janela:** 1 linha por `(zona_id, janela_inicio, janela_fim)`. Não gravar por frame.
-- **Fora do hot-loop:** Nenhuma operação SQL (`execute/commit`) dentro do `while True`. Usar fila em memória + *batch writer* em thread separada.
-- **Idempotência:** Cada lote com `batch_id` (UUID). Evitar duplicados em reinício.
+- **Fora do hot-loop:** Nenhuma operação SQL dentro do `while True`. Fila em memória + batch writer em thread separada.
+- **Idempotência:** `UNIQUE` por janela + `ON CONFLICT DO NOTHING`; lote identificado por `batch_id` (UUID) apenas em log.
 - **Latência:** Loop ≤ 5 ms/frame mesmo com escrita ativa.
 - **Testes negativos:** Deve falhar se tentar inserir `track_id`/criar tabelas vetadas.
 
-## Arquitetura-alvo
-1. **Produtor (main/worker de vídeo):** Ao fechar janela, monta evento **agregado** (apenas números) e enfileira.
-2. **Fila em memória:** `queue.Queue` com eventos agregados. Nunca recebe IDs individuais.
-3. **Batch Writer:** Thread dedicada. Consome em lote (`size-or-time`), `executemany`/transação, commit fora do loop.
-4. **PostgreSQL:** Schema conforme `MODELAGEM_BANCO_DE_DADOS.md` §2.1.
+## Decisões confirmadas com o usuário (2026-10-28)
 
-## Estrutura alvo (inicial)
+Estas quatro foram discutidas e escolhidas explicitamente — não são suposições minhas:
+
+| Tema | Decisão | Efeito no código |
+|---|---|---|
+| Banco indisponível | **Retry com fila limitada** (não descartar na primeira falha) | `BatchWriter` mantém pendentes com backoff exponencial (0,5 s → 30 s) e corta os mais antigos ao passar de 1000 eventos |
+| Cadastro de zonas | **Seed explícito antes de rodar** | `db/seed.py` sincroniza `cameras`/`zonas` do `config/zonas.yaml`; o writer **não** cria zona alguma, apenas ignora e avisa |
+| Janela de agregação | **Configurável por env** | `DB_JANELA_SEGUNDOS` (padrão 60) lido em `main.py` |
+| Escopo da fase | **Só persistência** — sem docker-compose nem TTL | TTL é critério da Fase 4 (API-03) e `docker-compose` da Fase 5; a validação usa um PostgreSQL descartável documentado em `03-VERIFICATION.md` |
+
+## Arquitetura-alvo
+1. **Produtor (main):** ao fechar janela, monta evento **agregado** (só números) e enfileira.
+2. **Fila em memória:** `queue.Queue` com eventos agregados; rejeita chaves por-pessoa.
+3. **Batch Writer:** thread dedicada, conexão persistente da própria thread, lote `size-or-time`, retry com backoff.
+4. **PostgreSQL:** schema conforme `MODELAGEM_BANCO_DE_DADOS.md` §2.1.
+
+## Estrutura
 `metricas_fluxo_zona(id, zona_id, janela_inicio, janela_fim, ocupacao_media, pct_area_media, criado_em)`
 
 ## Verificações obrigatórias
@@ -28,3 +40,4 @@
 - Grep no código: sem `cursor.execute`/`conn.commit` no caminho do loop de vídeo
 - Testes negativos passam (falham ao violar)
 - FPS/latência estáveis com escrita ativa
+- Seed roda antes da gravação e zona desconhecida não é criada implicitamente
