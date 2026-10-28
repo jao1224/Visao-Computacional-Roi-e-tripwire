@@ -85,4 +85,4 @@ Recent decisions affecting current work:
 - Reconciliação documental com o planejamento vigente (16 commits, 2026-10-21): plano mestre, docs 01–09, parecer LGPD/MCI, ROADMAP, REQUIREMENTS, PROJECT, mapa do codebase e README
 - Relatório de conformidade LGPD/MCI v1.1 publicado em `docs/relatorios/` (26 pág.)
 - Correção de implementação: `config/data.yaml` sem caminho absoluto de máquina; scripts de treino/validação com resolução correta do descritor de dataset
-- Suite de testes: 49 passando + 1 integração opcional (DB_TESTE=1), 100% verdes
+- Suite de testes: 52 passando + 1 integração opcional (DB_TESTE=1), 100% verdes

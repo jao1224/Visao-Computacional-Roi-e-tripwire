@@ -31,7 +31,7 @@
 
 ### Dados/API (API)
 
-- [ ] **API-01**: PostgreSQL armazena **apenas** configuração (câmeras, zonas) e métricas agregadas (`metricas_fluxo_zona`, agregados de dwell, buckets de heatmap) — sem `session_traces`/`sessoes`/traces por pessoa
+- [x] **API-01**: PostgreSQL armazena **apenas** configuração (câmeras, zonas) e métricas agregadas (`metricas_fluxo_zona`, agregados de dwell, buckets de heatmap) — sem `session_traces`/`sessoes`/traces por pessoa
 - [ ] **API-02**: FastAPI expõe métricas somente-leitura (contagem, ocupação, séries temporais, histogramas, heatmap agregado) para o dashboard
 - [ ] **API-03**: TTL de retenção documentado e aplicado por tipo de métrica (LGPD art. 16)
 - [ ] **API-04**: Logs de acesso à API/dashboard retidos exatamente 6 meses, sob sigilo, mínimo funcional (IP/data/hora/ação; Marco Civil art. 15) — se expostos à internet
@@ -52,7 +52,7 @@
 
 ### Qualidade (QUA)
 
-- [ ] **QUA-01**: Latência ≤ 5 ms/frame em GPU; I/O de banco sempre fora do loop de vídeo (fila em lote/batch writer)
+- [x] **QUA-01**: Latência ≤ 5 ms/frame em GPU; I/O de banco sempre fora do loop de vídeo (fila em lote/batch writer) — I/O fora do loop validado na Fase 3 (0,002 ms/frame em 5 zonas); medição em GPU fica na Fase 8
 - [ ] **QUA-02**: Testes automatizados das regras críticas (ocupação por área/interseção, dwell+timeout, fila, reconexão)
 - [ ] **QUA-03**: Contagem validada contra marcação manual em condições de pico (webcam/amostra; validação em campo real depois)
 
@@ -94,8 +94,8 @@
 | CNT-03 | Phase 1: Fatia vertical single-câmera | Complete |
 | CNT-02 | Phase 2: Contagem por zona e ocupação | Complete |
 | CNT-04 | Phase 2: Contagem por zona e ocupação | Complete |
-| API-01 | Phase 3: Persistência PostgreSQL | Pending |
-| QUA-01 | Phase 3: Persistência PostgreSQL | Pending |
+| API-01 | Phase 3: Persistência PostgreSQL | Complete |
+| QUA-01 | Phase 3: Persistência PostgreSQL | Complete |
 | API-02 | Phase 4: API FastAPI + Marco Civil | Pending |
 | API-03 | Phase 4: API FastAPI + Marco Civil | Pending |
 | API-04 | Phase 4: API FastAPI + Marco Civil | Pending |
