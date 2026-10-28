@@ -7,6 +7,9 @@ import captura
 import rastreio
 import overlay
 import zona
+from persistencia.agregador import JanelaAgregada
+from persistencia.batch_writer import BatchWriter
+from persistencia.fila import FilaAgregados
 
 
 def resolver_fonte(argumentos):
@@ -73,6 +76,12 @@ def main():
     frame_duration = 1.0 / target_fps
     prev_time = time.time()
 
+    # Persistência fora do hot-loop: aqui só acumula em RAM e enfileira.
+    fila = FilaAgregados()
+    janela = JanelaAgregada(janela_segundos=60)
+    writer = BatchWriter(fila)
+    writer.start()
+
     while True:
         loop_start = time.time()
 
@@ -94,6 +103,16 @@ def main():
                                 track_states=track_states, frame_shape=frame.shape)
         zona.podar_track_states(track_states, frame_idx)
         frame_idx += 1
+
+        # Acumula só números por zona; zero I/O aqui.
+        agora_loop = time.time()
+        for z in zonas:
+            est_z = estado.get(z['id'])
+            if isinstance(est_z, dict):
+                janela.adicionar(z['id'], est_z.get('ocupacao', 0), est_z.get('pct_area', 0.0))
+        if janela.deve_fechar(agora_loop):
+            for evento in janela.fechar_janela():
+                fila.put(evento)
 
         # overlay.desenhar_tripwires(frame, zonas)
         overlay.desenhar_rois(frame, zonas, caixas=caixas)
@@ -117,6 +136,12 @@ def main():
 
     cap.release()
     cv2.destroyAllWindows()
+
+    # Fecha a última janela e deixa o writer drenar a fila.
+    for evento in janela.fechar_janela():
+        fila.put(evento)
+    writer.parar()
+    writer.join(timeout=5)
     print('[OK] Encerrado.')
 
 
