@@ -78,7 +78,7 @@ def main():
 
     # Persistência fora do hot-loop: aqui só acumula em RAM e enfileira.
     fila = FilaAgregados()
-    janela = JanelaAgregada(janela_segundos=60)
+    janela = JanelaAgregada(janela_segundos=int(os.getenv('DB_JANELA_SEGUNDOS', '60')))
     writer = BatchWriter(fila)
     writer.start()
 
