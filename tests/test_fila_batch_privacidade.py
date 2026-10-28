@@ -79,9 +79,9 @@ def test_writer_recusa_lote_com_dado_por_pessoa():
 
 
 class _CursorFalso:
-    def __init__(self):
+    def __init__(self, linhas=None):
         self.sqls = []
-        self._linhas = [('hall', 1)]
+        self._linhas = [('hall', 1)] if linhas is None else linhas
 
     def execute(self, sql, params=None):
         self.sqls.append((sql, params))
@@ -97,6 +97,7 @@ class _ConnFalsa:
     def __init__(self, cursor):
         self._cursor = cursor
         self.commitou = False
+        self.closed = False
 
     def cursor(self):
         return self._cursor
@@ -105,7 +106,7 @@ class _ConnFalsa:
         self.commitou = True
 
     def close(self):
-        pass
+        self.closed = True
 
 
 def test_writer_troca_codigo_de_zona_pelo_id_numerico(monkeypatch):
@@ -121,27 +122,86 @@ def test_writer_troca_codigo_de_zona_pelo_id_numerico(monkeypatch):
     assert inseridos['values'] == [
         (1, EVENTO_VALIDO['janela_inicio'], EVENTO_VALIDO['janela_fim'], 3.0, 12.5)
     ]
-    assert any('INSERT INTO zonas' in sql for sql, _ in cursor.sqls)
+    # zona já existe: o writer nunca cria cadastro por conta própria
+    assert not any('INSERT INTO zonas' in sql for sql, _ in cursor.sqls)
 
 
-def test_writer_nao_propaga_erro_de_banco(monkeypatch):
-    def explode(**_):
-        raise RuntimeError('banco fora')
+def test_writer_ignora_zona_nao_cadastrada(monkeypatch):
+    cursor = _CursorFalso(linhas=[])
+    monkeypatch.setattr(bw.psycopg2, 'connect', lambda **_: _ConnFalsa(cursor))
+    inseridos = []
+    monkeypatch.setattr(bw, 'execute_values', lambda cur, sql, values: inseridos.extend(values))
 
-    monkeypatch.setattr(bw.psycopg2, 'connect', explode)
-    bw.BatchWriter(FilaAgregados()).gravar_lote([EVENTO_VALIDO])  # não deve levantar
+    bw.BatchWriter(FilaAgregados()).gravar_lote([EVENTO_VALIDO])
+
+    assert inseridos == []
+
+
+def test_writer_mantem_pendentes_e_reconecta_no_retry(monkeypatch):
+    chamadas = {'n': 0}
+
+    def connect_instavel(**_):
+        chamadas['n'] += 1
+        if chamadas['n'] == 1:
+            raise RuntimeError('banco fora')
+        return _ConnFalsa(_CursorFalso())
+
+    monkeypatch.setattr(bw.psycopg2, 'connect', connect_instavel)
+    gravados = []
+    monkeypatch.setattr(bw, 'execute_values', lambda cur, sql, values: gravados.extend(values))
+    monkeypatch.setattr(bw.time, 'sleep', lambda _: None)
+
+    writer = bw.BatchWriter(FilaAgregados())
+    writer._pendentes.extend([EVENTO_VALIDO])
+
+    writer._drenar()  # primeira tentativa falha
+    assert len(writer._pendentes) == 1
+    assert gravados == []
+
+    writer._drenar()  # segunda tentativa reconecta e grava
+    assert len(writer._pendentes) == 0
+    assert len(gravados) == 1
+    assert chamadas['n'] == 2
+
+
+def test_writer_descarta_excedente_quando_retry_fica_cheio(monkeypatch):
+    monkeypatch.setattr(bw.psycopg2, 'connect', lambda **_: (_ for _ in ()).throw(RuntimeError('fora')))
+    monkeypatch.setattr(bw.time, 'sleep', lambda _: None)
+
+    writer = bw.BatchWriter(FilaAgregados(), max_pendentes=2)
+    writer._pendentes.extend([{**EVENTO_VALIDO, 'ocupacao_media': i} for i in range(4)])
+
+    writer._drenar()
+
+    assert len(writer._pendentes) == 2
+    assert [ev['ocupacao_media'] for ev in writer._pendentes] == [2, 3]
+
+
+def test_seed_le_zonas_do_yaml():
+    from db.seed import linhas_de_config
+
+    cameras, zonas = linhas_de_config()
+
+    assert ('camera_0', 'camera_0', 'camera_0') in cameras
+    hall = next(z for z in zonas if z[0] == 'hall')
+    assert hall[2] == 'roi'
+    assert hall[4] == 50
+    assert len(__import__('json').loads(hall[3])) == 4
 
 
 @pytest.mark.skipif(os.getenv('DB_TESTE') != '1',
                     reason='defina DB_TESTE=1 (e DB_*) para validar contra PostgreSQL real')
 def test_gravacao_real_contra_postgres():
-    """Valida o SQL de verdade: aplica o schema e grava o lote com rollback no final."""
+    """Valida o SQL de verdade: schema, seed, gravação e reentrega idempotente."""
+    from db.seed import main as seed
+
     conn = bw.psycopg2.connect(**bw.get_conn_params())
     try:
         with open(os.path.join(RAIZ, 'db', 'schema.sql'), encoding='utf-8') as f:
             cur = conn.cursor()
             cur.execute(f.read())
         conn.commit()
+        seed()  # cadastro explícito das zonas antes de gravar
         writer = bw.BatchWriter(FilaAgregados())
         writer.gravar_lote([EVENTO_VALIDO])
         writer.gravar_lote([EVENTO_VALIDO])  # idempotência
